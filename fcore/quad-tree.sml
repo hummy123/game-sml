@@ -21,7 +21,7 @@ struct
   | LEAF of item vector
 
   (* max size of vector before we split it further *)
-  val maxSize = 9
+  val maxSize = 3
 
   fun isItemInQuad (iX, iY, iWidth, iHeight, qX, qY, qWidth, qHeight) =
     iX >= qX andalso iY >= qY andalso iWidth <= qWidth
@@ -278,4 +278,170 @@ struct
           in
             LEAF elements
           end
+
+  fun isColliding (iX, iY, iW, iH, itemID, checkWith: item) =
+    let
+      val itemEndX = iX + iW
+      val itemEndY = iY + iH
+      val {itemID = checkID, startX, startY, width, height, ...} = checkWith
+      val endX = startX + width
+      val endY = startY + height
+    in
+      iX < endX 
+      andalso itemEndX > startX
+      andalso iY < endY 
+      andalso itemEndY > startY
+      andalso itemID <> checkID
+    end
+
+  fun getCollisionsVec (iX, iY, iW, iH, itemID, pos, elements, acc) =
+    if pos = Vector.length elements then
+      acc
+    else
+      let
+        val item = Vector.sub (elements, pos)
+        val acc = 
+          if isColliding (iX, iY, iW, iH, itemID, item)
+          then item :: acc
+          else acc
+      in
+        getCollisionsVec (iX, iY, iW, iH, itemID, pos + 1, elements, acc)
+      end
+
+  fun getCollisionsAll 
+    ( iX, iY, iW, iH, qW, qH
+    , itemID, acc, tree
+    ) =
+    case tree of 
+      NODE {topLeft, topRight, bottomLeft, bottomRight, elements} =>
+        let
+          val acc = 
+            getCollisionsVec (iX, iY, iW, iH, itemID, 0, elements, acc)
+          val halfWidth = qW div 2
+          val halfHeight = qH div 2
+
+          val acc = 
+            getCollisionsAll
+              ( iX, iY, iW, iH, halfWidth, halfHeight
+              , itemID, acc, topLeft
+              )
+
+          val acc = 
+            getCollisionsAll
+              ( iX, iY, iW, iH, halfWidth, halfHeight
+              , itemID, acc, topRight
+              )
+
+          val acc = 
+            getCollisionsAll
+              ( iX, iY, iW, iH, halfWidth, halfHeight
+              , itemID, acc, bottomLeft
+              )
+        in
+          getCollisionsAll
+            ( iX, iY, iW, iH, halfWidth, halfWidth
+            , itemID, acc, bottomRight
+            )
+        end
+    | LEAF elements =>
+        getCollisionsVec (iX, iY, iW, iH, itemID, 0, elements, acc)
+
+  fun getCollisions 
+    ( itemX, itemY, itemWidth, itemHeight
+    , quadX, quadY, quadWidth, quadHeight
+    , itemID, acc, tree: t
+    ) =
+    case tree of
+      NODE {topLeft, topRight, bottomLeft, bottomRight, elements} =>
+        let
+          (* get colliding elements in this node first *)
+          val acc = 
+            getCollisionsVec 
+              ( itemX, itemY, itemWidth, itemHeight
+              , itemID, 0, elements, acc
+              )
+          val halfWidth = quadWidth div 2
+          val halfHeight = quadHeight div 2
+        in
+          (case whichQuadrant 
+            ( itemX, itemY, itemWidth, itemHeight
+            , quadX, quadY, quadWidth, quadHeight
+            ) 
+           of
+             TOP_LEFT =>
+               getCollisions 
+                 ( itemX, itemY, itemWidth, itemHeight
+                 , quadX, quadY, halfWidth, halfHeight
+                 , itemID, acc, topLeft
+                 )
+           | TOP_RIGHT =>
+               getCollisions 
+                 ( itemX, itemY, itemWidth, itemHeight
+                 , quadX + halfWidth, quadY, halfWidth, halfHeight
+                 , itemID, acc, topRight
+                 )
+           | BOTTOM_LEFT =>
+               getCollisions 
+                 ( itemX, itemY, itemWidth, itemHeight
+                 , quadX, quadY + halfHeight, halfWidth, halfHeight
+                 , itemID, acc, bottomLeft
+                 )
+           | BOTTOM_RIGHT => 
+               getCollisions 
+                 ( itemX, itemY, itemWidth, itemHeight
+                 , quadX + halfWidth, quadY + halfHeight
+                 , halfWidth, halfHeight
+                 , itemID, acc, bottomRight
+                 )
+           | PARENT_QUADRANT => 
+               (* In this function, PARENT_QUADRANT means 
+                * that the item is not in any of the main quadrants 
+                * but may possibly in the parent quadrant OR 
+                * it may be in any of the child quadrants. 
+                * So descend down on all the children, accumulating acc. 
+                * *)
+                let
+                  val acc = 
+                    getCollisionsAll
+                      ( itemX, itemY, itemWidth, itemHeight
+                      , halfWidth, halfHeight
+                      , itemID, acc, topLeft
+                      )
+
+                  val acc = 
+                    getCollisionsAll
+                      ( itemX, itemY, itemWidth, itemHeight
+                      , halfWidth, halfHeight
+                      , itemID, acc, topRight
+                      )
+
+                  val acc = 
+                    getCollisionsAll
+                      ( itemX, itemY, itemWidth, itemHeight
+                      , halfWidth, halfHeight
+                      , itemID, acc, bottomLeft
+                      )
+                in
+                  getCollisionsAll
+                    ( itemX, itemY, itemWidth, itemHeight
+                    , halfWidth, halfHeight
+                    , itemID, acc, bottomRight
+                    )
+                end)
+        end
+    | LEAF elements =>
+        getCollisionsVec 
+          ( itemX, itemY, itemWidth, itemHeight
+          , itemID, 0, elements, acc
+          )
+
+  datatype t =
+    NODE of
+      { topLeft: t
+      , topRight: t
+      , bottomLeft: t
+      , bottomRight: t
+      , elements: item vector
+      }
+  | LEAF of item vector
 end
