@@ -1,4 +1,17 @@
-structure QuadTree =
+signature QUAD_TREE =
+sig
+  type t
+
+  val insert : int * int * int * int *
+               int * int * int * int *
+               int * t -> t
+
+  val getCollisions : int * int * int * int *
+                      int * int * int * int *
+                      int * t -> int list
+end
+
+structure QuadTree : QUAD_TREE =
 struct
   type item = {itemID: int, startX: int, startY: int, width: int, height: int}
 
@@ -302,7 +315,7 @@ struct
         val item = Vector.sub (elements, pos)
         val acc = 
           if isColliding (iX, iY, iW, iH, itemID, item)
-          then item :: acc
+          then #itemID item :: acc
           else acc
       in
         getCollisionsVec (iX, iY, iW, iH, itemID, pos + 1, elements, acc)
@@ -346,7 +359,7 @@ struct
     | LEAF elements =>
         getCollisionsVec (iX, iY, iW, iH, itemID, 0, elements, acc)
 
-  fun getCollisions 
+  fun helpGetCollisions 
     ( itemX, itemY, itemWidth, itemHeight
     , quadX, quadY, quadWidth, quadHeight
     , itemID, acc, tree: t
@@ -369,25 +382,25 @@ struct
             ) 
            of
              TOP_LEFT =>
-               getCollisions 
+               helpGetCollisions 
                  ( itemX, itemY, itemWidth, itemHeight
                  , quadX, quadY, halfWidth, halfHeight
                  , itemID, acc, topLeft
                  )
            | TOP_RIGHT =>
-               getCollisions 
+               helpGetCollisions 
                  ( itemX, itemY, itemWidth, itemHeight
                  , quadX + halfWidth, quadY, halfWidth, halfHeight
                  , itemID, acc, topRight
                  )
            | BOTTOM_LEFT =>
-               getCollisions 
+               helpGetCollisions 
                  ( itemX, itemY, itemWidth, itemHeight
                  , quadX, quadY + halfHeight, halfWidth, halfHeight
                  , itemID, acc, bottomLeft
                  )
            | BOTTOM_RIGHT => 
-               getCollisions 
+               helpGetCollisions 
                  ( itemX, itemY, itemWidth, itemHeight
                  , quadX + halfWidth, quadY + halfHeight
                  , halfWidth, halfHeight
@@ -435,13 +448,14 @@ struct
           , itemID, 0, elements, acc
           )
 
-  datatype t =
-    NODE of
-      { topLeft: t
-      , topRight: t
-      , bottomLeft: t
-      , bottomRight: t
-      , elements: item vector
-      }
-  | LEAF of item vector
+  fun getCollisions 
+    ( itemX, itemY, itemWidth, itemHeight
+    , quadX, quadY, quadWidth, quadHeight
+    , itemID, tree
+    ) =
+    helpGetCollisions 
+      ( itemX, itemY, itemWidth, itemHeight
+      , quadX, quadY, quadWidth, quadHeight
+      , itemID, [], tree
+      )
 end
