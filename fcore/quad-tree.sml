@@ -2,6 +2,12 @@ signature QUAD_TREE =
 sig
   type t
 
+  datatype collision_side =
+    QUERY_ON_LEFT_SIDE
+  | QUERY_ON_TOP_SIDE
+  | QUERY_ON_RIGHT_SIDE
+  | QUERY_ON_BOTTOM_SIDE
+
   val insert : int * int * int * int *
                int * int * int * int *
                int * t -> t
@@ -307,6 +313,64 @@ struct
       andalso itemID <> checkID
     end
 
+  (* no variant to represent 'no collision' case
+   * because caller should only try getting collision side 
+   * after checking that there is any collision. *)
+  datatype collision_side =
+    QUERY_ON_LEFT_SIDE
+  | QUERY_ON_TOP_SIDE
+  | QUERY_ON_RIGHT_SIDE
+  | QUERY_ON_BOTTOM_SIDE
+
+  (* getCollisionSide function ported from this answer:
+   * https://stackoverflow.com/a/56607347
+   * *)
+  fun getCollisionSide (iX, iY, iW, iH, checkWith: item) =
+    let
+      val iFinishX = iX + iW
+      val iFinishY = iY + iH
+      val iHalfW = iW div 2
+      val iHalfH = iH div 2
+      val iCentreX = iX + iHalfW
+      val iCentreY = iY + iHalfH
+
+      val {startX = cX, startY = cY, width = cW, height = cH, ...} = item
+
+      val cFinishX = cX + cW
+      val cFinishY = cY + cH
+      val cHalfW = cW div 2
+      val cHalfH = cH div 2
+      val cCentreX = cX + cHalfW
+      val cCentreY = cY + cHalfH
+
+      val diffX = iCentreX - cCentreX
+      val diffY = iCentreY - cCentreY
+
+      val minXDist = iHalfW + cHalfW
+      val minYDist = iHalfH + cHalfH
+
+      val depthX = 
+        if diffX > 0
+        then minXDist - diffX
+        else (~minXDist) - diffX
+
+      val depthY =
+        if diffY > 0 
+        then minYDist - diffY
+        else (~minYDist) - diffY
+    in
+      if abs depthX < abs depthY then
+        if depthX > 0 then
+          QUERY_ON_LEFT_SIDE
+        else
+          QUERY_ON_RIGHT_SIDE
+      else
+        if depthY > 0 then
+          QUERY_ON_TOP_SIDE
+        else
+          QUERY_ON_BOTTOM_SIDE
+    end
+
   fun getCollisionsVec (iX, iY, iW, iH, itemID, pos, elements, acc) =
     if pos = Vector.length elements then
       acc
@@ -316,6 +380,27 @@ struct
         val acc = 
           if isColliding (iX, iY, iW, iH, itemID, item)
           then #itemID item :: acc
+          else acc
+      in
+        getCollisionsVec (iX, iY, iW, iH, itemID, pos + 1, elements, acc)
+      end
+
+  (* like getCollisionsVec, but instead of consing just the itemID, 
+   * it also conses the "collision-side" information.
+   * *)
+  fun getCollisionSideVec (iX, iY, iW, iH, itemID, pos, elements, acc) =
+    if pos = Vector.length elements then
+      acc
+    else
+      let
+        val item = Vector.sub (elements, pos)
+        val acc = 
+          if isColliding (iX, iY, iW, iH, itemID, item) then 
+            let
+              val side = getCollisionSide (iX, iY, iW, iH, item)
+            in
+              (side, #itemID item) :: acc
+            end
           else acc
       in
         getCollisionsVec (iX, iY, iW, iH, itemID, pos + 1, elements, acc)
