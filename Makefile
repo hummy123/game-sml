@@ -1,2 +1,2 @@
 run:
-	mlton oms.mlb && ./oms
+	./build-unix.sh && ./oms

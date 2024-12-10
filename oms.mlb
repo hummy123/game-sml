@@ -10,3 +10,19 @@ end
 fcore/quad-tree.sml
 fcore/player.sml
 fcore/wall.sml
+
+(* shell *)
+$(SML_LIB)/basis/mlton.mlb
+$(SML_LIB)/cml/cml.mlb
+
+ann
+  "allowFFI true"
+in
+  ffi/gles3-import.sml
+  ffi/glfw-import.sml
+  ffi/glfw-input.sml
+end
+
+shell/gl-shaders.sml
+shell/gl-draw.sml
+shell/shell.sml
