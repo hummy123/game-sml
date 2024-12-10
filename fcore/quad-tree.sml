@@ -15,6 +15,10 @@ sig
   val getCollisions : int * int * int * int *
                       int * int * int * int *
                       int * t -> int list
+
+  val getCollisionSides : int * int * int * int *
+                          int * int * int * int *
+                          int * t -> (collision_side * int) list
 end
 
 structure QuadTree : QUAD_TREE =
@@ -313,64 +317,6 @@ struct
       andalso itemID <> checkID
     end
 
-  (* no variant to represent 'no collision' case
-   * because caller should only try getting collision side 
-   * after checking that there is any collision. *)
-  datatype collision_side =
-    QUERY_ON_LEFT_SIDE
-  | QUERY_ON_TOP_SIDE
-  | QUERY_ON_RIGHT_SIDE
-  | QUERY_ON_BOTTOM_SIDE
-
-  (* getCollisionSide function ported from this answer:
-   * https://stackoverflow.com/a/56607347
-   * *)
-  fun getCollisionSide (iX, iY, iW, iH, checkWith: item) =
-    let
-      val iFinishX = iX + iW
-      val iFinishY = iY + iH
-      val iHalfW = iW div 2
-      val iHalfH = iH div 2
-      val iCentreX = iX + iHalfW
-      val iCentreY = iY + iHalfH
-
-      val {startX = cX, startY = cY, width = cW, height = cH, ...} = item
-
-      val cFinishX = cX + cW
-      val cFinishY = cY + cH
-      val cHalfW = cW div 2
-      val cHalfH = cH div 2
-      val cCentreX = cX + cHalfW
-      val cCentreY = cY + cHalfH
-
-      val diffX = iCentreX - cCentreX
-      val diffY = iCentreY - cCentreY
-
-      val minXDist = iHalfW + cHalfW
-      val minYDist = iHalfH + cHalfH
-
-      val depthX = 
-        if diffX > 0
-        then minXDist - diffX
-        else (~minXDist) - diffX
-
-      val depthY =
-        if diffY > 0 
-        then minYDist - diffY
-        else (~minYDist) - diffY
-    in
-      if abs depthX < abs depthY then
-        if depthX > 0 then
-          QUERY_ON_LEFT_SIDE
-        else
-          QUERY_ON_RIGHT_SIDE
-      else
-        if depthY > 0 then
-          QUERY_ON_TOP_SIDE
-        else
-          QUERY_ON_BOTTOM_SIDE
-    end
-
   fun getCollisionsVec (iX, iY, iW, iH, itemID, pos, elements, acc) =
     if pos = Vector.length elements then
       acc
@@ -380,27 +326,6 @@ struct
         val acc = 
           if isColliding (iX, iY, iW, iH, itemID, item)
           then #itemID item :: acc
-          else acc
-      in
-        getCollisionsVec (iX, iY, iW, iH, itemID, pos + 1, elements, acc)
-      end
-
-  (* like getCollisionsVec, but instead of consing just the itemID, 
-   * it also conses the "collision-side" information.
-   * *)
-  fun getCollisionSideVec (iX, iY, iW, iH, itemID, pos, elements, acc) =
-    if pos = Vector.length elements then
-      acc
-    else
-      let
-        val item = Vector.sub (elements, pos)
-        val acc = 
-          if isColliding (iX, iY, iW, iH, itemID, item) then 
-            let
-              val side = getCollisionSide (iX, iY, iW, iH, item)
-            in
-              (side, #itemID item) :: acc
-            end
           else acc
       in
         getCollisionsVec (iX, iY, iW, iH, itemID, pos + 1, elements, acc)
@@ -539,6 +464,223 @@ struct
     , itemID, tree
     ) =
     helpGetCollisions 
+      ( itemX, itemY, itemWidth, itemHeight
+      , quadX, quadY, quadWidth, quadHeight
+      , itemID, [], tree
+      )
+
+  (* no variant to represent 'no collision' case
+   * because caller should only try getting collision side 
+   * after checking that there is any collision. *)
+  datatype collision_side =
+    QUERY_ON_LEFT_SIDE
+  | QUERY_ON_TOP_SIDE
+  | QUERY_ON_RIGHT_SIDE
+  | QUERY_ON_BOTTOM_SIDE
+
+  (* getCollisionSide function ported from this answer:
+   * https://stackoverflow.com/a/56607347
+   * *)
+  fun getCollisionSide (iX, iY, iW, iH, checkWith: item) =
+    let
+      val iFinishX = iX + iW
+      val iFinishY = iY + iH
+      val iHalfW = iW div 2
+      val iHalfH = iH div 2
+      val iCentreX = iX + iHalfW
+      val iCentreY = iY + iHalfH
+
+      val {startX = cX, startY = cY, width = cW, height = cH, ...} = checkWith
+
+      val cFinishX = cX + cW
+      val cFinishY = cY + cH
+      val cHalfW = cW div 2
+      val cHalfH = cH div 2
+      val cCentreX = cX + cHalfW
+      val cCentreY = cY + cHalfH
+
+      val diffX = iCentreX - cCentreX
+      val diffY = iCentreY - cCentreY
+
+      val minXDist = iHalfW + cHalfW
+      val minYDist = iHalfH + cHalfH
+
+      val depthX = 
+        if diffX > 0
+        then minXDist - diffX
+        else (~minXDist) - diffX
+
+      val depthY =
+        if diffY > 0 
+        then minYDist - diffY
+        else (~minYDist) - diffY
+    in
+      if abs depthX < abs depthY then
+        if depthX > 0 then
+          QUERY_ON_LEFT_SIDE
+        else
+          QUERY_ON_RIGHT_SIDE
+      else
+        if depthY > 0 then
+          QUERY_ON_TOP_SIDE
+        else
+          QUERY_ON_BOTTOM_SIDE
+    end
+
+  (* like getCollisionsVec, but instead of consing just the itemID, 
+   * it also conses the "collision-side" information.
+   * *)
+  fun getCollisionSideVec (iX, iY, iW, iH, itemID, pos, elements, acc) =
+    if pos = Vector.length elements then
+      acc
+    else
+      let
+        val item = Vector.sub (elements, pos)
+        val acc = 
+          if isColliding (iX, iY, iW, iH, itemID, item) then 
+            let
+              val side = getCollisionSide (iX, iY, iW, iH, item)
+            in
+              (side, #itemID item) :: acc
+            end
+          else acc
+      in
+        getCollisionSideVec (iX, iY, iW, iH, itemID, pos + 1, elements, acc)
+      end
+
+  fun getCollisionSidesAll 
+    ( iX, iY, iW, iH, qW, qH
+    , itemID, acc, tree
+    ) =
+    case tree of 
+      NODE {topLeft, topRight, bottomLeft, bottomRight, elements} =>
+        let
+          val acc = 
+            getCollisionSideVec (iX, iY, iW, iH, itemID, 0, elements, acc)
+          val halfWidth = qW div 2
+          val halfHeight = qH div 2
+
+          val acc = 
+            getCollisionSidesAll
+              ( iX, iY, iW, iH, halfWidth, halfHeight
+              , itemID, acc, topLeft
+              )
+
+          val acc = 
+            getCollisionSidesAll
+              ( iX, iY, iW, iH, halfWidth, halfHeight
+              , itemID, acc, topRight
+              )
+
+          val acc = 
+            getCollisionSidesAll
+              ( iX, iY, iW, iH, halfWidth, halfHeight
+              , itemID, acc, bottomLeft
+              )
+        in
+          getCollisionSidesAll
+            ( iX, iY, iW, iH, halfWidth, halfWidth
+            , itemID, acc, bottomRight
+            )
+        end
+    | LEAF elements =>
+        getCollisionSideVec (iX, iY, iW, iH, itemID, 0, elements, acc)
+
+  fun helpGetCollisionSides
+    ( itemX, itemY, itemWidth, itemHeight
+    , quadX, quadY, quadWidth, quadHeight
+    , itemID, acc, tree: t
+    ) =
+    case tree of
+      NODE {topLeft, topRight, bottomLeft, bottomRight, elements} =>
+        let
+          (* get colliding elements in this node first *)
+          val acc = 
+            getCollisionSideVec 
+              ( itemX, itemY, itemWidth, itemHeight
+              , itemID, 0, elements, acc
+              )
+          val halfWidth = quadWidth div 2
+          val halfHeight = quadHeight div 2
+        in
+          (case whichQuadrant 
+            ( itemX, itemY, itemWidth, itemHeight
+            , quadX, quadY, quadWidth, quadHeight
+            ) 
+           of
+             TOP_LEFT =>
+               helpGetCollisionSides
+                 ( itemX, itemY, itemWidth, itemHeight
+                 , quadX, quadY, halfWidth, halfHeight
+                 , itemID, acc, topLeft
+                 )
+           | TOP_RIGHT =>
+               helpGetCollisionSides
+                 ( itemX, itemY, itemWidth, itemHeight
+                 , quadX + halfWidth, quadY, halfWidth, halfHeight
+                 , itemID, acc, topRight
+                 )
+           | BOTTOM_LEFT =>
+               helpGetCollisionSides
+                 ( itemX, itemY, itemWidth, itemHeight
+                 , quadX, quadY + halfHeight, halfWidth, halfHeight
+                 , itemID, acc, bottomLeft
+                 )
+           | BOTTOM_RIGHT => 
+               helpGetCollisionSides
+                 ( itemX, itemY, itemWidth, itemHeight
+                 , quadX + halfWidth, quadY + halfHeight
+                 , halfWidth, halfHeight
+                 , itemID, acc, bottomRight
+                 )
+           | PARENT_QUADRANT => 
+               (* In this function, PARENT_QUADRANT means 
+                * that the item is not in any of the main quadrants 
+                * but may possibly in the parent quadrant OR 
+                * it may be in any of the child quadrants. 
+                * So descend down on all the children, accumulating acc. 
+                * *)
+                let
+                  val acc = 
+                    getCollisionSidesAll
+                      ( itemX, itemY, itemWidth, itemHeight
+                      , halfWidth, halfHeight
+                      , itemID, acc, topLeft
+                      )
+
+                  val acc = 
+                    getCollisionSidesAll
+                      ( itemX, itemY, itemWidth, itemHeight
+                      , halfWidth, halfHeight
+                      , itemID, acc, topRight
+                      )
+
+                  val acc = 
+                    getCollisionSidesAll
+                      ( itemX, itemY, itemWidth, itemHeight
+                      , halfWidth, halfHeight
+                      , itemID, acc, bottomLeft
+                      )
+                in
+                  getCollisionSidesAll
+                    ( itemX, itemY, itemWidth, itemHeight
+                    , halfWidth, halfHeight
+                    , itemID, acc, bottomRight
+                    )
+                end)
+        end
+    | LEAF elements =>
+        getCollisionSideVec
+          ( itemX, itemY, itemWidth, itemHeight
+          , itemID, 0, elements, acc
+          )
+
+  fun getCollisionSides
+    ( itemX, itemY, itemWidth, itemHeight
+    , quadX, quadY, quadWidth, quadHeight
+    , itemID, tree
+    ) =
+    helpGetCollisionSides
       ( itemX, itemY, itemWidth, itemHeight
       , quadX, quadY, quadWidth, quadHeight
       , itemID, [], tree
