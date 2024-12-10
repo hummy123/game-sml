@@ -1,0 +1,12 @@
+$(SML_LIB)/basis/basis.mlb
+
+(* fcore *)
+ann
+  "allowVectorExps true"
+in
+  fcore/block.sml
+end
+
+fcore/quad-tree.sml
+fcore/player.sml
+fcore/wall.sml
