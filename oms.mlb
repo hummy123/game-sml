@@ -1,6 +1,8 @@
 $(SML_LIB)/basis/basis.mlb
 
 (* fcore *)
+message-types/input-msg.sml
+
 ann
   "allowVectorExps true"
 in
@@ -8,8 +10,8 @@ in
 end
 
 fcore/quad-tree.sml
-fcore/player.sml
 fcore/wall.sml
+fcore/player.sml
 
 (* shell *)
 $(SML_LIB)/basis/mlton.mlb
