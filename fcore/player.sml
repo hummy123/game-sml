@@ -9,7 +9,7 @@ struct
 
   val moveBy = 5
   val jumpLimit = 150
-  val floatLimit = 5
+  val floatLimit = 4
 
   type t = {yAxis: y_axis, xAxis: x_axis, health: int, x: int, y: int}
 
