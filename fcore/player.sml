@@ -69,10 +69,7 @@ struct
             val collisions = QuadTree.getCollisionSides
               (desiredX, y, size, size, 0, 0, 1920, 1080, 0, Wall.tree)
           in
-            (* using default yAxis of FALLING when on ground 
-             * ensures that gravity is applied 
-             * when player walks off from platform *)
-            checkWalls (FALLING, xAxis, desiredX, y, health, collisions)
+            checkWalls (yAxis, xAxis, desiredX, y, health, collisions)
           end
       | FALLING =>
           let
@@ -114,7 +111,14 @@ struct
 
   fun getYAxis (uh, dh, yAxis) =
     case (uh, dh) of
-      (false, false) => yAxis
+      (false, false) => 
+        (* default yAxis of FALLING does two things:
+        * 1. When player walks off platform, gravity is applied.
+        * 2. When player presses up for a short period of time,
+        *    the player makes a shorter jump rather than jumping longer. 
+        *    *)
+        FALLING
+    | (true, true) => FALLING
     | (true, false) =>
         (case yAxis of
            ON_GROUND => JUMPING 0
@@ -122,7 +126,6 @@ struct
     | (false, true) => 
         (* todo: should move down if on platform *) 
         yAxis
-    | (true, true) => yAxis
 
   fun move
     ({x, y, yAxis, health, ...}: t, {leftHeld, rightHeld, upHeld, downHeld}) =
