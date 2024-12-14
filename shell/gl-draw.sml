@@ -1,10 +1,7 @@
 structure GlDraw =
 struct
-  open CML
-
   type t =
     { window: MLton.Pointer.t
-    , mbox: InputMsg.t Mailbox.mbox
     , wallVertexBuffer: Word32.word
     , wallProgram: Word32.word
     , wallLength: int
@@ -34,7 +31,6 @@ struct
 
   fun create window =
     let
-      val mbox = Mailbox.mailbox ()
       (* create vertex buffer, program, etc. *)
       val xyrgbVertexShader = createShader
         (Gles3.VERTEX_SHADER, GlShaders.xyrgbVertexShaderString)
@@ -50,7 +46,6 @@ struct
       val playerProgram = createProgram (xyrgbVertexShader, rgbFragmentShader)
     in
       { window = window
-      , mbox = mbox
       , wallVertexBuffer = wallVertexBuffer
       , wallProgram = wallProgram
       , wallLength = 0
@@ -64,7 +59,6 @@ struct
     let
       val
         { window
-        , mbox
         , playerVertexBuffer
         , playerProgram
         , playerLength
@@ -78,7 +72,6 @@ struct
       val newWallLength = Vector.length vec div 5
     in
       { window = window
-      , mbox = mbox
       , playerVertexBuffer = playerVertexBuffer
       , playerProgram = playerProgram
       , playerLength = playerLength
@@ -92,7 +85,6 @@ struct
     let
       val
         { window
-        , mbox
         , wallVertexBuffer
         , wallProgram
         , wallLength
@@ -106,7 +98,6 @@ struct
       val newPlayerLength = Vector.length vec div 5
     in
       { window = window
-      , mbox = mbox
       , wallVertexBuffer = wallVertexBuffer
       , wallProgram = wallProgram
       , wallLength = wallLength
@@ -163,10 +154,11 @@ struct
            * *)
 
           val wallVec = Wall.generateWalls ()
-          val shellState = uploadWall (shellState, wallVec)
 
-          val player = Player.move player
+          val input = InputState.getSnapshot ()
+          val player = Player.move (player, input)
           val playerVec = Player.getVec player
+
           val shellState = uploadWall (shellState, wallVec)
           val shellState = uploadPlayer (shellState, playerVec)
 

@@ -4,6 +4,17 @@
 #include <GLFW/glfw3.h>
 
 int PRESS = GLFW_PRESS;
-int REPEAT = GLFW_REPEAT;
 int RELEASE = GLFW_RELEASE;
 
+int ARROW_UP = GLFW_KEY_UP;
+int ARROW_DOWN = GLFW_KEY_DOWN;
+int ARROW_LEFT = GLFW_KEY_LEFT;
+int ARROW_RIGHT = GLFW_KEY_RIGHT;
+
+void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {
+  mltonKeyCallback(key, scancode, action, mods);
+}
+
+void setKeyCallback(GLFWwindow* window) {
+  glfwSetKeyCallback(window, keyCallback);
+}

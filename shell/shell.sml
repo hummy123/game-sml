@@ -1,7 +1,5 @@
 structure Shell =
 struct
-  open CML
-
   fun main () =
     let
       (* Set up GLFW. *)
@@ -13,6 +11,8 @@ struct
       val window = Glfw.createWindow (1920, 1080, "shf")
       val _ = Glfw.makeContextCurrent window
       val _ = Gles3.loadGlad ()
+
+      val _ = InputState.registerCallbacks window
     in
       GlDraw.loop window
     end

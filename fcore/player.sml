@@ -47,14 +47,14 @@ struct
             val {y = wallY, ...} = Wall.getID wallID
             val newY = wallY - size
           in
-            checkWalls (yAxis, xAxis, x, newY, health, tl)
+            checkWalls (ON_GROUND, xAxis, x, newY, health, tl)
           end
       | (QUERY_ON_TOP_SIDE, wallID) :: tl =>
           checkWalls (yAxis, xAxis, x, y, health, tl)
       | [] => mkPlayer (health, xAxis, yAxis, x, y)
     end
 
-  fun move ({x, y, xAxis, yAxis, health}: t) =
+  fun helpMove (x, y, xAxis, yAxis, health) =
     let
       (* check against wall quad tree *)
       val desiredX =
@@ -100,5 +100,33 @@ struct
             in
               checkWalls (yAxis, xAxis, desiredX, desiredY, health, collisions)
             end
+    end
+
+  fun getXAxis (lh, rh) =
+    case (lh, rh) of
+      (false, false) => STAY_STILL
+    | (false, true) => MOVE_RIGHT
+    | (true, false) => MOVE_LEFT
+    | (true, true) => STAY_STILL
+
+  fun getYAxis (uh, dh, yAxis) =
+    case (uh, dh) of
+      (false, false) => yAxis
+    | (true, false) =>
+        (case yAxis of
+           ON_GROUND => JUMPING 0
+         | _ => yAxis)
+    | (false, true) => 
+        (* todo: should move down if on platform *) 
+        yAxis
+    | (true, true) => yAxis
+
+  fun move
+    ({x, y, yAxis, health, ...}: t, {leftHeld, rightHeld, upHeld, downHeld}) =
+    let
+      val xAxis = getXAxis (leftHeld, rightHeld)
+      val yAxis = getYAxis (upHeld, downHeld, yAxis)
+    in
+      helpMove (x, y, xAxis, yAxis, health)
     end
 end

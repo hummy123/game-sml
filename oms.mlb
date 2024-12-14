@@ -1,8 +1,6 @@
 $(SML_LIB)/basis/basis.mlb
 
 (* fcore *)
-message-types/input-msg.sml
-
 ann
   "allowVectorExps true"
 in
@@ -15,7 +13,6 @@ fcore/player.sml
 
 (* shell *)
 $(SML_LIB)/basis/mlton.mlb
-$(SML_LIB)/cml/cml.mlb
 
 ann
   "allowFFI true"
@@ -25,6 +22,7 @@ in
   ffi/glfw-input.sml
 end
 
+shell/input-state.sml
 shell/gl-shaders.sml
 shell/gl-draw.sml
 shell/shell.sml
