@@ -1,0 +1,4 @@
+structure GameTyoe =
+struct
+
+end

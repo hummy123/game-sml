@@ -1,6 +1,6 @@
 structure Player =
 struct
-  datatype y_axis = ON_GROUND | FALLING | JUMPING of int
+  datatype y_axis = ON_GROUND | FALLING | JUMPING of int | FLOATING of int
   datatype x_axis = MOVE_LEFT | STAY_STILL | MOVE_RIGHT
 
   (* width/height *)
@@ -9,6 +9,7 @@ struct
 
   val moveBy = 5
   val jumpLimit = 150
+  val floatLimit = 5
 
   type t = {yAxis: y_axis, xAxis: x_axis, health: int, x: int, y: int}
 
@@ -71,6 +72,16 @@ struct
           in
             checkWalls (yAxis, xAxis, desiredX, y, health, collisions)
           end
+      | FLOATING floated =>
+          let
+            val collisions = QuadTree.getCollisionSides
+              (desiredX, y, size, size, 0, 0, 1920, 1080, 0, Wall.tree)
+
+            val yAxis =
+              if floated = floatLimit then FALLING else FLOATING (floated + 1)
+          in
+            checkWalls (yAxis, xAxis, desiredX, y, health, collisions)
+          end
       | FALLING =>
           let
             val desiredY = y + moveBy
@@ -86,7 +97,7 @@ struct
               val collisions = QuadTree.getCollisionSides
                 (desiredX, y, size, size, 0, 0, 1920, 1080, 0, Wall.tree)
             in
-              checkWalls (FALLING, xAxis, desiredX, y, health, collisions)
+              checkWalls (FLOATING 0, xAxis, desiredX, y, health, collisions)
             end
           else
             (* jump *)
@@ -109,23 +120,44 @@ struct
     | (true, false) => MOVE_LEFT
     | (true, true) => STAY_STILL
 
-  fun getYAxis (uh, dh, yAxis) =
+  (* function returns default yAxis when neither up/down are pressed
+   * or both are pressed. 
+   *
+   * In the case where the user was previously jumping,
+   * we enter the floating stage, because it's normal for games
+   * to have a very brief floating/gliding period before applying gravity.
+   *
+   * In the case where the user was previously floating, we want the player to
+   * keep floating at this point (another function will apply gravity if we
+   * floated enough).
+   *
+   * In every other case, we return the FALLING variant,
+   * which has the same effect as returning the ON_GROUND variant,
+   * except that it means gravity is applied if we walk off a platform.
+   * *)
+  fun defaultYAxis prevAxis =
+    case prevAxis of
+      JUMPING _ => FLOATING 0
+    | FLOATING _ => prevAxis
+    | _ => FALLING
+
+  (* We want to prevent a double jump
+   * or jumping while the player is falling
+   * so we only switch to the JUMPING case if the player
+   * is on the ground. *)
+  fun onJumpPressed prevAxis =
+    case prevAxis of
+      ON_GROUND => JUMPING 0
+    | _ => prevAxis
+
+  fun getYAxis (uh, dh, prevAxis) =
     case (uh, dh) of
-      (false, false) => 
-        (* default yAxis of FALLING does two things:
-        * 1. When player walks off platform, gravity is applied.
-        * 2. When player presses up for a short period of time,
-        *    the player makes a shorter jump rather than jumping longer. 
-        *    *)
-        FALLING
-    | (true, true) => FALLING
-    | (true, false) =>
-        (case yAxis of
-           ON_GROUND => JUMPING 0
-         | _ => yAxis)
+      (false, false) => defaultYAxis prevAxis
+    | (true, true) => defaultYAxis prevAxis
+    | (true, false) => onJumpPressed prevAxis
     | (false, true) => 
         (* todo: should move down if on platform *) 
-        yAxis
+        prevAxis
 
   fun move
     ({x, y, yAxis, health, ...}: t, {leftHeld, rightHeld, upHeld, downHeld}) =
