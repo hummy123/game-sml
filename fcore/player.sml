@@ -69,7 +69,10 @@ struct
             val collisions = QuadTree.getCollisionSides
               (desiredX, y, size, size, 0, 0, 1920, 1080, 0, Wall.tree)
           in
-            checkWalls (yAxis, xAxis, desiredX, y, health, collisions)
+            (* using default yAxis of FALLING when on ground 
+             * ensures that gravity is applied 
+             * when player walks off from platform *)
+            checkWalls (FALLING, xAxis, desiredX, y, health, collisions)
           end
       | FALLING =>
           let
