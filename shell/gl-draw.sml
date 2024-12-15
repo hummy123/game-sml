@@ -140,7 +140,7 @@ struct
       ()
     end
 
-  fun helpLoop (shellState as {window, ...}: t, player) =
+  fun helpLoop (shellState as {window, ...}: t, game) =
     case Glfw.windowShouldClose window of
       false =>
         let
@@ -153,11 +153,11 @@ struct
            * - finally, draw 
            * *)
 
-          val wallVec = Wall.generateWalls ()
-
           val input = InputState.getSnapshot ()
-          val player = Player.move (player, input)
-          val playerVec = Player.getVec player
+          val game = GameUpdate.update (game, input)
+
+          val wallVec = Wall.getDrawVec (#walls game)
+          val playerVec = Player.getDrawVec (#player game)
 
           val shellState = uploadWall (shellState, wallVec)
           val shellState = uploadPlayer (shellState, playerVec)
@@ -167,12 +167,12 @@ struct
           val _ = Glfw.swapBuffers window
           val _ = Glfw.waitEvents ()
         in
-          helpLoop (shellState, player)
+          helpLoop (shellState, game)
         end
     | true => Glfw.terminate ()
 
   fun loop window =
     let val shellState = create window
-    in helpLoop (shellState, Player.initial)
+    in helpLoop (shellState, GameType.initial)
     end
 end

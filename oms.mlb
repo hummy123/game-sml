@@ -1,15 +1,20 @@
 $(SML_LIB)/basis/basis.mlb
 
 (* fcore *)
+fcore/quad-tree.sml
+
 ann
   "allowVectorExps true"
 in
   fcore/block.sml
 end
 
-fcore/quad-tree.sml
 fcore/wall.sml
+fcore/game-type.sml
+
 fcore/player.sml
+
+fcore/game-update.sml
 
 (* shell *)
 $(SML_LIB)/basis/mlton.mlb

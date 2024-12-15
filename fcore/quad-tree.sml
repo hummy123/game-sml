@@ -2,6 +2,8 @@ signature QUAD_TREE =
 sig
   type t
 
+  val empty: t
+
   datatype collision_side =
     QUERY_ON_LEFT_SIDE
   | QUERY_ON_TOP_SIDE
@@ -40,6 +42,8 @@ struct
       , elements: item vector
       }
   | LEAF of item vector
+
+  val empty = LEAF (Vector.fromList [])
 
   fun fromItem (itemID, startX, startY, width, height) =
     let

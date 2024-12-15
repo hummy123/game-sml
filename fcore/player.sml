@@ -1,7 +1,6 @@
 structure Player =
 struct
-  datatype y_axis = ON_GROUND | FALLING | JUMPING of int | FLOATING of int
-  datatype x_axis = MOVE_LEFT | STAY_STILL | MOVE_RIGHT
+  open GameType
 
   (* width/height *)
   val size = 35
@@ -10,29 +9,6 @@ struct
   val moveBy = 5
   val jumpLimit = 150
   val floatLimit = 3
-
-  type t =
-    { yAxis: y_axis
-    , xAxis: x_axis
-    , health: int
-    , x: int
-    , y: int
-    , jumpPressed: bool
-    }
-
-  (* placeholder *)
-  val initial: t =
-    { yAxis = JUMPING 0
-    , xAxis = STAY_STILL
-    , health = 3
-    , x = 500
-    , y = 500
-    , jumpPressed = false
-    }
-
-  (* placeholder *)
-  fun getVec ({x, y, ...}: t) =
-    Block.lerp (x, y, realSize, realSize, 1920.0, 1080.0, 0.5, 0.5, 0.5)
 
   fun mkPlayer (health, xAxis, yAxis, x, y, jumpPressed) =
     { yAxis = yAxis
@@ -43,38 +19,47 @@ struct
     , jumpPressed = jumpPressed
     }
 
-  fun checkWalls (yAxis, xAxis, x, y, health, jumpPressed, lst) =
+  fun checkWalls (yAxis, xAxis, x, y, health, jumpPressed, lst, game: game_type) =
     let
       open QuadTree
     in
       case lst of
         (QUERY_ON_LEFT_SIDE, wallID) :: tl =>
           let
-            val {x = wallX, width = wallWidth, ...} = Wall.getID wallID
+            val {walls, ...} = game
+            val {x = wallX, width = wallWidth, ...} =
+              Vector.sub (walls, wallID - 1)
+
             val newX = wallX + wallWidth
           in
-            checkWalls (yAxis, xAxis, newX, y, health, jumpPressed, tl)
+            checkWalls (yAxis, xAxis, newX, y, health, jumpPressed, tl, game)
           end
       | (QUERY_ON_RIGHT_SIDE, wallID) :: tl =>
           let
-            val {x = wallX, width = wallWidth, ...} = Wall.getID wallID
+            val {walls, ...} = game
+            val {x = wallX, width = wallWidth, ...} =
+              Vector.sub (walls, wallID - 1)
+
             val newX = wallX - size
           in
-            checkWalls (yAxis, xAxis, newX, y, health, jumpPressed, tl)
+            checkWalls (yAxis, xAxis, newX, y, health, jumpPressed, tl, game)
           end
       | (QUERY_ON_BOTTOM_SIDE, wallID) :: tl =>
           let
-            val {y = wallY, ...} = Wall.getID wallID
+            val {walls, ...} = game
+            val {y = wallY, ...} = Vector.sub (walls, wallID - 1)
+
             val newY = wallY - size
           in
-            checkWalls (ON_GROUND, xAxis, x, newY, health, jumpPressed, tl)
+            checkWalls
+              (ON_GROUND, xAxis, x, newY, health, jumpPressed, tl, game)
           end
       | (QUERY_ON_TOP_SIDE, wallID) :: tl =>
-          checkWalls (yAxis, xAxis, x, y, health, jumpPressed, tl)
+          checkWalls (yAxis, xAxis, x, y, health, jumpPressed, tl, game)
       | [] => mkPlayer (health, xAxis, yAxis, x, y, jumpPressed)
     end
 
-  fun helpMove (x, y, xAxis, yAxis, health, jumpPressed) =
+  fun helpMove (x, y, xAxis, yAxis, health, jumpPressed, game: game_type) =
     let
       (* check against wall quad tree *)
       val desiredX =
@@ -87,27 +72,37 @@ struct
         ON_GROUND =>
           let
             val collisions = QuadTree.getCollisionSides
-              (desiredX, y, size, size, 0, 0, 1920, 1080, 0, Wall.tree)
+              (desiredX, y, size, size, 0, 0, 1920, 1080, 0, #wallTree game)
           in
             checkWalls
-              (yAxis, xAxis, desiredX, y, health, jumpPressed, collisions)
+              (yAxis, xAxis, desiredX, y, health, jumpPressed, collisions, game)
           end
       | FLOATING floated =>
           let
             val collisions = QuadTree.getCollisionSides
-              (desiredX, y, size, size, 0, 0, 1920, 1080, 0, Wall.tree)
+              (desiredX, y, size, size, 0, 0, 1920, 1080, 0, #wallTree game)
 
             val yAxis =
               if floated = floatLimit then FALLING else FLOATING (floated + 1)
           in
             checkWalls
-              (yAxis, xAxis, desiredX, y, health, jumpPressed, collisions)
+              (yAxis, xAxis, desiredX, y, health, jumpPressed, collisions, game)
           end
       | FALLING =>
           let
             val desiredY = y + moveBy
             val collisions = QuadTree.getCollisionSides
-              (desiredX, desiredY, size, size, 0, 0, 1920, 1080, 0, Wall.tree)
+              ( desiredX
+              , desiredY
+              , size
+              , size
+              , 0
+              , 0
+              , 1920
+              , 1080
+              , 0
+              , #wallTree game
+              )
           in
             checkWalls
               ( yAxis
@@ -117,6 +112,7 @@ struct
               , health
               , jumpPressed
               , collisions
+              , game
               )
           end
       | JUMPING jumped =>
@@ -124,7 +120,7 @@ struct
             (* if we are above the jump limit, trigger a fall *)
             let
               val collisions = QuadTree.getCollisionSides
-                (desiredX, y, size, size, 0, 0, 1920, 1080, 0, Wall.tree)
+                (desiredX, y, size, size, 0, 0, 1920, 1080, 0, #wallTree game)
             in
               checkWalls
                 ( FLOATING 0
@@ -134,6 +130,7 @@ struct
                 , health
                 , jumpPressed
                 , collisions
+                , game
                 )
             end
           else
@@ -144,7 +141,17 @@ struct
               val desiredY = y - moveBy
 
               val collisions = QuadTree.getCollisionSides
-                (desiredX, desiredY, size, size, 0, 0, 1920, 1080, 0, Wall.tree)
+                ( desiredX
+                , desiredY
+                , size
+                , size
+                , 0
+                , 0
+                , 1920
+                , 1080
+                , 0
+                , #wallTree game
+                )
             in
               checkWalls
                 ( yAxis
@@ -154,6 +161,7 @@ struct
                 , health
                 , jumpPressed
                 , collisions
+                , game
                 )
             end
     end
@@ -195,9 +203,11 @@ struct
       ON_GROUND => if jumpPressed then prevAxis else JUMPING 0
     | _ => prevAxis
 
-  fun move ({x, y, yAxis, health, jumpPressed, ...}: t, input) =
+  fun move (game: game_type, input) =
     let
+      val {x, y, yAxis, health, jumpPressed, ...} = #player game
       val {leftHeld, rightHeld, upHeld, downHeld} = input
+
       val xAxis = getXAxis (leftHeld, rightHeld)
     in
       case (upHeld, downHeld) of
@@ -206,27 +216,27 @@ struct
             val yAxis = defaultYAxis yAxis
             val jumpPressed = false
           in
-            helpMove (x, y, xAxis, yAxis, health, jumpPressed)
+            helpMove (x, y, xAxis, yAxis, health, jumpPressed, game)
           end
       | (true, true) =>
-          let
-            val yAxis = defaultYAxis yAxis
-          in
-            helpMove (x, y, xAxis, yAxis, health, jumpPressed)
+          let val yAxis = defaultYAxis yAxis
+          in helpMove (x, y, xAxis, yAxis, health, jumpPressed, game)
           end
       | (true, false) =>
           let
             val yAxis = onJumpPressed (yAxis, jumpPressed)
             val jumpPressed = true
           in
-            helpMove (x, y, xAxis, yAxis, health, jumpPressed)
+            helpMove (x, y, xAxis, yAxis, health, jumpPressed, game)
           end
       | (false, true) =>
           (* todo: should move down if on platform *)
-          let
-            val jumpPressed = false
-          in
-            helpMove (x, y, xAxis, yAxis, health, jumpPressed)
+          let val jumpPressed = false
+          in helpMove (x, y, xAxis, yAxis, health, jumpPressed, game)
           end
     end
+
+  (* placeholder *)
+  fun getDrawVec ({x, y, ...}: player) =
+    Block.lerp (x, y, realSize, realSize, 1920.0, 1080.0, 0.5, 0.5, 0.5)
 end
