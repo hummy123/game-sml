@@ -236,7 +236,7 @@ struct
           end
     end
 
-  (* placeholder *)
-  fun getDrawVec ({x, y, ...}: player) =
-    Block.lerp (x, y, realSize, realSize, 1920.0, 1080.0, 0.5, 0.5, 0.5)
+  (* block is placeholder asset *)
+  fun getDrawVec ({x, y, ...}: player, width, height) =
+    Block.lerp (x, y, realSize, realSize, width, height, 0.5, 0.5, 0.5)
 end

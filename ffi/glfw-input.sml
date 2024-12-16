@@ -31,4 +31,9 @@ struct
     _export "mltonKeyCallback" public : (int * int * int * int -> unit) -> unit;
   val setKeyCallback =
     _import "setKeyCallback" public : window -> unit;
+
+  val exportFramebufferSizeCallback =
+    _export "mltonFramebufferSizeCallback" public : (Real32.real * Real32.real -> unit) -> unit;
+  val setFramebufferSizeCallback =
+    _import "setFramebufferSizeCallback" public : window -> unit;
 end

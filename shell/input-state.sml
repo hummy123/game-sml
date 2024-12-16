@@ -6,6 +6,8 @@ struct
     , rightHeld = ref false
     , upHeld = ref false
     , downHeld = ref false
+    , width = ref (1920.0 : Real32.real)
+    , height = ref (1080.0 : Real32.real)
     }
 
   fun getSnapshot () =
@@ -15,19 +17,14 @@ struct
     , downHeld = !(#downHeld state)
     }
 
-  fun getPlayerXAxis () =
-    let
-      val lh = #leftHeld state
-      val rh = #rightHeld state
+  fun getWidth () =
+    !(#width state)
 
-      open Player
-    in
-      case (!lh, !rh) of
-        (false, false) => STAY_STILL
-      | (false, true) => MOVE_RIGHT
-      | (true, false) => MOVE_LEFT
-      | (true, true) => STAY_STILL
-    end
+  fun getHeight () =
+    !(#height state)
+
+  fun sizeCallback (width, height) =
+    (#width state := width; #height state := height)
 
   open Input
 
@@ -60,6 +57,9 @@ struct
     let
       val () = Input.exportKeyCallback keyCallback
       val () = Input.setKeyCallback window
+
+      val () = Input.exportFramebufferSizeCallback sizeCallback
+      val () = Input.setFramebufferSizeCallback window
     in
       ()
     end

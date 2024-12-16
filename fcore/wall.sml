@@ -23,6 +23,7 @@ struct
         val {x, y, width, height, id = _} = wall
         val width = Real32.fromInt width
         val height = Real32.fromInt height
+
         val block = Block.lerp
           (x, y, width, height, winWidth, winHeight, 0.0, 0.0, 0.0)
         val acc = block :: acc
@@ -30,6 +31,6 @@ struct
         helpGetDrawVec (pos + 1, wallVec, acc, winWidth, winHeight)
       end
 
-  fun getDrawVec wallVec =
-    helpGetDrawVec (0, wallVec, [], 1920.0, 1080.0)
+  fun getDrawVec (wallVec, width, height) =
+    helpGetDrawVec (0, wallVec, [], width, height)
 end

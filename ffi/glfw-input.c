@@ -18,3 +18,13 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
 void setKeyCallback(GLFWwindow* window) {
   glfwSetKeyCallback(window, keyCallback);
 }
+
+void framebufferSizeCallback(GLFWwindow* window, int width, int height) {
+  glViewport(0, 0, width, height);
+  mltonFramebufferSizeCallback((float) width, (float) height);
+}
+
+void setFramebufferSizeCallback(GLFWwindow* window) {
+  glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
+}
+

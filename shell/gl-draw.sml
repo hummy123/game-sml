@@ -154,10 +154,13 @@ struct
            * *)
 
           val input = InputState.getSnapshot ()
+          val width = InputState.getWidth ()
+          val height = InputState.getHeight ()
+
           val game = GameUpdate.update (game, input)
 
-          val wallVec = Wall.getDrawVec (#walls game)
-          val playerVec = Player.getDrawVec (#player game)
+          val wallVec = Wall.getDrawVec (#walls game, width, height)
+          val playerVec = Player.getDrawVec (#player game, width, height)
 
           val shellState = uploadWall (shellState, wallVec)
           val shellState = uploadPlayer (shellState, playerVec)
