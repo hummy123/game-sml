@@ -7,6 +7,7 @@ sig
   datatype player_y_axis =
     ON_GROUND
   | FALLING
+  | DROP_BELOW_PLATFORM
   | JUMPING of int
   | FLOATING of int
 
@@ -42,6 +43,7 @@ struct
   datatype player_y_axis =
     ON_GROUND
   | FALLING
+  | DROP_BELOW_PLATFORM
   | JUMPING of int
   | FLOATING of int
 

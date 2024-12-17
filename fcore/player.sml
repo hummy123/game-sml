@@ -56,7 +56,59 @@ struct
           end
       | (QUERY_ON_TOP_SIDE, wallID) :: tl =>
           checkWalls (yAxis, xAxis, x, y, health, jumpPressed, tl, game)
-      | [] => mkPlayer (health, xAxis, yAxis, x, y, jumpPressed)
+      | [] =>
+          mkPlayer (health, xAxis, yAxis, x, y, jumpPressed)
+    end
+
+  fun helpCheckPlatforms
+    ( yAxis, xAxis, x, y, health
+    , jumpPressed, platList, wallList, game
+    ) =
+    let
+      open QuadTree
+    in
+      case platList of
+        platID :: tl =>
+          (case yAxis of
+            DROP_BELOW_PLATFORM =>
+              helpCheckPlatforms
+                (yAxis, xAxis, x, y, health, jumpPressed, tl, wallList, game)
+          | _ =>
+          let
+            val {platforms, ...} = game
+            val {y = platY, ...} = Vector.sub (platforms, platID - 1)
+
+            val newY = platY - size
+          in
+            helpCheckPlatforms
+              (ON_GROUND, xAxis, x, newY, health, jumpPressed, tl, wallList, game)
+          end)
+      | [] => 
+          checkWalls (yAxis, xAxis, x, y, health, jumpPressed, wallList, game)
+    end
+
+  (*** MLTON STRANGE TYPES ERROR:
+   *** Trigger by deleting the longer  `checkPlatforms` function
+   *** and uncommenting the function of the same name that raises Match.
+
+  fun checkPlatforms (yAxis, xAxis, x, y, health, jumpPressed, game) =
+    raise Match
+
+   *** *)
+
+  fun checkPlatforms (yAxis, xAxis, x, y, health, jumpPressed, game) =
+    let
+      val {wallTree, platformTree, ...} = game
+      val platCollisions = QuadTree.getCollisionsBelow
+        (y, y, size, size, 0, 0, 1920, 1080, 0, wallTree)
+
+      val wallCollisions = QuadTree.getCollisionSides
+        (y, y, size, size, 0, 0, 1920, 1080, 0, wallTree)
+    in
+      helpCheckPlatforms
+        ( yAxis, xAxis, x, y, health, jumpPressed
+        , platCollisions, wallCollisions, game
+        )
     end
 
   fun helpMove (x, y, xAxis, yAxis, health, jumpPressed, game: game_type) =
@@ -70,99 +122,48 @@ struct
     in
       case yAxis of
         ON_GROUND =>
-          let
-            val collisions = QuadTree.getCollisionSides
-              (desiredX, y, size, size, 0, 0, 1920, 1080, 0, #wallTree game)
-          in
-            checkWalls
-              (yAxis, xAxis, desiredX, y, health, jumpPressed, collisions, game)
-          end
+          checkPlatforms
+            (yAxis, xAxis, desiredX, y, health, jumpPressed, game)
       | FLOATING floated =>
           let
-            val collisions = QuadTree.getCollisionSides
-              (desiredX, y, size, size, 0, 0, 1920, 1080, 0, #wallTree game)
-
             val yAxis =
               if floated = floatLimit then FALLING else FLOATING (floated + 1)
           in
-            checkWalls
-              (yAxis, xAxis, desiredX, y, health, jumpPressed, collisions, game)
+            checkPlatforms
+              (yAxis, xAxis, desiredX, y, health, jumpPressed, game)
           end
       | FALLING =>
           let
             val desiredY = y + moveBy
-            val collisions = QuadTree.getCollisionSides
-              ( desiredX
-              , desiredY
-              , size
-              , size
-              , 0
-              , 0
-              , 1920
-              , 1080
-              , 0
-              , #wallTree game
-              )
           in
-            checkWalls
-              ( yAxis
-              , xAxis
-              , desiredX
-              , desiredY
-              , health
-              , jumpPressed
-              , collisions
-              , game
-              )
+            checkPlatforms
+              (yAxis, xAxis, desiredX, desiredY, health, jumpPressed, game)
+          end
+      | DROP_BELOW_PLATFORM =>
+          let
+            val desiredY = y + moveBy
+          in
+            checkPlatforms
+              (yAxis, xAxis, desiredX, desiredY, health, jumpPressed, game)
           end
       | JUMPING jumped =>
           if jumped + moveBy > jumpLimit then
             (* if we are above the jump limit, trigger a fall *)
             let
-              val collisions = QuadTree.getCollisionSides
-                (desiredX, y, size, size, 0, 0, 1920, 1080, 0, #wallTree game)
+              val newYAxis = FLOATING 0
             in
-              checkWalls
-                ( FLOATING 0
-                , xAxis
-                , desiredX
-                , y
-                , health
-                , jumpPressed
-                , collisions
-                , game
-                )
+              checkPlatforms
+                (newYAxis, xAxis, desiredX, y, health, jumpPressed, game)
             end
           else
             (* jump *)
             let
               val newJumped = jumped + moveBy
-              val yAxis = JUMPING newJumped
+              val newYAxis = JUMPING newJumped
               val desiredY = y - moveBy
-
-              val collisions = QuadTree.getCollisionSides
-                ( desiredX
-                , desiredY
-                , size
-                , size
-                , 0
-                , 0
-                , 1920
-                , 1080
-                , 0
-                , #wallTree game
-                )
             in
-              checkWalls
-                ( yAxis
-                , xAxis
-                , desiredX
-                , desiredY
-                , health
-                , jumpPressed
-                , collisions
-                , game
-                )
+              checkPlatforms
+                (newYAxis, xAxis, desiredX, desiredY, health, jumpPressed, game)
             end
     end
 
