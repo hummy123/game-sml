@@ -74,27 +74,29 @@ struct
               helpCheckPlatforms
                 (yAxis, xAxis, x, y, health, jumpPressed, tl, wallList, game)
           | _ =>
-          let
-            val {platforms, ...} = game
-            val {y = platY, ...} = Vector.sub (platforms, platID - 1)
+            let
+              (*** 
+               *** cause of compiler error is here 
+               *** The specific error is an error with optimising record representations.
+               ***
+               *** TO make the problem go away (at the cost of incorrectness),
+               *** one can:
+               *** 1. Delete the call to Vector.sub below
+               *** 2. Change the `platY` value below (in `platY - size`)
+               ***    to any constant integer (like 300 or 555).
+               ***)
 
-            val newY = platY - size
-          in
-            helpCheckPlatforms
-              (ON_GROUND, xAxis, x, newY, health, jumpPressed, tl, wallList, game)
-          end)
+              val {platforms, ...} = game
+              val {y = platY, ...} = Vector.sub (platforms, platID - 1)
+
+              val newY = platY - size
+            in
+              helpCheckPlatforms
+                (ON_GROUND, xAxis, x, newY, health, jumpPressed, tl, wallList, game)
+            end)
       | [] => 
           checkWalls (yAxis, xAxis, x, y, health, jumpPressed, wallList, game)
     end
-
-  (*** MLTON STRANGE TYPES ERROR:
-   *** Trigger by deleting the longer  `checkPlatforms` function
-   *** and uncommenting the function of the same name that raises Match.
-
-  fun checkPlatforms (yAxis, xAxis, x, y, health, jumpPressed, game) =
-    raise Match
-
-   *** *)
 
   fun checkPlatforms (yAxis, xAxis, x, y, health, jumpPressed, game) =
     let
