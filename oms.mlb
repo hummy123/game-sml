@@ -10,6 +10,7 @@ in
 end
 
 fcore/wall.sml
+fcore/platform.sml
 fcore/game-type.sml
 
 fcore/player.sml
