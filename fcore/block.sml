@@ -2,8 +2,6 @@ structure Block =
 struct
   fun lerp (startX, startY, drawWidth, drawHeight, windowWidth, windowHeight, r, g, b) : Real32.real vector =
     let
-       val startX = Real32.fromInt startX
-       val startY = Real32.fromInt startY
        val endY = windowHeight - startY
        val startY = windowHeight - (startY + drawHeight)
        val endX = startX + drawWidth

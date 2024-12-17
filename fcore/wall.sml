@@ -14,26 +14,6 @@ struct
 
   fun generateTree wallVec = helpGenerateTree (0, wallVec, QuadTree.empty)
 
-  val preferredAspectRatio: Real32.real = 1920.0 / 1080.0
-
-  fun helpGetDrawVecPreferred (pos, wallVec, acc, winWidth, winHeight) =
-    if pos = Vector.length wallVec then
-      Vector.concat acc
-    else
-      let
-        val wall = Vector.sub (wallVec, pos)
-        val {x, y, width, height, id = _} = wall
-        val width = Real32.fromInt width
-        val height = Real32.fromInt height
-
-        val block = Block.lerp
-          (x, y, width, height, winWidth, winHeight, 0.0, 0.0, 0.0)
-        val acc = block :: acc
-      in
-        helpGetDrawVecPreferred (pos + 1, wallVec, acc, winWidth, winHeight)
-      end
-
-  (* when actual aspect ratio > preferredAspectRatio *)
   fun helpGetDrawVecWider
     (pos, wallVec, acc, winWidth, winHeight, ratio, yOffset) =
     if pos = Vector.length wallVec then
@@ -44,10 +24,7 @@ struct
         val {x, y, width, height, id = _} = wall
 
         val x = Real32.fromInt x * ratio
-        val x = Real32.toInt IEEEReal.TO_NEAREST x
-
         val y = Real32.fromInt y * ratio + yOffset
-        val y = Real32.toInt IEEEReal.TO_NEAREST y
 
         val width = Real32.fromInt width * ratio
         val height = Real32.fromInt height * ratio
@@ -60,7 +37,6 @@ struct
           (pos + 1, wallVec, acc, winWidth, winHeight, ratio, yOffset)
       end
 
-  (* when actual aspect ratio < preferredAspectRatio *)
   fun helpGetDrawVecTaller
     (pos, wallVec, acc, winWidth, winHeight, ratio, xOffset) =
     if pos = Vector.length wallVec then
@@ -71,10 +47,7 @@ struct
         val {x, y, width, height, id = _} = wall
 
         val x = Real32.fromInt x * ratio + xOffset
-        val x = Real32.toInt IEEEReal.TO_NEAREST x
-
         val y = Real32.fromInt y * ratio
-        val y = Real32.toInt IEEEReal.TO_NEAREST y
 
         val width = Real32.fromInt width * ratio
         val height = Real32.fromInt height * ratio

@@ -238,5 +238,39 @@ struct
 
   (* block is placeholder asset *)
   fun getDrawVec ({x, y, ...}: player, width, height) =
-    Block.lerp (x, y, realSize, realSize, width, height, 0.5, 0.5, 0.5)
+    let
+      val wratio = width / 1920.0
+      val hratio = height / 1080.0
+    in
+      if wratio < hratio then
+        let
+          val scale = 1080.0 * wratio
+          val yOffset =
+            if height > scale then (height - scale) / 2.0
+            else if height < scale then (scale - height) / 2.0
+            else 0.0
+
+          val x = Real32.fromInt x * wratio
+          val y = Real32.fromInt y * wratio + yOffset
+
+          val realSize = realSize * wratio
+        in
+          Block.lerp (x, y, realSize, realSize, width, height, 0.5, 0.5, 0.5)
+        end
+      else
+        let
+          val scale = 1920.0 * hratio
+          val xOffset =
+            if width > scale then (width - scale) / 2.0
+            else if width < scale then (scale - width) / 2.0
+            else 0.0
+
+          val x = Real32.fromInt x * hratio + xOffset
+          val y = Real32.fromInt y * hratio
+
+          val realSize = realSize * hratio
+        in
+          Block.lerp (x, y, realSize, realSize, width, height, 0.5, 0.5, 0.5)
+        end
+    end
 end
