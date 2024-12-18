@@ -71,10 +71,18 @@ struct
         platID :: tl =>
           (case yAxis of
             DROP_BELOW_PLATFORM =>
+              (* pass through, allowing player to drop below the platform *)
+              helpCheckPlatforms
+                (yAxis, xAxis, x, y, health, jumpPressed, tl, wallList, game)
+          | JUMPING _ =>
+              (* pass through, allowing player to jump above the platform *)
               helpCheckPlatforms
                 (yAxis, xAxis, x, y, health, jumpPressed, tl, wallList, game)
           | _ =>
             let
+              (* default case: 
+               * player will land on platform and stay on the ground there. *)
+
               (*** 
                *** cause of compiler error is here 
                *** The specific error is an error with optimising record representations.
@@ -102,10 +110,10 @@ struct
     let
       val {wallTree, platformTree, ...} = game
       val platCollisions = QuadTree.getCollisionsBelow
-        (y, y, size, size, 0, 0, 1920, 1080, 0, platformTree)
+        (x, y, size, size, 0, 0, 1920, 1080, 0, platformTree)
 
       val wallCollisions = QuadTree.getCollisionSides
-        (y, y, size, size, 0, 0, 1920, 1080, 0, wallTree)
+        (x, y, size, size, 0, 0, 1920, 1080, 0, wallTree)
     in
       helpCheckPlatforms
         ( yAxis, xAxis, x, y, health, jumpPressed
@@ -234,8 +242,11 @@ struct
           end
       | (false, true) =>
           (* todo: should move down if on platform *)
-          let val jumpPressed = false
-          in helpMove (x, y, xAxis, yAxis, health, jumpPressed, game)
+          let 
+            val jumpPressed = false
+            val yAxis = DROP_BELOW_PLATFORM
+          in 
+            helpMove (x, y, xAxis, yAxis, health, jumpPressed, game)
           end
     end
 

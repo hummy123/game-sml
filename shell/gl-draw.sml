@@ -159,8 +159,10 @@ struct
 
           val game = GameUpdate.update (game, input)
 
-          val wallVec = Wall.getDrawVec (#walls game, width, height)
           val playerVec = Player.getDrawVec (#player game, width, height)
+          val wallVec = Wall.getDrawVec (#walls game, width, height)
+          val platVec = Platform.getDrawVec (#platforms game, width, height)
+          val wallVec = Vector.concat [wallVec, platVec]
 
           val shellState = uploadWall (shellState, wallVec)
           val shellState = uploadPlayer (shellState, playerVec)
