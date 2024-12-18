@@ -102,7 +102,7 @@ struct
     let
       val {wallTree, platformTree, ...} = game
       val platCollisions = QuadTree.getCollisionsBelow
-        (y, y, size, size, 0, 0, 1920, 1080, 0, wallTree)
+        (y, y, size, size, 0, 0, 1920, 1080, 0, platformTree)
 
       val wallCollisions = QuadTree.getCollisionSides
         (y, y, size, size, 0, 0, 1920, 1080, 0, wallTree)
