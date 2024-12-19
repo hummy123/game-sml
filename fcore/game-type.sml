@@ -13,9 +13,12 @@ sig
 
   datatype player_x_axis = MOVE_LEFT | STAY_STILL | MOVE_RIGHT
 
+  datatype player_reaction = NO_REACTION | RECOIL of int
+
   type player =
     { yAxis: player_y_axis
     , xAxis: player_x_axis
+    , reaction: player_reaction
     , health: int
     , x: int
     , y: int
@@ -53,9 +56,12 @@ struct
 
   datatype player_x_axis = MOVE_LEFT | STAY_STILL | MOVE_RIGHT
 
+  datatype player_reaction = NO_REACTION | RECOIL of int
+
   type player =
     { yAxis: player_y_axis
     , xAxis: player_x_axis
+    , reaction: player_reaction
     , health: int
     , x: int
     , y: int
@@ -79,6 +85,7 @@ struct
       val player =
         { yAxis = JUMPING 0
         , xAxis = STAY_STILL
+        , reaction = NO_REACTION
         , health = 3
         , x = 500
         , y = 500
