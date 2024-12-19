@@ -10,7 +10,7 @@ struct
 
   val jumpLimit = 150
   val floatLimit = 3
-  val recoilLimit = 5
+  val recoilLimit = 15
 
   fun mkPlayer (health, xAxis, yAxis, x, y, jumpPressed, recoil) =
     { yAxis = yAxis
@@ -110,19 +110,75 @@ struct
           checkWalls (yAxis, xAxis, x, y, health, jumpPressed, recoil, wallList, game)
     end
 
-  fun checkPlatforms (yAxis, xAxis, x, y, health, jumpPressed, recoil, game) =
+  fun checkEnemies 
+    ( yAxis, xAxis, x, y, health, jumpPressed, recoil
+    , enemyCollisions, platCollisions, wallCollisions, game
+    ) =
+    case enemyCollisions of
+      id :: tl =>
+        let
+          val newRecoil =
+            (* check if collision is closer to left side of enemy or right
+             * and then chose appropriate direction to recoil in *)
+            let
+              val pFinishX = x + size
+              val pHalfW = size div 2
+              val pCentreX = x + pHalfW
+
+              val {x = ex, y = ey, ...} = Vector.sub (#enemies game, id - 1)
+              val eFinishX = ex + Enemy.size
+              val eHalfW = Enemy.size div 2
+              val eCentreX = ex + eHalfW
+            in
+              if eCentreX < pCentreX then
+                RECOIL_RIGHT 0
+              else
+                RECOIL_LEFT 0
+            end
+        in
+          checkEnemies
+            ( FALLING, STAY_STILL, x, y, health, false, newRecoil
+            , tl, platCollisions, wallCollisions, game
+            )
+        end
+    | [] =>
+        helpCheckPlatforms
+           ( yAxis, xAxis, x, y, health, jumpPressed, recoil
+           , platCollisions, wallCollisions, game
+           )
+
+  fun checkCollisions (yAxis, xAxis, x, y, health, jumpPressed, recoil, game) =
     let
-      val {wallTree, platformTree, ...} = game
+      val {wallTree, platformTree, enemyTree, ...} = game
+
+      (* control flow is: check enemies -> check platforms -> check walls
+       * but this is not visible in this function as everything is implemented
+       * by tail call.
+       * So, when one function hits the end of its collision list, 
+       * it calls the next function at its tail. *)
+
       val platCollisions = QuadTree.getCollisionsBelow
         (x, y, size, size, 0, 0, 1920, 1080, 0, platformTree)
 
       val wallCollisions = QuadTree.getCollisionSides
         (x, y, size, size, 0, 0, 1920, 1080, 0, wallTree)
     in
-      helpCheckPlatforms
-        ( yAxis, xAxis, x, y, health, jumpPressed, recoil
-        , platCollisions, wallCollisions, game
-        )
+      case recoil of
+        NO_RECOIL =>
+          let
+            val enemyCollisions = QuadTree.getCollisions
+              (x, y, size, size, 0, 0, 1920, 1080, 0, enemyTree)
+          in
+            checkEnemies
+              ( yAxis, xAxis, x, y, health, jumpPressed, recoil
+              , enemyCollisions, platCollisions, wallCollisions, game
+              )
+          end
+      | _ =>
+          helpCheckPlatforms
+            ( yAxis, xAxis, x, y, health, jumpPressed, recoil
+            , platCollisions, wallCollisions, game
+            )
     end
 
   fun helpMove (x, y, xAxis, yAxis, health, jumpPressed, recoil, game) =
@@ -136,28 +192,28 @@ struct
     in
       case yAxis of
         ON_GROUND =>
-          checkPlatforms
+          checkCollisions
             (yAxis, xAxis, desiredX, y, health, jumpPressed, recoil, game)
       | FLOATING floated =>
           let
             val yAxis =
               if floated = floatLimit then FALLING else FLOATING (floated + 1)
           in
-            checkPlatforms
+            checkCollisions
               (yAxis, xAxis, desiredX, y, health, jumpPressed, recoil, game)
           end
       | FALLING =>
           let
             val desiredY = y + moveBy
           in
-            checkPlatforms
+            checkCollisions
               (yAxis, xAxis, desiredX, desiredY, health, jumpPressed, recoil, game)
           end
       | DROP_BELOW_PLATFORM =>
           let
             val desiredY = y + moveBy
           in
-            checkPlatforms
+            checkCollisions
               (yAxis, xAxis, desiredX, desiredY, health, jumpPressed, recoil, game)
           end
       | JUMPING jumped =>
@@ -166,7 +222,7 @@ struct
             let
               val newYAxis = FLOATING 0
             in
-              checkPlatforms
+              checkCollisions
                 (newYAxis, xAxis, desiredX, y, health, jumpPressed, recoil, game)
             end
           else
@@ -176,7 +232,7 @@ struct
               val newYAxis = JUMPING newJumped
               val desiredY = y - moveBy
             in
-              checkPlatforms
+              checkCollisions
                 ( newYAxis, xAxis, desiredX, desiredY
                 , health, jumpPressed, recoil, game
                 )
