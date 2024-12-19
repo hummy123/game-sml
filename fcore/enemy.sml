@@ -1,0 +1,71 @@
+structure Enemy =
+struct
+  val size = 35
+  val realSize = 35.0
+
+  fun helpGenerateTree (pos, enemyVec, acc) =
+    if pos = Vector.length enemyVec then
+      acc
+    else
+      let
+        val {id, x, y, health = _} = Vector.sub (enemyVec, pos)
+        val acc = QuadTree.insert
+          (x, y, size, size, 0, 0, 1920, 1080, id, acc)
+      in
+        helpGenerateTree (pos + 1, enemyVec, acc)
+      end
+
+  fun generateTree enemyVec = helpGenerateTree (0, enemyVec, QuadTree.empty)
+
+  fun helpGetDrawVec ({x, y, id = _, health = _}, width, height) =
+    let
+      val wratio = width / 1920.0
+      val hratio = height / 1080.0
+    in
+      if wratio < hratio then
+        let
+          val scale = 1080.0 * wratio
+          val yOffset =
+            if height > scale then (height - scale) / 2.0
+            else if height < scale then (scale - height) / 2.0
+            else 0.0
+
+          val x = Real32.fromInt x * wratio
+          val y = Real32.fromInt y * wratio + yOffset
+
+          val realSize = realSize * wratio
+        in
+          Block.lerp (x, y, realSize, realSize, width, height, 0.5, 0.5, 1.0)
+        end
+      else
+        let
+          val scale = 1920.0 * hratio
+          val xOffset =
+            if width > scale then (width - scale) / 2.0
+            else if width < scale then (scale - width) / 2.0
+            else 0.0
+
+          val x = Real32.fromInt x * hratio + xOffset
+          val y = Real32.fromInt y * hratio
+
+          val realSize = realSize * hratio
+        in
+          Block.lerp (x, y, realSize, realSize, width, height, 0.5, 0.5, 1.0)
+        end
+    end
+
+  fun getDrawVecLoop (pos, enemies, width, height, acc) =
+    if pos = Vector.length enemies then
+      Vector.concat acc
+    else
+      let
+        val e = Vector.sub (enemies, pos)
+        val hd = helpGetDrawVec (e, width, height)
+        val acc = hd :: acc
+      in
+        getDrawVecLoop (pos + 1, enemies, width, height, acc)
+      end
+
+  fun getDrawVec (enemies, width, height) = 
+    getDrawVecLoop (0, enemies, width, height, [])
+end

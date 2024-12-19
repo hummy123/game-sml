@@ -11,6 +11,7 @@ end
 
 fcore/wall.sml
 fcore/platform.sml
+fcore/enemy.sml
 fcore/game-type.sml
 
 fcore/player.sml

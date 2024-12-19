@@ -22,12 +22,16 @@ sig
     , jumpPressed: bool
     }
 
+  type enemy = {id: int, health: int, x: int, y: int}
+
   type game_type =
     { player: player
     , walls: wall vector
     , wallTree: QuadTree.t
     , platforms: platform vector
     , platformTree: QuadTree.t
+    , enemies: enemy vector
+    , enemyTree: QuadTree.t
     }
 
   val initial: game_type
@@ -58,12 +62,16 @@ struct
     , jumpPressed: bool
     }
 
+  type enemy = {id: int, health: int, x: int, y: int}
+
   type game_type =
     { player: player
     , walls: wall vector
     , wallTree: QuadTree.t
     , platforms: platform vector
     , platformTree: QuadTree.t
+    , enemies: enemy vector
+    , enemyTree: QuadTree.t
     }
 
   val initial: game_type =
@@ -86,12 +94,18 @@ struct
       val plat1 = {id = 1, x = 155, y = 911, width = 155}
       val platforms = Vector.fromList [plat1]
       val platformTree = Platform.generateTree platforms
+
+      val enemy1 = {id = 1, x = 300, y = 945, health = 5}
+      val enemies = Vector.fromList [enemy1]
+      val enemyTree = Enemy.generateTree enemies
     in
       { player = player
       , walls = walls
       , wallTree = wallTree
       , platforms = platforms
       , platformTree = platformTree
+      , enemies = enemies
+      , enemyTree = enemyTree
       }
     end
 end
