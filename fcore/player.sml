@@ -12,17 +12,17 @@ struct
   val floatLimit = 3
   val recoilLimit = 5
 
-  fun mkPlayer (health, xAxis, yAxis, x, y, jumpPressed, reaction) =
+  fun mkPlayer (health, xAxis, yAxis, x, y, jumpPressed, recoil) =
     { yAxis = yAxis
     , xAxis = xAxis
-    , reaction = reaction
+    , recoil = recoil
     , health = health
     , x = x
     , y = y
     , jumpPressed = jumpPressed
     }
 
-  fun checkWalls (yAxis, xAxis, x, y, health, jumpPressed, reaction, lst, game: game_type) =
+  fun checkWalls (yAxis, xAxis, x, y, health, jumpPressed, recoil, lst, game: game_type) =
     let
       open QuadTree
     in
@@ -35,7 +35,7 @@ struct
 
             val newX = wallX + wallWidth
           in
-            checkWalls (yAxis, xAxis, newX, y, health, jumpPressed, reaction, tl, game)
+            checkWalls (yAxis, xAxis, newX, y, health, jumpPressed, recoil, tl, game)
           end
       | (QUERY_ON_RIGHT_SIDE, wallID) :: tl =>
           let
@@ -45,7 +45,7 @@ struct
 
             val newX = wallX - size
           in
-            checkWalls (yAxis, xAxis, newX, y, health, jumpPressed, reaction, tl, game)
+            checkWalls (yAxis, xAxis, newX, y, health, jumpPressed, recoil, tl, game)
           end
       | (QUERY_ON_BOTTOM_SIDE, wallID) :: tl =>
           let
@@ -55,17 +55,17 @@ struct
             val newY = wallY - size
           in
             checkWalls
-              (ON_GROUND, xAxis, x, newY, health, jumpPressed, reaction, tl, game)
+              (ON_GROUND, xAxis, x, newY, health, jumpPressed, recoil, tl, game)
           end
       | (QUERY_ON_TOP_SIDE, wallID) :: tl =>
-          checkWalls (yAxis, xAxis, x, y, health, jumpPressed, reaction, tl, game)
+          checkWalls (yAxis, xAxis, x, y, health, jumpPressed, recoil, tl, game)
       | [] =>
-          mkPlayer (health, xAxis, yAxis, x, y, jumpPressed, reaction)
+          mkPlayer (health, xAxis, yAxis, x, y, jumpPressed, recoil)
     end
 
   fun helpCheckPlatforms
     ( yAxis, xAxis, x, y, health
-    , jumpPressed, reaction
+    , jumpPressed, recoil
     , platList, wallList, game
     ) =
     let
@@ -77,11 +77,11 @@ struct
             DROP_BELOW_PLATFORM =>
               (* pass through, allowing player to drop below the platform *)
               helpCheckPlatforms
-                (yAxis, xAxis, x, y, health, jumpPressed, reaction, tl, wallList, game)
+                (yAxis, xAxis, x, y, health, jumpPressed, recoil, tl, wallList, game)
           | JUMPING _ =>
               (* pass through, allowing player to jump above the platform *)
               helpCheckPlatforms
-                (yAxis, xAxis, x, y, health, jumpPressed, reaction, tl, wallList, game)
+                (yAxis, xAxis, x, y, health, jumpPressed, recoil, tl, wallList, game)
           | _ =>
             let
               (* default case: 
@@ -104,13 +104,13 @@ struct
               val newY = platY - size
             in
               helpCheckPlatforms
-                (ON_GROUND, xAxis, x, newY, health, jumpPressed, reaction, tl, wallList, game)
+                (ON_GROUND, xAxis, x, newY, health, jumpPressed, recoil, tl, wallList, game)
             end)
       | [] => 
-          checkWalls (yAxis, xAxis, x, y, health, jumpPressed, reaction, wallList, game)
+          checkWalls (yAxis, xAxis, x, y, health, jumpPressed, recoil, wallList, game)
     end
 
-  fun checkPlatforms (yAxis, xAxis, x, y, health, jumpPressed, reaction, game) =
+  fun checkPlatforms (yAxis, xAxis, x, y, health, jumpPressed, recoil, game) =
     let
       val {wallTree, platformTree, ...} = game
       val platCollisions = QuadTree.getCollisionsBelow
@@ -120,12 +120,12 @@ struct
         (x, y, size, size, 0, 0, 1920, 1080, 0, wallTree)
     in
       helpCheckPlatforms
-        ( yAxis, xAxis, x, y, health, jumpPressed, reaction
+        ( yAxis, xAxis, x, y, health, jumpPressed, recoil
         , platCollisions, wallCollisions, game
         )
     end
 
-  fun helpMove (x, y, xAxis, yAxis, health, jumpPressed, reaction, game) =
+  fun helpMove (x, y, xAxis, yAxis, health, jumpPressed, recoil, game) =
     let
       (* check against wall quad tree *)
       val desiredX =
@@ -137,28 +137,28 @@ struct
       case yAxis of
         ON_GROUND =>
           checkPlatforms
-            (yAxis, xAxis, desiredX, y, health, jumpPressed, reaction, game)
+            (yAxis, xAxis, desiredX, y, health, jumpPressed, recoil, game)
       | FLOATING floated =>
           let
             val yAxis =
               if floated = floatLimit then FALLING else FLOATING (floated + 1)
           in
             checkPlatforms
-              (yAxis, xAxis, desiredX, y, health, jumpPressed, reaction, game)
+              (yAxis, xAxis, desiredX, y, health, jumpPressed, recoil, game)
           end
       | FALLING =>
           let
             val desiredY = y + moveBy
           in
             checkPlatforms
-              (yAxis, xAxis, desiredX, desiredY, health, jumpPressed, reaction, game)
+              (yAxis, xAxis, desiredX, desiredY, health, jumpPressed, recoil, game)
           end
       | DROP_BELOW_PLATFORM =>
           let
             val desiredY = y + moveBy
           in
             checkPlatforms
-              (yAxis, xAxis, desiredX, desiredY, health, jumpPressed, reaction, game)
+              (yAxis, xAxis, desiredX, desiredY, health, jumpPressed, recoil, game)
           end
       | JUMPING jumped =>
           if jumped + moveBy > jumpLimit then
@@ -167,7 +167,7 @@ struct
               val newYAxis = FLOATING 0
             in
               checkPlatforms
-                (newYAxis, xAxis, desiredX, y, health, jumpPressed, reaction, game)
+                (newYAxis, xAxis, desiredX, y, health, jumpPressed, recoil, game)
             end
           else
             (* jump *)
@@ -178,7 +178,7 @@ struct
             in
               checkPlatforms
                 ( newYAxis, xAxis, desiredX, desiredY
-                , health, jumpPressed, reaction, game
+                , health, jumpPressed, recoil, game
                 )
             end
     end
@@ -220,7 +220,7 @@ struct
       ON_GROUND => if jumpPressed then prevAxis else JUMPING 0
     | _ => prevAxis
 
-  fun handleInput (game: game_type, input, reaction) =
+  fun handleInput (game: game_type, input, recoil) =
     let
       val {x, y, yAxis, health, jumpPressed, ...} = #player game
       val {leftHeld, rightHeld, upHeld, downHeld} = input
@@ -233,53 +233,72 @@ struct
             val yAxis = defaultYAxis yAxis
             val jumpPressed = false
           in
-            helpMove (x, y, xAxis, yAxis, health, jumpPressed, reaction, game)
+            helpMove (x, y, xAxis, yAxis, health, jumpPressed, recoil, game)
           end
       | (true, true) =>
           let val yAxis = defaultYAxis yAxis
-          in helpMove (x, y, xAxis, yAxis, health, jumpPressed, reaction, game)
+          in helpMove (x, y, xAxis, yAxis, health, jumpPressed, recoil, game)
           end
       | (true, false) =>
           let
             val yAxis = onJumpPressed (yAxis, jumpPressed)
             val jumpPressed = true
           in
-            helpMove (x, y, xAxis, yAxis, health, jumpPressed, reaction, game)
+            helpMove (x, y, xAxis, yAxis, health, jumpPressed, recoil, game)
           end
       | (false, true) =>
           let 
             val jumpPressed = false
             val yAxis = DROP_BELOW_PLATFORM
           in 
-            helpMove (x, y, xAxis, yAxis, health, jumpPressed, reaction, game)
+            helpMove (x, y, xAxis, yAxis, health, jumpPressed, recoil, game)
           end
     end
 
   fun move (game: game_type, input) =
     let
       val player = #player game
-      val reaction = #reaction player
+      val recoil = #recoil player
     in
-      case reaction of
-        NO_REACTION => handleInput (game, input, reaction)
-      | RECOIL recoiled =>
+      case recoil of
+        NO_RECOIL => handleInput (game, input, recoil)
+      | RECOIL_LEFT recoiled =>
           (* if player is recoiling, don't accept or adjust any input.
            * However, if player has reached the recoil limit, exit the recoil
            * state and accept input.
            * *)
           if recoiled = recoilLimit then
-            handleInput (game, input, NO_REACTION)
+            handleInput (game, input, NO_RECOIL)
           else
             let
               val {x, y, health, ...} = player
+              (* difference between RECOIL_LEFT and RECOIL_RIGHT
+               * is the direction player moves back in *)
               val x = x - 5
+
               val xAxis = STAY_STILL
               val yAxis = FALLING
               val jumpPressed = false
               val recoiled = recoiled + 1
-              val reaction = RECOIL recoiled
+              val recoil = RECOIL_LEFT recoiled
             in
-              helpMove (x, y, xAxis, yAxis, health, jumpPressed, reaction, game)
+              helpMove (x, y, xAxis, yAxis, health, jumpPressed, recoil, game)
+            end
+      | RECOIL_RIGHT recoiled =>
+          if recoiled = recoilLimit then
+            handleInput (game, input, NO_RECOIL)
+          else
+            let
+              val {x, y, health, ...} = player
+              val x = x + 5
+
+              val xAxis = STAY_STILL
+              val yAxis = FALLING
+              val jumpPressed = false
+              val recoiled = recoiled + 1
+              val recoil = RECOIL_RIGHT recoiled
+            in
+              helpMove (x, y, xAxis, yAxis, health, jumpPressed, recoil, game)
             end
     end
 
