@@ -137,7 +137,7 @@ struct
             end
         in
           checkEnemies
-            ( FALLING, STAY_STILL, x, y, health, false, newRecoil
+            ( FALLING, STAY_STILL, x, y, health, jumpPressed, newRecoil
             , tl, platCollisions, wallCollisions, game
             )
         end
@@ -273,7 +273,12 @@ struct
    * is on the ground. *)
   fun onJumpPressed (prevAxis, jumpPressed) =
     case prevAxis of
-      ON_GROUND => if jumpPressed then prevAxis else JUMPING 0
+      ON_GROUND => 
+        if jumpPressed then 
+          (* apply gravity *)
+          FALLING 
+        else 
+          JUMPING 0
     | _ => prevAxis
 
   fun handleInput (game: game_type, input, recoil) =
