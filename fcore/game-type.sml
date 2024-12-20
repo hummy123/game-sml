@@ -15,10 +15,13 @@ sig
 
   datatype player_recoil = NO_RECOIL | RECOIL_LEFT of int | RECOIL_RIGHT of int
 
+  datatype player_attacked = NOT_ATTACKED | ATTACKED of int
+
   type player =
     { yAxis: player_y_axis
     , xAxis: player_x_axis
     , recoil: player_recoil
+    , attacked: player_attacked
     , health: int
     , x: int
     , y: int
@@ -58,10 +61,13 @@ struct
 
   datatype player_recoil = NO_RECOIL | RECOIL_LEFT of int | RECOIL_RIGHT of int
 
+  datatype player_attacked = NOT_ATTACKED | ATTACKED of int
+
   type player =
     { yAxis: player_y_axis
     , xAxis: player_x_axis
     , recoil: player_recoil
+    , attacked: player_attacked
     , health: int
     , x: int
     , y: int
@@ -86,6 +92,7 @@ struct
         { yAxis = JUMPING 0
         , xAxis = STAY_STILL
         , recoil = NO_RECOIL
+        , attacked = NOT_ATTACKED
         , health = 3
         , x = 500
         , y = 500
