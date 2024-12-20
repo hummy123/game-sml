@@ -11,7 +11,7 @@ struct
   val jumpLimit = 150
   val floatLimit = 3
   val recoilLimit = 15
-  val attackLimit = 35
+  val attackLimit = 55
 
   fun mkPlayer (health, xAxis, yAxis, x, y, jumpPressed, recoil, attacked) =
     { yAxis = yAxis
@@ -166,7 +166,7 @@ struct
         in
           checkEnemies
             ( FALLING, STAY_STILL, x, y, health
-            , jumpPressed, newRecoil, attacked
+            , jumpPressed, newRecoil, ATTACKED 0
             , tl, platCollisions, wallCollisions, game
             )
         end
@@ -453,10 +453,28 @@ struct
     end
 
   (* block is placeholder asset *)
-  fun getDrawVec ({x, y, ...}: player, width, height) =
+  fun helpGetDrawVec (x, y, size, width, height, attacked) =
+    case attacked of
+      NOT_ATTACKED =>
+        Block.lerp (x, y, size, size, width, height, 0.5, 0.5, 0.5)
+    | ATTACKED amt =>
+        if amt mod 5 = 0 then
+          Block.lerp (x, y, size, size, width, height, 0.9, 0.9, 0.9)
+        else
+          Block.lerp (x, y, size, size, width, height, 0.5, 0.5, 0.5)
+
+  fun getDrawVec ({x, y, attacked, ...}: player, width, height) =
     let
       val wratio = width / 1920.0
       val hratio = height / 1080.0
+      val (r, g, b) = 
+        case attacked of
+          NOT_ATTACKED => (0.5, 0.5, 0.5)
+        | ATTACKED amt => 
+            if amt mod 5 = 0 then
+              (0.9, 0.9, 0.9)
+            else
+              (0.5, 0.5, 0.5)
     in
       if wratio < hratio then
         let
@@ -471,7 +489,7 @@ struct
 
           val realSize = realSize * wratio
         in
-          Block.lerp (x, y, realSize, realSize, width, height, 0.5, 0.5, 0.5)
+          helpGetDrawVec (x, y, realSize, width, height, attacked)
         end
       else
         let
@@ -486,7 +504,7 @@ struct
 
           val realSize = realSize * hratio
         in
-          Block.lerp (x, y, realSize, realSize, width, height, 0.5, 0.5, 0.5)
+          helpGetDrawVec (x, y, realSize, width, height, attacked)
         end
     end
 end
