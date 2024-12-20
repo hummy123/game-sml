@@ -173,7 +173,7 @@ struct
           val _ = draw shellState
 
           val _ = Glfw.swapBuffers window
-          val _ = Glfw.waitEvents ()
+          val _ = Glfw.pollEvents ()
         in
           helpLoop (shellState, game)
         end

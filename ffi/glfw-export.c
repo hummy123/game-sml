@@ -35,6 +35,10 @@ bool windowShouldClose(GLFWwindow *window) {
   glfwWindowShouldClose(window);
 }
 
+void pollEvents() {
+  glfwPollEvents();
+}
+
 void waitEvents() {
   glfwWaitEvents();
 }

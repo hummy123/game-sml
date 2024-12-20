@@ -27,6 +27,30 @@ struct
     _symbol "ARROW_RIGHT" public : ( unit -> int ) * ( int -> unit );
   val ARROW_RIGHT = ARROW_RIGHT ()
 
+  val (KEY_S, _) =
+    _symbol "KEY_S" public : ( unit -> int ) * ( int -> unit );
+  val KEY_S = KEY_S ()
+
+  val (KEY_D, _) =
+    _symbol "KEY_D" public : ( unit -> int ) * ( int -> unit );
+  val KEY_D = KEY_D ()
+
+  val (KEY_F, _) =
+    _symbol "KEY_F" public : ( unit -> int ) * ( int -> unit );
+  val KEY_F = KEY_F ()
+
+  val (KEY_J, _) =
+    _symbol "KEY_J" public : ( unit -> int ) * ( int -> unit );
+  val KEY_J = KEY_J ()
+
+  val (KEY_K, _) =
+    _symbol "KEY_K" public : ( unit -> int ) * ( int -> unit );
+  val KEY_K = KEY_K ()
+
+  val (KEY_L, _) =
+    _symbol "KEY_L" public : ( unit -> int ) * ( int -> unit );
+  val KEY_L = KEY_L ()
+
   val exportKeyCallback =
     _export "mltonKeyCallback" public : (int * int * int * int -> unit) -> unit;
   val setKeyCallback =

@@ -29,19 +29,19 @@ struct
   open Input
 
   fun handleKey (key, action) =
-    if key = ARROW_UP then
+    if key = KEY_K then
       if action = PRESS then (#upHeld state) := true
       else if action = RELEASE then (#upHeld state) := false
       else ()
-    else if key = ARROW_DOWN then
+    else if key = KEY_D then
       if action = PRESS then (#downHeld state) := true
       else if action = RELEASE then (#downHeld state) := false
       else ()
-    else if key = ARROW_LEFT then
+    else if key = KEY_S then
       if action = PRESS then (#leftHeld state) := true
       else if action = RELEASE then (#leftHeld state) := false
       else ()
-    else if key = ARROW_RIGHT then
+    else if key = KEY_F then
       if action = PRESS then (#rightHeld state) := true
       else if action = RELEASE then (#rightHeld state) := false
       else ()

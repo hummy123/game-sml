@@ -24,6 +24,7 @@ struct
   val terminate = _import "terminate" public : unit -> unit;
   val makeContextCurrent = _import "makeContextCurrent" public : window -> unit;
   val windowShouldClose = _import "windowShouldClose" public : window -> bool;
+  val pollEvents = _import "pollEvents" public reentrant : unit -> unit;
   val waitEvents = _import "waitEvents" public reentrant : unit -> unit;
   val swapBuffers = _import "swapBuffers" public : window -> unit;
   val setClipboardString = _import "setClipboardString" public : window * string -> unit;
