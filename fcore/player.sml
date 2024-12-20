@@ -471,7 +471,7 @@ struct
         case attacked of
           NOT_ATTACKED => (0.5, 0.5, 0.5)
         | ATTACKED amt => 
-            if amt mod 5 = 0 then
+            if amt mod 5 = 0 orelse amt mod 3 = 0 then
               (0.9, 0.9, 0.9)
             else
               (0.5, 0.5, 0.5)
