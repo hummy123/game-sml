@@ -15,10 +15,7 @@ sig
 
   datatype player_recoil = NO_RECOIL | RECOIL_LEFT of int | RECOIL_RIGHT of int
 
-[main 58f552b] add player_attacked datatype to player record, and refactor
- 2 files changed, 138 insertions(+), 42 deletions(-)
-To https://github.com/hummy123/quad-tree-sml.git
-   fec4d99..58f552b  main -> main
+  datatype player_attacked = NOT_ATTACKED | ATTACKED of int
 
   type player =
     { yAxis: player_y_axis
