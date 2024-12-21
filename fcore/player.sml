@@ -118,17 +118,6 @@ struct
               (* default case: 
                * player will land on platform and stay on the ground there. *)
 
-              (*** 
-               *** cause of compiler error is here 
-               *** The specific error is an error with optimising record representations.
-               ***
-               *** TO make the problem go away (at the cost of incorrectness),
-               *** one can:
-               *** 1. Delete the call to Vector.sub below
-               *** 2. Change the `platY` value below (in `platY - size`)
-               ***    to any constant integer (like 300 or 555).
-               ***)
-
               val {platforms, ...} = game
               val {y = platY, ...} = Vector.sub (platforms, platID - 1)
 
@@ -509,14 +498,6 @@ struct
     let
       val wratio = width / 1920.0
       val hratio = height / 1080.0
-      val (r, g, b) = 
-        case attacked of
-          NOT_ATTACKED => (0.5, 0.5, 0.5)
-        | ATTACKED amt => 
-            if amt mod 5 = 0 orelse amt mod 3 = 0 then
-              (0.9, 0.9, 0.9)
-            else
-              (0.5, 0.5, 0.5)
     in
       if wratio < hratio then
         let
