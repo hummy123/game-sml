@@ -597,18 +597,30 @@ struct
     end
 
   (* block is placeholder asset *)
-  fun helpGetDrawVec (x, y, size, width, height, attacked) =
-    case attacked of
-      NOT_ATTACKED =>
-        Block.lerp (x, y, size, size, width, height, 0.5, 0.5, 0.5)
-    | ATTACKED amt =>
-        if amt mod 5 = 0 then
-          Block.lerp (x, y, size, size, width, height, 0.9, 0.9, 0.9)
-        else
-          Block.lerp (x, y, size, size, width, height, 0.5, 0.5, 0.5)
+  fun helpGetDrawVec (x, y, size, width, height, attacked, mainAttack) =
+    case mainAttack of
+      MAIN_NOT_ATTACKING =>
+        (case attacked of
+           NOT_ATTACKED =>
+             Block.lerp (x, y, size, size, width, height, 0.5, 0.5, 0.5)
+         | ATTACKED amt =>
+             if amt mod 5 = 0 then
+               Block.lerp (x, y, size, size, width, height, 0.9, 0.9, 0.9)
+             else
+               Block.lerp (x, y, size, size, width, height, 0.5, 0.5, 0.5))
+    | MAIN_ATTACKING _ =>
+        (case attacked of
+           NOT_ATTACKED =>
+             Block.lerp (x, y, size, size, width, height, 1.0, 0.5, 0.5)
+         | ATTACKED amt =>
+             if amt mod 5 = 0 then
+               Block.lerp (x, y, size, size, width, height, 1.0, 0.9, 0.9)
+             else
+               Block.lerp (x, y, size, size, width, height, 1.0, 0.5, 0.5))
 
-  fun getDrawVec ({x, y, attacked, ...}: player, width, height) =
+  fun getDrawVec (player: player, width, height) =
     let
+      val {x, y, attacked, mainAttack, ...} = player
       val wratio = width / 1920.0
       val hratio = height / 1080.0
     in
@@ -625,7 +637,7 @@ struct
 
           val realSize = realSize * wratio
         in
-          helpGetDrawVec (x, y, realSize, width, height, attacked)
+          helpGetDrawVec (x, y, realSize, width, height, attacked, mainAttack)
         end
       else
         let
@@ -640,7 +652,7 @@ struct
 
           val realSize = realSize * hratio
         in
-          helpGetDrawVec (x, y, realSize, width, height, attacked)
+          helpGetDrawVec (x, y, realSize, width, height, attacked, mainAttack)
         end
     end
 end
