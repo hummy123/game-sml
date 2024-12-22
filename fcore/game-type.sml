@@ -19,11 +19,14 @@ sig
 
   datatype facing = FACING_LEFT | FACING_RIGHT
 
+  datatype main_attack = MAIN_UNUSED | MAIN_ATTACKING of int
+
   type player =
     { yAxis: player_y_axis
     , xAxis: player_x_axis
     , recoil: player_recoil
     , attacked: player_attacked
+    , mainAttack: main_attack
     , facing: facing
     , health: int
     , x: int
@@ -68,11 +71,14 @@ struct
 
   datatype facing = FACING_LEFT | FACING_RIGHT
 
+  datatype main_attack = MAIN_UNUSED | MAIN_ATTACKING of int
+
   type player =
     { yAxis: player_y_axis
     , xAxis: player_x_axis
     , recoil: player_recoil
     , attacked: player_attacked
+    , mainAttack: main_attack
     , facing: facing
     , health: int
     , x: int
@@ -99,6 +105,7 @@ struct
         , xAxis = STAY_STILL
         , recoil = NO_RECOIL
         , attacked = NOT_ATTACKED
+        , mainAttack = MAIN_UNUSED
         , facing = FACING_RIGHT
         , health = 3
         , x = 500

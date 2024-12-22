@@ -6,6 +6,7 @@ struct
     , rightHeld = ref false
     , upHeld = ref false
     , downHeld = ref false
+    , attackHeld = ref false
     , width = ref (1920.0 : Real32.real)
     , height = ref (1080.0 : Real32.real)
     }
@@ -15,6 +16,7 @@ struct
     , rightHeld = !(#rightHeld state)
     , upHeld = !(#upHeld state)
     , downHeld = !(#downHeld state)
+    , attackHeld = !(#attackHeld state)
     }
 
   fun getWidth () =
@@ -44,6 +46,10 @@ struct
     else if key = KEY_F then
       if action = PRESS then (#rightHeld state) := true
       else if action = RELEASE then (#rightHeld state) := false
+      else ()
+    else if key = KEY_J then
+      if action = PRESS then (#attackHeld state) := true
+      else if action = RELEASE then (#attackHeld state) := false
       else ()
     else
       ()
