@@ -372,7 +372,7 @@ struct
        * where player can walk through enemies without receiving damage
        * in which case enemy collisions don't count
        * *)
-      case #attacked player of
+      case attacked of
         NOT_ATTACKED =>
           let
             val {x, y, ...} = player
@@ -450,7 +450,7 @@ struct
 
   fun getInputPatches (player: player, input) =
     let
-      val {x, y, yAxis, health, jumpPressed, attacked, facing, ...} = player
+      val {x, y, yAxis, jumpPressed, facing, ...} = player
       val {leftHeld, rightHeld, upHeld, downHeld, attackHeld} = input
 
       val xAxis = getXAxis (leftHeld, rightHeld)
