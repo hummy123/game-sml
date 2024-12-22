@@ -25,12 +25,14 @@ struct
     , attacked
     , mainAttack
     , facing
+    , mainAttackPressed
     ) =
     { yAxis = yAxis
     , xAxis = xAxis
     , recoil = recoil
     , attacked = attacked
-    , mainAttack = MAIN_UNUSED
+    , mainAttack = mainAttack
+    , mainAttackPressed = mainAttackPressed
     , facing = facing
     , health = health
     , x = x
@@ -46,6 +48,7 @@ struct
         , recoil
         , attacked
         , mainAttack
+        , mainAttackPressed
         , facing
         , health
         , x
@@ -66,6 +69,7 @@ struct
             , attacked
             , mainAttack
             , facing
+            , mainAttackPressed
             )
       | W_Y_AXIS yAxis =>
           mkPlayer
@@ -79,6 +83,7 @@ struct
             , attacked
             , mainAttack
             , facing
+            , mainAttackPressed
             )
       | W_RECOIL recoil =>
           mkPlayer
@@ -92,6 +97,7 @@ struct
             , attacked
             , mainAttack
             , facing
+            , mainAttackPressed
             )
       | W_ATTACKED attacked =>
           mkPlayer
@@ -105,6 +111,7 @@ struct
             , attacked
             , mainAttack
             , facing
+            , mainAttackPressed
             )
       | W_MAIN_ATTACK mainAttack =>
           mkPlayer
@@ -118,6 +125,7 @@ struct
             , attacked
             , mainAttack
             , facing
+            , mainAttackPressed
             )
       | W_FACING facing =>
           mkPlayer
@@ -131,6 +139,7 @@ struct
             , attacked
             , mainAttack
             , facing
+            , mainAttackPressed
             )
       | W_HEALTH health =>
           mkPlayer
@@ -144,6 +153,7 @@ struct
             , attacked
             , mainAttack
             , facing
+            , mainAttackPressed
             )
       | W_X x =>
           mkPlayer
@@ -157,6 +167,7 @@ struct
             , attacked
             , mainAttack
             , facing
+            , mainAttackPressed
             )
       | W_Y y =>
           mkPlayer
@@ -170,6 +181,7 @@ struct
             , attacked
             , mainAttack
             , facing
+            , mainAttackPressed
             )
       | W_JUMP_PRESSED jumpPressed =>
           mkPlayer
@@ -183,6 +195,7 @@ struct
             , attacked
             , mainAttack
             , facing
+            , mainAttackPressed
             )
     end
 
@@ -203,7 +216,8 @@ struct
   val jumpLimit = 150
   val floatLimit = 3
   val recoilLimit = 15
-  val attackLimit = 55
+  val attackedLimit = 55
+  val mainAttackLimit = 15
 
   (* helper functions checking input *)
   fun getXAxis (lh, rh) =
@@ -382,7 +396,7 @@ struct
             checkEnemies (player, enemies, enemyCollisions, acc)
           end
       | ATTACKED amt =>
-          if amt = attackLimit then
+          if amt = attackedLimit then
             (* if we hit limit, exit ATTACKED phase 
              * and react to enemy collisions again 
              * *)
@@ -448,13 +462,9 @@ struct
             end
     end
 
-  fun getInputPatches (player: player, input) =
+  fun getJumpPatches (player, upHeld, downHeld, acc) =
     let
-      val {x, y, yAxis, jumpPressed, facing, ...} = player
-      val {leftHeld, rightHeld, upHeld, downHeld, attackHeld} = input
-
-      val xAxis = getXAxis (leftHeld, rightHeld)
-      val facing = getFacing (facing, xAxis)
+      val {yAxis, jumpPressed, ...} = player
     in
       case (upHeld, downHeld) of
         (false, false) =>
@@ -462,38 +472,48 @@ struct
             val yAxis = defaultYAxis yAxis
             val jumpPressed = false
           in
-            [ W_X_AXIS xAxis
-            , W_Y_AXIS yAxis
-            , W_JUMP_PRESSED jumpPressed
-            , W_FACING facing
-            ]
+            W_JUMP_PRESSED jumpPressed :: W_Y_AXIS yAxis :: acc
           end
       | (true, true) =>
           let val yAxis = defaultYAxis yAxis
-          in [W_X_AXIS xAxis, W_Y_AXIS yAxis, W_FACING facing]
+          in W_Y_AXIS yAxis :: acc
           end
       | (true, false) =>
           let
             val yAxis = onJumpPressed (yAxis, jumpPressed)
             val jumpPressed = true
           in
-            [ W_X_AXIS xAxis
-            , W_Y_AXIS yAxis
-            , W_JUMP_PRESSED jumpPressed
-            , W_FACING facing
-            ]
+            W_Y_AXIS yAxis :: W_JUMP_PRESSED jumpPressed :: acc
           end
       | (false, true) =>
           let
             val jumpPressed = false
             val yAxis = DROP_BELOW_PLATFORM
           in
-            [ W_X_AXIS xAxis
-            , W_Y_AXIS yAxis
-            , W_JUMP_PRESSED jumpPressed
-            , W_FACING facing
-            ]
+            W_Y_AXIS yAxis :: W_JUMP_PRESSED jumpPressed :: acc
           end
+    end
+
+  fun getMainAttackPatches (prevAttack, attackHeld) =
+    case prevAttack of
+      MAIN_NOT_ATTACKING => if attackHeld then MAIN_ATTACKING 0 else prevAttack
+    | MAIN_ATTACKING amt =>
+        if amt = mainAttackLimit then MAIN_NOT_ATTACKING
+        else let val amt = amt + 1 in MAIN_ATTACKING amt end
+
+  fun getInputPatches (player: player, input) =
+    let
+      val {x, y, yAxis, jumpPressed, facing, mainAttack, ...} = player
+      val {leftHeld, rightHeld, upHeld, downHeld, attackHeld} = input
+
+      val xAxis = getXAxis (leftHeld, rightHeld)
+      val facing = getFacing (facing, xAxis)
+      val mainAttack = getMainAttackPatches (mainAttack, attackHeld)
+
+      val acc = [W_X_AXIS xAxis, W_FACING facing, W_MAIN_ATTACK mainAttack]
+      val acc = getJumpPatches (player, upHeld, downHeld, acc)
+    in
+      acc
     end
 
   fun getRecoilPatches player =
