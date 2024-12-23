@@ -13,6 +13,7 @@ struct
   | W_X of int
   | W_Y of int
   | W_JUMP_PRESSED of bool
+  | W_MAIN_ATTACK_PRESSED of bool
 
   fun mkPlayer
     ( health
@@ -197,6 +198,20 @@ struct
             , facing
             , mainAttackPressed
             )
+      | W_MAIN_ATTACK_PRESSED mainAttackPressed =>
+          mkPlayer
+            ( health
+            , xAxis
+            , yAxis
+            , x
+            , y
+            , jumpPressed
+            , recoil
+            , attacked
+            , mainAttack
+            , facing
+            , mainAttackPressed
+            )
     end
 
   fun withPatches (player: player, lst) =
@@ -333,7 +348,7 @@ struct
     case lst of
       id :: tl =>
         let
-          val newRecoil =
+          val playerOnRight =
             (* check if collision is closer to left side of enemy or right
              * and then chose appropriate direction to recoil in *)
             let
@@ -347,8 +362,11 @@ struct
               val eHalfW = Enemy.size div 2
               val eCentreX = ex + eHalfW
             in
-              if eCentreX < pCentreX then RECOIL_RIGHT 0 else RECOIL_LEFT 0
+              eCentreX < pCentreX
             end
+
+          val newRecoil =
+            if playerOnRight then RECOIL_RIGHT 0 else RECOIL_LEFT 0
 
           val acc = W_RECOIL newRecoil :: acc
 
@@ -494,27 +512,69 @@ struct
           end
     end
 
-  fun getMainAttackPatches (prevAttack, attackHeld) =
+  fun getMainAttackPatches (prevAttack, attackHeld, mainAttackPressed) =
     case prevAttack of
-      MAIN_NOT_ATTACKING => if attackHeld then MAIN_ATTACKING 0 else prevAttack
+      MAIN_NOT_ATTACKING =>
+        if attackHeld andalso not mainAttackPressed then MAIN_ATTACKING 0
+        else prevAttack
     | MAIN_ATTACKING amt =>
         if amt = mainAttackLimit then MAIN_NOT_ATTACKING
         else let val amt = amt + 1 in MAIN_ATTACKING amt end
 
   fun getInputPatches (player: player, input) =
-    let
-      val {x, y, yAxis, jumpPressed, facing, mainAttack, ...} = player
-      val {leftHeld, rightHeld, upHeld, downHeld, attackHeld} = input
+    case #mainAttack player of
+      MAIN_NOT_ATTACKING =>
+        let
+          val
+            { x
+            , y
+            , yAxis
+            , jumpPressed
+            , facing
+            , mainAttack
+            , mainAttackPressed
+            , ...
+            } = player
 
-      val xAxis = getXAxis (leftHeld, rightHeld)
-      val facing = getFacing (facing, xAxis)
-      val mainAttack = getMainAttackPatches (mainAttack, attackHeld)
+          val {leftHeld, rightHeld, upHeld, downHeld, attackHeld} = input
 
-      val acc = [W_X_AXIS xAxis, W_FACING facing, W_MAIN_ATTACK mainAttack]
-      val acc = getJumpPatches (player, upHeld, downHeld, acc)
-    in
-      acc
-    end
+          val xAxis = getXAxis (leftHeld, rightHeld)
+          val facing = getFacing (facing, xAxis)
+          val mainAttack =
+            getMainAttackPatches (mainAttack, attackHeld, mainAttackPressed)
+
+          val mainAttackPressed =
+            case mainAttack of
+              MAIN_ATTACKING _ => true
+            | _ => attackHeld
+
+          val acc =
+            [ W_X_AXIS xAxis
+            , W_FACING facing
+            , W_MAIN_ATTACK mainAttack
+            , W_MAIN_ATTACK_PRESSED mainAttackPressed
+            ]
+          val acc = getJumpPatches (player, upHeld, downHeld, acc)
+        in
+          acc
+        end
+    | MAIN_ATTACKING _ =>
+        let
+          val {mainAttack, mainAttackPressed, ...} = player
+          val {attackHeld, ...} = input
+          val mainAttack =
+            getMainAttackPatches (mainAttack, attackHeld, mainAttackPressed)
+          val mainAttackPressed =
+            case mainAttack of
+              MAIN_ATTACKING _ => true
+            | _ => mainAttackPressed
+        in
+          [ W_X_AXIS STAY_STILL
+          , W_Y_AXIS FALLING
+          , W_MAIN_ATTACK mainAttack
+          , W_MAIN_ATTACK_PRESSED mainAttackPressed
+          ]
+        end
 
   fun getRecoilPatches player =
     case #recoil player of
