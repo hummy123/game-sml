@@ -394,14 +394,12 @@ struct
         end
     | [] => acc
 
-  fun checkEnemiesWhileAttacking (player, wasAttacked, enemies, lst, acc) =
+  fun checkEnemiesWhileAttacking (player, enemies, lst, acc) =
     let
       open QuadTree
     in
       case lst of
-        enemyID :: tl => 
-          (* placeholder *) 
-          acc
+        enemyID :: tl => (* placeholder *) acc
       | [] => acc
     end
 
@@ -455,39 +453,19 @@ struct
             end
       | (MAIN_ATTACKING amt, NOT_ATTACKED) =>
           let
+            (* todo: have x, y, and size values reflect a larger player size *)
             val enemyCollisions = QuadTree.getCollisions
-              ( x
-              , y
-              , mainAttackSize
-              , mainAttackSize
-              , 0
-              , 0
-              , 1920
-              , 1080
-              , 0
-              , enemyTree
-              )
+              (x, y, size, size, 0, 0, 1920, 1080, 0, enemyTree)
           in
-            checkEnemiesWhileAttacking
-              (player, false, enemies, enemyCollisions, acc)
+            checkEnemiesWhileAttacking (player, enemies, enemyCollisions, acc)
           end
       | (MAIN_ATTACKING attackingAmt, ATTACKED attackedAmt) =>
           let
+            (* todo: have x, y, and size values reflect a larger player size *)
             val enemyCollisions = QuadTree.getCollisions
-              ( x
-              , y
-              , mainAttackSize
-              , mainAttackSize
-              , 0
-              , 0
-              , 1920
-              , 1080
-              , 0
-              , enemyTree
-              )
+              (x, y, size, size, 0, 0, 1920, 1080, 0, enemyTree)
           in
-            checkEnemiesWhileAttacking
-              (player, true, enemies, enemyCollisions, acc)
+            checkEnemiesWhileAttacking (player, enemies, enemyCollisions, acc)
           end
     end
 
