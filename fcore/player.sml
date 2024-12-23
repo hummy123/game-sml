@@ -228,6 +228,10 @@ struct
 
   val moveBy = 5
 
+  val mainAttackSize = 55
+
+  (* timing variables; always start at 0, 
+   * and revert to default state when limit is hit *)
   val jumpLimit = 150
   val floatLimit = 3
   val recoilLimit = 15
@@ -267,6 +271,7 @@ struct
     case prevAxis of
       JUMPING _ => FLOATING 0
     | FLOATING _ => prevAxis
+    | DROP_BELOW_PLATFORM => prevAxis
     | _ => FALLING
 
   (* We want to prevent a double jump
@@ -344,6 +349,24 @@ struct
       | [] => acc
     end
 
+  fun getEnemyRecoilPatches (player, playerOnRight, acc) =
+    if playerOnRight then
+      let
+        val newRecoil = RECOIL_RIGHT 0
+        val newAttacked = ATTACKED 0
+      in
+        W_RECOIL newRecoil :: W_ATTACKED newAttacked :: W_FACING FACING_LEFT
+        :: W_Y_AXIS FALLING :: W_X_AXIS STAY_STILL :: acc
+      end
+    else
+      let
+        val newRecoil = RECOIL_LEFT 0
+        val newAttacked = ATTACKED 0
+      in
+        W_RECOIL newRecoil :: W_ATTACKED newAttacked :: W_FACING FACING_RIGHT
+        :: W_Y_AXIS FALLING :: W_X_AXIS STAY_STILL :: acc
+      end
+
   fun checkEnemies (player, enemies, lst, acc) =
     case lst of
       id :: tl =>
@@ -365,31 +388,29 @@ struct
               eCentreX < pCentreX
             end
 
-          val newRecoil =
-            if playerOnRight then RECOIL_RIGHT 0 else RECOIL_LEFT 0
-
-          val acc = W_RECOIL newRecoil :: acc
-
-          val acc =
-            case newRecoil of
-              RECOIL_LEFT _ => W_FACING FACING_RIGHT :: acc
-            | RECOIL_RIGHT _ => W_FACING FACING_LEFT :: acc
-            | NO_RECOIL => acc
-
-          val acc =
-            W_ATTACKED (ATTACKED 0) :: W_Y_AXIS (FALLING) :: W_X_AXIS STAY_STILL
-            :: acc
+          val acc = getEnemyRecoilPatches (player, playerOnRight, acc)
         in
           checkEnemies (player, enemies, tl, acc)
         end
     | [] => acc
+
+  fun checkEnemiesWhileAttacking (player, wasAttacked, enemies, lst, acc) =
+    let
+      open QuadTree
+    in
+      case lst of
+        enemyID :: tl => 
+          (* placeholder *) 
+          acc
+      | [] => acc
+    end
 
   fun getCollisionPatches (player, game) =
     let
       val {walls, wallTree, platformTree, platforms, enemyTree, enemies, ...} =
         game
 
-      val {x, y, attacked, ...} = player
+      val {x, y, attacked, mainAttack, ...} = player
 
       val platCollisions = QuadTree.getCollisionsBelow
         (x, y, size, size, 0, 0, 1920, 1080, 0, platformTree)
@@ -404,22 +425,20 @@ struct
        * where player can walk through enemies without receiving damage
        * in which case enemy collisions don't count
        * *)
-      case attacked of
-        NOT_ATTACKED =>
+      case (mainAttack, attacked) of
+        (MAIN_NOT_ATTACKING, NOT_ATTACKED) =>
           let
-            val {x, y, ...} = player
             val enemyCollisions = QuadTree.getCollisions
               (x, y, size, size, 0, 0, 1920, 1080, 0, enemyTree)
           in
             checkEnemies (player, enemies, enemyCollisions, acc)
           end
-      | ATTACKED amt =>
+      | (MAIN_NOT_ATTACKING, ATTACKED amt) =>
           if amt = attackedLimit then
             (* if we hit limit, exit ATTACKED phase 
              * and react to enemy collisions again 
              * *)
             let
-              val {x, y, ...} = player
               val enemyCollisions = QuadTree.getCollisions
                 (x, y, size, size, 0, 0, 1920, 1080, 0, enemyTree)
 
@@ -434,6 +453,42 @@ struct
             in
               W_ATTACKED attacked :: acc
             end
+      | (MAIN_ATTACKING amt, NOT_ATTACKED) =>
+          let
+            val enemyCollisions = QuadTree.getCollisions
+              ( x
+              , y
+              , mainAttackSize
+              , mainAttackSize
+              , 0
+              , 0
+              , 1920
+              , 1080
+              , 0
+              , enemyTree
+              )
+          in
+            checkEnemiesWhileAttacking
+              (player, false, enemies, enemyCollisions, acc)
+          end
+      | (MAIN_ATTACKING attackingAmt, ATTACKED attackedAmt) =>
+          let
+            val enemyCollisions = QuadTree.getCollisions
+              ( x
+              , y
+              , mainAttackSize
+              , mainAttackSize
+              , 0
+              , 0
+              , 1920
+              , 1080
+              , 0
+              , enemyTree
+              )
+          in
+            checkEnemiesWhileAttacking
+              (player, true, enemies, enemyCollisions, acc)
+          end
     end
 
   fun getMovePatches player =
@@ -570,7 +625,6 @@ struct
             | _ => mainAttackPressed
         in
           [ W_X_AXIS STAY_STILL
-          , W_Y_AXIS FALLING
           , W_MAIN_ATTACK mainAttack
           , W_MAIN_ATTACK_PRESSED mainAttackPressed
           ]
