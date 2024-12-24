@@ -2,19 +2,6 @@ structure Player =
 struct
   open GameType
 
-  datatype patch =
-    W_X_AXIS of player_x_axis
-  | W_Y_AXIS of player_y_axis
-  | W_RECOIL of player_recoil
-  | W_ATTACKED of player_attacked
-  | W_MAIN_ATTACK of main_attack
-  | W_FACING of facing
-  | W_HEALTH of int
-  | W_X of int
-  | W_Y of int
-  | W_JUMP_PRESSED of bool
-  | W_MAIN_ATTACK_PRESSED of bool
-
   fun mkPlayer
     ( health
     , xAxis
@@ -347,60 +334,6 @@ struct
       | [] => acc
     end
 
-  fun getEnemyRecoilPatches (player, playerOnRight, acc) =
-    if playerOnRight then
-      let
-        val newRecoil = RECOIL_RIGHT 0
-        val newAttacked = ATTACKED 0
-      in
-        W_RECOIL newRecoil :: W_ATTACKED newAttacked :: W_FACING FACING_LEFT
-        :: W_Y_AXIS FALLING :: W_X_AXIS STAY_STILL :: acc
-      end
-    else
-      let
-        val newRecoil = RECOIL_LEFT 0
-        val newAttacked = ATTACKED 0
-      in
-        W_RECOIL newRecoil :: W_ATTACKED newAttacked :: W_FACING FACING_RIGHT
-        :: W_Y_AXIS FALLING :: W_X_AXIS STAY_STILL :: acc
-      end
-
-  fun checkEnemies (player: player, enemies: enemy vector, lst, acc) =
-    case lst of
-      id :: tl =>
-        let
-          val playerOnRight =
-            (* check if collision is closer to left side of enemy or right
-             * and then chose appropriate direction to recoil in *)
-            let
-              val {x, ...} = player
-              val pFinishX = x + size
-              val pHalfW = size div 2
-              val pCentreX = x + pHalfW
-
-              val {x = ex, y = ey, ...} = Vector.sub (enemies, id - 1)
-              val eFinishX = ex + Enemy.size
-              val eHalfW = Enemy.size div 2
-              val eCentreX = ex + eHalfW
-            in
-              eCentreX < pCentreX
-            end
-
-          val acc = getEnemyRecoilPatches (player, playerOnRight, acc)
-        in
-          checkEnemies (player, enemies, tl, acc)
-        end
-    | [] => acc
-
-  fun checkEnemiesWhileAttacking (player, enemies, lst, acc) =
-    let
-      open QuadTree
-    in
-      case lst of
-        enemyID :: tl => (* placeholder *) acc
-      | [] => acc
-    end
-
   (* only checks for collisions with environment (walls and platforms) *)
   fun getEnvironmentPatches (player, game) =
     let
@@ -614,7 +547,7 @@ struct
             ]
           end
 
-  fun move (game: game_type, input) =
+  fun runPhysicsAndInput (game: game_type, input) =
     let
       val player = #player game
 

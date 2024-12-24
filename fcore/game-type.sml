@@ -35,6 +35,19 @@ sig
     , jumpPressed: bool
     }
 
+  datatype player_patch =
+    W_X_AXIS of player_x_axis
+  | W_Y_AXIS of player_y_axis
+  | W_RECOIL of player_recoil
+  | W_ATTACKED of player_attacked
+  | W_MAIN_ATTACK of main_attack
+  | W_FACING of facing
+  | W_HEALTH of int
+  | W_X of int
+  | W_Y of int
+  | W_JUMP_PRESSED of bool
+  | W_MAIN_ATTACK_PRESSED of bool
+
   type enemy = {id: int, health: int, x: int, y: int}
 
   type game_type =
@@ -87,6 +100,19 @@ struct
     , y: int
     , jumpPressed: bool
     }
+
+  datatype player_patch =
+    W_X_AXIS of player_x_axis
+  | W_Y_AXIS of player_y_axis
+  | W_RECOIL of player_recoil
+  | W_ATTACKED of player_attacked
+  | W_MAIN_ATTACK of main_attack
+  | W_FACING of facing
+  | W_HEALTH of int
+  | W_X of int
+  | W_Y of int
+  | W_JUMP_PRESSED of bool
+  | W_MAIN_ATTACK_PRESSED of bool
 
   type enemy = {id: int, health: int, x: int, y: int}
 
