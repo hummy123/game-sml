@@ -56,11 +56,61 @@ struct
       | [] => acc
     end
 
+  fun checkPlayerEnemyCollisions (player, game) =
+    let
+      val {x, y, mainAttack, attacked, ...} = player
+      val {enemies, enemyTree, ...} = game
+      val size = Player.size
+    in
+      case mainAttack of
+        MAIN_NOT_ATTACKING =>
+          (case attacked of
+             NOT_ATTACKED =>
+               let
+                 val enemyCollisions = QuadTree.getCollisions
+                   (x, y, size, size, 0, 0, 1920, 1080, 0, enemyTree)
+               in
+                 checkEnemies (player, enemies, enemyCollisions, [])
+               end
+           | ATTACKED amt =>
+               if amt = Player.attackedLimit then
+                 (* if reached limit, detect enemies again *)
+                 let
+                   val enemyCollisions = QuadTree.getCollisions
+                     (x, y, size, size, 0, 0, 1920, 1080, 0, enemyTree)
+                   val lst = [W_ATTACKED NOT_ATTACKED]
+                 in
+                   checkEnemies (player, enemies, enemyCollisions, lst)
+                 end
+               else
+                 (* if attacked, don't detect collisions, 
+                  * allowing a brief invincibility period as is common in many games 
+                  * *)
+                 let
+                   val amt = amt + 1
+                   val attacked = ATTACKED amt
+                 in
+                   [W_ATTACKED attacked]
+                 end)
+      | MAIN_ATTACKING amt =>
+          let
+            val enemyCollisions = QuadTree.getCollisions
+              (x, y, size, size, 0, 0, 1920, 1080, 0, enemyTree)
+          in
+            checkEnemiesWhileAttacking (player, enemies, enemyCollisions, [])
+          end
+    end
+
   fun update (game, input) =
     let
       val {player, walls, wallTree, platforms, platformTree, enemies, enemyTree} =
         game
+
       val player = Player.runPhysicsAndInput (game, input)
+
+      (* check player-enemy collisions and react *)
+      val playerPatches = checkPlayerEnemyCollisions (player, game)
+      val player = Player.withPatches (player, playerPatches)
     in
       { player = player
       , walls = walls
