@@ -14,6 +14,7 @@ struct
     , mainAttack
     , facing
     , mainAttackPressed
+    , enemies
     ) =
     { yAxis = yAxis
     , xAxis = xAxis
@@ -26,6 +27,7 @@ struct
     , x = x
     , y = y
     , jumpPressed = jumpPressed
+    , enemies = enemies
     }
 
   fun withPatch (player: player, patch) =
@@ -42,6 +44,7 @@ struct
         , x
         , y
         , jumpPressed
+        , enemies
         } = player
     in
       case patch of
@@ -58,6 +61,7 @@ struct
             , mainAttack
             , facing
             , mainAttackPressed
+            , enemies
             )
       | W_Y_AXIS yAxis =>
           mkPlayer
@@ -72,6 +76,7 @@ struct
             , mainAttack
             , facing
             , mainAttackPressed
+            , enemies
             )
       | W_RECOIL recoil =>
           mkPlayer
@@ -86,6 +91,7 @@ struct
             , mainAttack
             , facing
             , mainAttackPressed
+            , enemies
             )
       | W_ATTACKED attacked =>
           mkPlayer
@@ -100,6 +106,7 @@ struct
             , mainAttack
             , facing
             , mainAttackPressed
+            , enemies
             )
       | W_MAIN_ATTACK mainAttack =>
           mkPlayer
@@ -114,6 +121,7 @@ struct
             , mainAttack
             , facing
             , mainAttackPressed
+            , enemies
             )
       | W_FACING facing =>
           mkPlayer
@@ -128,6 +136,7 @@ struct
             , mainAttack
             , facing
             , mainAttackPressed
+            , enemies
             )
       | W_HEALTH health =>
           mkPlayer
@@ -142,6 +151,7 @@ struct
             , mainAttack
             , facing
             , mainAttackPressed
+            , enemies
             )
       | W_X x =>
           mkPlayer
@@ -156,6 +166,7 @@ struct
             , mainAttack
             , facing
             , mainAttackPressed
+            , enemies
             )
       | W_Y y =>
           mkPlayer
@@ -170,6 +181,7 @@ struct
             , mainAttack
             , facing
             , mainAttackPressed
+            , enemies
             )
       | W_JUMP_PRESSED jumpPressed =>
           mkPlayer
@@ -184,6 +196,7 @@ struct
             , mainAttack
             , facing
             , mainAttackPressed
+            , enemies
             )
       | W_MAIN_ATTACK_PRESSED mainAttackPressed =>
           mkPlayer
@@ -198,6 +211,22 @@ struct
             , mainAttack
             , facing
             , mainAttackPressed
+            , enemies
+            )
+      | W_ENEMIES enemies =>
+          mkPlayer
+            ( health
+            , xAxis
+            , yAxis
+            , x
+            , y
+            , jumpPressed
+            , recoil
+            , attacked
+            , mainAttack
+            , facing
+            , mainAttackPressed
+            , enemies
             )
     end
 

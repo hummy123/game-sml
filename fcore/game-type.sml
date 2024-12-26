@@ -21,6 +21,8 @@ sig
 
   datatype main_attack = MAIN_NOT_ATTACKING | MAIN_ATTACKING of int
 
+  type defeated_enemies = {x: int, y: int}
+
   type player =
     { yAxis: player_y_axis
     , xAxis: player_x_axis
@@ -33,6 +35,7 @@ sig
     , x: int
     , y: int
     , jumpPressed: bool
+    , enemies: defeated_enemies vector
     }
 
   datatype player_patch =
@@ -47,6 +50,7 @@ sig
   | W_Y of int
   | W_JUMP_PRESSED of bool
   | W_MAIN_ATTACK_PRESSED of bool
+  | W_ENEMIES of defeated_enemies vector
 
   type enemy = {id: int, health: int, x: int, y: int}
 
@@ -87,6 +91,8 @@ struct
 
   datatype main_attack = MAIN_NOT_ATTACKING | MAIN_ATTACKING of int
 
+  type defeated_enemies = {x: int, y: int}
+
   type player =
     { yAxis: player_y_axis
     , xAxis: player_x_axis
@@ -99,6 +105,7 @@ struct
     , x: int
     , y: int
     , jumpPressed: bool
+    , enemies: defeated_enemies vector
     }
 
   datatype player_patch =
@@ -113,6 +120,7 @@ struct
   | W_Y of int
   | W_JUMP_PRESSED of bool
   | W_MAIN_ATTACK_PRESSED of bool
+  | W_ENEMIES of defeated_enemies vector
 
   type enemy = {id: int, health: int, x: int, y: int}
 
@@ -140,6 +148,7 @@ struct
         , x = 500
         , y = 500
         , jumpPressed = false
+        , enemies = Vector.fromList []
         }
 
       val wall1 = {id = 1, x = 0, y = 0, width = 100, height = 1080}
