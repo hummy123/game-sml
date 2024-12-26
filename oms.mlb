@@ -2,6 +2,7 @@ $(SML_LIB)/basis/basis.mlb
 
 (* fcore *)
 fcore/quad-tree.sml
+fcore/bin-search.sml
 
 ann
   "allowVectorExps true"
