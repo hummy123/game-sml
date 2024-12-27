@@ -47,14 +47,21 @@ struct
         end
     | [] => acc
 
-  fun checkEnemiesWhileAttacking (player, enemies, lst, acc) =
-    let
-      open QuadTree
-    in
-      case lst of
-        enemyID :: tl => (* placeholder *) acc
-      | [] => acc
-    end
+  (* removes enemies from `enemies` vector when that enemy is in collisions *)
+  fun filterEnemyCollisions (pos, collisions, enemies: enemy vector, acc) =
+    if pos < 0 then
+      Vector.fromList acc
+    else
+      let
+        val enemy = Vector.sub (enemies, pos)
+      in
+        if BinSearch.exists (#id enemy, collisions) then
+          (* filter out *)
+          filterEnemyCollisions (pos - 1, collisions, enemies, acc)
+        else
+          (* don't filter out *)
+          filterEnemyCollisions (pos - 1, collisions, enemies, enemy :: acc)
+      end
 
   fun checkPlayerEnemyCollisions (player, game) =
     let
@@ -108,6 +115,10 @@ struct
             val patches =
               checkEnemiesWhileAttacking (player, enemies, enemyCollisions, [])
             val player = Player.withPatches (player, patches)
+
+            val enemyCollisions = Vector.fromList enemyCollisions
+            val enemies = filterEnemyCollisions
+              (Vector.length enemies - 1, enemyCollisions, enemies, [])
           in
             (player, enemies)
           end
@@ -122,6 +133,9 @@ struct
 
       (* check player-enemy collisions and react *)
       val (player, enemies) = checkPlayerEnemyCollisions (player, game)
+
+      (* create enemy quad tree from list of new enemies *)
+      val enemyTree = Enemy.generateTree enemies
     in
       { player = player
       , walls = walls
