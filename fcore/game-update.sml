@@ -69,8 +69,12 @@ struct
                let
                  val enemyCollisions = QuadTree.getCollisions
                    (x, y, size, size, 0, 0, 1920, 1080, 0, enemyTree)
+
+                 val patches =
+                   checkEnemies (player, enemies, enemyCollisions, [])
+                 val player = Player.withPatches (player, patches)
                in
-                 checkEnemies (player, enemies, enemyCollisions, [])
+                 (player, enemies)
                end
            | ATTACKED amt =>
                if amt = Player.attackedLimit then
@@ -79,8 +83,11 @@ struct
                    val enemyCollisions = QuadTree.getCollisions
                      (x, y, size, size, 0, 0, 1920, 1080, 0, enemyTree)
                    val lst = [W_ATTACKED NOT_ATTACKED]
+                   val patches =
+                     checkEnemies (player, enemies, enemyCollisions, lst)
+                   val player = Player.withPatches (player, patches)
                  in
-                   checkEnemies (player, enemies, enemyCollisions, lst)
+                   (player, enemies)
                  end
                else
                  (* if attacked, don't detect collisions, 
@@ -89,15 +96,20 @@ struct
                  let
                    val amt = amt + 1
                    val attacked = ATTACKED amt
+                   val player = Player.withPatches
+                     (player, [W_ATTACKED attacked])
                  in
-                   [W_ATTACKED attacked]
+                   (player, enemies)
                  end)
       | MAIN_ATTACKING amt =>
           let
             val enemyCollisions = QuadTree.getCollisions
               (x, y, size, size, 0, 0, 1920, 1080, 0, enemyTree)
+            val patches =
+              checkEnemiesWhileAttacking (player, enemies, enemyCollisions, [])
+            val player = Player.withPatches (player, patches)
           in
-            checkEnemiesWhileAttacking (player, enemies, enemyCollisions, [])
+            (player, enemies)
           end
     end
 
@@ -109,8 +121,7 @@ struct
       val player = Player.runPhysicsAndInput (game, input)
 
       (* check player-enemy collisions and react *)
-      val playerPatches = checkPlayerEnemyCollisions (player, game)
-      val player = Player.withPatches (player, playerPatches)
+      val (player, enemies) = checkPlayerEnemyCollisions (player, game)
     in
       { player = player
       , walls = walls
