@@ -17,6 +17,24 @@ struct
 
   fun generateTree enemyVec = helpGenerateTree (0, enemyVec, QuadTree.empty)
 
+  fun helpFind (findNum, vec, low, high) =
+    (* should only be called when we know enemy already exists in vec *)
+    let
+      val mid = low + ((high - low) div 2)
+      val enemy = Vector.sub (vec, mid)
+      val {id = curNum, x = _, y = _, health = _} = enemy
+    in
+      if curNum = findNum then
+        enemy
+      else if curNum < findNum then
+        helpFind (findNum, vec, mid + 1, high)
+      else
+        helpFind (findNum, vec, low, mid - 1)
+    end
+
+  fun find (findNum, vec) =
+    helpFind (findNum, vec, 0, Vector.length vec - 1)
+
   fun helpGetDrawVec ({x, y, id = _, health = _}, width, height) =
     let
       val wratio = width / 1920.0

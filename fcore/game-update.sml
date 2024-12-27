@@ -33,7 +33,7 @@ struct
               val pHalfW = Player.size div 2
               val pCentreX = x + pHalfW
 
-              val {x = ex, y = ey, ...} = Vector.sub (enemies, id - 1)
+              val {x = ex, y = ey, ...} = Enemy.find (id, enemies)
               val eFinishX = ex + Enemy.size
               val eHalfW = Enemy.size div 2
               val eCentreX = ex + eHalfW
@@ -46,6 +46,15 @@ struct
           checkEnemies (player, enemies, tl, acc)
         end
     | [] => acc
+
+  fun checkEnemiesWhileAttacking (player, enemies, lst, acc) =
+    let
+      open QuadTree
+    in
+      case lst of
+        enemyID :: tl => (* placeholder *) acc
+      | [] => acc
+    end
 
   (* removes enemies from `enemies` vector when that enemy is in collisions *)
   fun filterEnemyCollisions (pos, collisions, enemies: enemy vector, acc) =
