@@ -15,6 +15,7 @@ struct
     , facing
     , mainAttackPressed
     , enemies
+    , charge
     ) =
     { yAxis = yAxis
     , xAxis = xAxis
@@ -28,6 +29,7 @@ struct
     , y = y
     , jumpPressed = jumpPressed
     , enemies = enemies
+    , charge = charge
     }
 
   fun withPatch (player: player, patch) =
@@ -45,6 +47,7 @@ struct
         , y
         , jumpPressed
         , enemies
+        , charge
         } = player
     in
       case patch of
@@ -62,6 +65,7 @@ struct
             , facing
             , mainAttackPressed
             , enemies
+            , charge
             )
       | W_Y_AXIS yAxis =>
           mkPlayer
@@ -77,6 +81,7 @@ struct
             , facing
             , mainAttackPressed
             , enemies
+            , charge
             )
       | W_RECOIL recoil =>
           mkPlayer
@@ -92,6 +97,7 @@ struct
             , facing
             , mainAttackPressed
             , enemies
+            , charge
             )
       | W_ATTACKED attacked =>
           mkPlayer
@@ -107,6 +113,7 @@ struct
             , facing
             , mainAttackPressed
             , enemies
+            , charge
             )
       | W_MAIN_ATTACK mainAttack =>
           mkPlayer
@@ -122,6 +129,7 @@ struct
             , facing
             , mainAttackPressed
             , enemies
+            , charge
             )
       | W_FACING facing =>
           mkPlayer
@@ -137,6 +145,7 @@ struct
             , facing
             , mainAttackPressed
             , enemies
+            , charge
             )
       | W_HEALTH health =>
           mkPlayer
@@ -152,6 +161,7 @@ struct
             , facing
             , mainAttackPressed
             , enemies
+            , charge
             )
       | W_X x =>
           mkPlayer
@@ -167,6 +177,7 @@ struct
             , facing
             , mainAttackPressed
             , enemies
+            , charge
             )
       | W_Y y =>
           mkPlayer
@@ -182,6 +193,7 @@ struct
             , facing
             , mainAttackPressed
             , enemies
+            , charge
             )
       | W_JUMP_PRESSED jumpPressed =>
           mkPlayer
@@ -197,6 +209,7 @@ struct
             , facing
             , mainAttackPressed
             , enemies
+            , charge
             )
       | W_MAIN_ATTACK_PRESSED mainAttackPressed =>
           mkPlayer
@@ -212,6 +225,7 @@ struct
             , facing
             , mainAttackPressed
             , enemies
+            , charge
             )
       | W_ENEMIES enemies =>
           mkPlayer
@@ -227,6 +241,7 @@ struct
             , facing
             , mainAttackPressed
             , enemies
+            , charge
             )
     end
 
@@ -254,6 +269,7 @@ struct
   val recoilLimit = 15
   val attackedLimit = 55
   val mainAttackLimit = 15
+  val maxCharge = 60
 
   (* helper functions checking input *)
   fun getXAxis (lh, rh) =

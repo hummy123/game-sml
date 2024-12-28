@@ -36,6 +36,7 @@ sig
     , y: int
     , jumpPressed: bool
     , enemies: defeated_enemies vector
+    , charge: int
     }
 
   datatype player_patch =
@@ -106,6 +107,7 @@ struct
     , y: int
     , jumpPressed: bool
     , enemies: defeated_enemies vector
+    , charge: int
     }
 
   datatype player_patch =
@@ -149,6 +151,7 @@ struct
         , y = 500
         , jumpPressed = false
         , enemies = Vector.fromList []
+        , charge = 60
         }
 
       val wall1 = {id = 1, x = 0, y = 0, width = 100, height = 1080}
