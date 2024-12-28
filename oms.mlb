@@ -8,6 +8,7 @@ ann
   "allowVectorExps true"
 in
   fcore/block.sml
+  fcore/field.sml
 end
 
 fcore/wall.sml

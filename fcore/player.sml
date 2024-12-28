@@ -242,6 +242,9 @@ struct
   val size = 35
   val realSize = 35.0
 
+  val halfSize = 35 div 2
+  val halfRealSize = 35.0 / 2.0
+
   val moveBy = 5
 
   (* timing variables; always start at 0, 
@@ -659,4 +662,49 @@ struct
           helpGetDrawVec (x, y, realSize, width, height, attacked, mainAttack)
         end
     end
+
+  fun getFieldVec (player: player, width, height) =
+    case #mainAttack player of
+      MAIN_NOT_ATTACKING => Vector.fromList []
+    | MAIN_ATTACKING amt =>
+        let
+          val {x, y, ...} = player
+          val wratio = width / 1920.0
+          val hratio = height / 1080.0
+        in
+          if wratio < hratio then
+            let
+              val scale = 1080.0 * wratio
+              val yOffset =
+                if height > scale then (height - scale) / 2.0
+                else if height < scale then (scale - height) / 2.0
+                else 0.0
+
+              val x = (Real32.fromInt x - halfRealSize) * wratio
+              val y = (Real32.fromInt y - halfRealSize) * wratio + yOffset
+
+              val realSize = (realSize * 2.0) * wratio
+              val alpha = Real32.fromInt amt / Real32.fromInt mainAttackLimit
+            in
+              Field.lerp
+                (x, y, realSize, realSize, width, height, 0.7, 0.7, 1.0, alpha)
+            end
+          else
+            let
+              val scale = 1920.0 * hratio
+              val xOffset =
+                if width > scale then (width - scale) / 2.0
+                else if width < scale then (scale - width) / 2.0
+                else 0.0
+
+              val x = (Real32.fromInt x - halfRealSize) * hratio + xOffset
+              val y = (Real32.fromInt y - halfRealSize) * hratio
+
+              val realSize = (realSize * 2.0) * hratio
+              val alpha = Real32.fromInt amt / Real32.fromInt mainAttackLimit
+            in
+              Field.lerp
+                (x, y, realSize, realSize, width, height, 0.7, 0.7, 1.0, alpha)
+            end
+        end
 end
