@@ -119,6 +119,11 @@ struct
                  end)
       | MAIN_ATTACKING amt =>
           let
+            (* when attacking, player collision should be larger than player themselves *)
+            val x = x - Player.halfSize
+            val y = y - Player.halfSize
+            val size = size * 2
+
             val enemyCollisions = QuadTree.getCollisions
               (x, y, size, size, 0, 0, 1920, 1080, 0, enemyTree)
             val patches =
