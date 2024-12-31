@@ -79,7 +79,26 @@ struct
       val size = Player.size
     in
       case mainAttack of
-        MAIN_NOT_ATTACKING =>
+        MAIN_ATTACKING =>
+          let
+            (* when attacking, player collision should be larger than player themselves *)
+            val x = x - Player.halfSize
+            val y = y - Player.halfSize
+            val size = size * 2
+
+            val enemyCollisions = QuadTree.getCollisions
+              (x, y, size, size, 0, 0, 1920, 1080, 0, enemyTree)
+            val patches =
+              checkEnemiesWhileAttacking (player, enemies, enemyCollisions, [])
+            val player = Player.withPatches (player, patches)
+
+            val enemyCollisions = Vector.fromList enemyCollisions
+            val enemies = filterEnemyCollisions
+              (Vector.length enemies - 1, enemyCollisions, enemies, [])
+          in
+            (player, enemies)
+          end
+      | _ =>
           (case attacked of
              NOT_ATTACKED =>
                let
@@ -117,25 +136,6 @@ struct
                  in
                    (player, enemies)
                  end)
-      | MAIN_ATTACKING amt =>
-          let
-            (* when attacking, player collision should be larger than player themselves *)
-            val x = x - Player.halfSize
-            val y = y - Player.halfSize
-            val size = size * 2
-
-            val enemyCollisions = QuadTree.getCollisions
-              (x, y, size, size, 0, 0, 1920, 1080, 0, enemyTree)
-            val patches =
-              checkEnemiesWhileAttacking (player, enemies, enemyCollisions, [])
-            val player = Player.withPatches (player, patches)
-
-            val enemyCollisions = Vector.fromList enemyCollisions
-            val enemies = filterEnemyCollisions
-              (Vector.length enemies - 1, enemyCollisions, enemies, [])
-          in
-            (player, enemies)
-          end
     end
 
   fun update (game, input) =

@@ -211,7 +211,7 @@ struct
             , enemies
             , charge
             )
-      | W_MAIN_ATTACK_PRESSED mainAttackPressed =>
+      | W_ENEMIES enemies =>
           mkPlayer
             ( health
             , xAxis
@@ -227,7 +227,7 @@ struct
             , enemies
             , charge
             )
-      | W_ENEMIES enemies =>
+      | W_CHARGE charge =>
           mkPlayer
             ( health
             , xAxis
@@ -268,7 +268,6 @@ struct
   val floatLimit = 3
   val recoilLimit = 15
   val attackedLimit = 55
-  val mainAttackLimit = 15
   val maxCharge = 60
 
   (* helper functions checking input *)
@@ -476,68 +475,48 @@ struct
           end
     end
 
-  fun getMainAttackPatches (prevAttack, attackHeld, mainAttackPressed) =
-    case prevAttack of
-      MAIN_NOT_ATTACKING =>
-        if attackHeld andalso not mainAttackPressed then MAIN_ATTACKING 0
-        else prevAttack
-    | MAIN_ATTACKING amt =>
-        if amt = mainAttackLimit then MAIN_NOT_ATTACKING
-        else let val amt = amt + 1 in MAIN_ATTACKING amt end
+  fun getMainAttackPatches (attackHeld, chargeHeld, charge) =
+    if attackHeld andalso charge > 0 then MAIN_ATTACKING
+    else if chargeHeld andalso not attackHeld then MAIN_CHARGING
+    else MAIN_NOT_ATTACKING
 
   fun getInputPatches (player: player, input) =
-    case #mainAttack player of
-      MAIN_NOT_ATTACKING =>
-        let
-          val
-            { x
-            , y
-            , yAxis
-            , jumpPressed
-            , facing
-            , mainAttack
-            , mainAttackPressed
-            , ...
-            } = player
+    let
+      val
+        { x
+        , y
+        , yAxis
+        , jumpPressed
+        , facing
+        , mainAttack
+        , mainAttackPressed
+        , charge
+        , ...
+        } = player
 
-          val {leftHeld, rightHeld, upHeld, downHeld, attackHeld} = input
+      val {leftHeld, rightHeld, upHeld, downHeld, attackHeld, chargeHeld} =
+        input
 
-          val xAxis = getXAxis (leftHeld, rightHeld)
-          val facing = getFacing (facing, xAxis)
-          val mainAttack =
-            getMainAttackPatches (mainAttack, attackHeld, mainAttackPressed)
+      val xAxis = getXAxis (leftHeld, rightHeld)
+      val facing = getFacing (facing, xAxis)
+      val mainAttack = getMainAttackPatches (attackHeld, chargeHeld, charge)
 
-          val mainAttackPressed =
-            case mainAttack of
-              MAIN_ATTACKING _ => true
-            | _ => attackHeld
+      val charge =
+        case mainAttack of
+          MAIN_CHARGING => Int.min (charge + 1, maxCharge)
+        | MAIN_ATTACKING => Int.max (charge - 1, 0)
+        | MAIN_NOT_ATTACKING => charge
 
-          val acc =
-            [ W_X_AXIS xAxis
-            , W_FACING facing
-            , W_MAIN_ATTACK mainAttack
-            , W_MAIN_ATTACK_PRESSED mainAttackPressed
-            ]
-          val acc = getJumpPatches (player, upHeld, downHeld, acc)
-        in
-          acc
-        end
-    | MAIN_ATTACKING _ =>
-        let
-          val {mainAttack, mainAttackPressed, ...} = player
-          val {attackHeld, ...} = input
-          val mainAttack =
-            getMainAttackPatches (mainAttack, attackHeld, mainAttackPressed)
-          val mainAttackPressed =
-            case mainAttack of
-              MAIN_ATTACKING _ => true
-            | _ => mainAttackPressed
-        in
-          [ W_X_AXIS STAY_STILL
-          , W_MAIN_ATTACK mainAttack
-          , W_MAIN_ATTACK_PRESSED mainAttackPressed
-          ]
-        end
+      val acc =
+        [ W_X_AXIS xAxis
+        , W_FACING facing
+        , W_MAIN_ATTACK mainAttack
+        , W_CHARGE charge
+        ]
+      val acc = getJumpPatches (player, upHeld, downHeld, acc)
+    in
+      acc
+    end
 
   fun getRecoilPatches player =
     case #recoil player of
@@ -631,7 +610,16 @@ struct
                Block.lerp (x, y, size, size, width, height, 0.9, 0.9, 0.9)
              else
                Block.lerp (x, y, size, size, width, height, 0.5, 0.5, 0.5))
-    | MAIN_ATTACKING _ =>
+    | MAIN_ATTACKING =>
+        (case attacked of
+           NOT_ATTACKED =>
+             Block.lerp (x, y, size, size, width, height, 1.0, 0.5, 0.5)
+         | ATTACKED amt =>
+             if amt mod 5 = 0 then
+               Block.lerp (x, y, size, size, width, height, 1.0, 0.9, 0.9)
+             else
+               Block.lerp (x, y, size, size, width, height, 1.0, 0.5, 0.5))
+    | MAIN_CHARGING =>
         (case attacked of
            NOT_ATTACKED =>
              Block.lerp (x, y, size, size, width, height, 1.0, 0.5, 0.5)
@@ -682,7 +670,7 @@ struct
   fun getFieldVec (player: player, width, height) =
     case #mainAttack player of
       MAIN_NOT_ATTACKING => Vector.fromList []
-    | MAIN_ATTACKING amt =>
+    | _ =>
         let
           val {x, y, ...} = player
           val wratio = width / 1920.0
@@ -700,7 +688,7 @@ struct
               val y = (Real32.fromInt y - halfRealSize) * wratio + yOffset
 
               val realSize = (realSize * 2.0) * wratio
-              val alpha = Real32.fromInt amt / Real32.fromInt mainAttackLimit
+              val alpha = 1.0
             in
               Field.lerp
                 (x, y, realSize, realSize, width, height, 0.7, 0.7, 1.0, alpha)
@@ -717,7 +705,7 @@ struct
               val y = (Real32.fromInt y - halfRealSize) * hratio
 
               val realSize = (realSize * 2.0) * hratio
-              val alpha = Real32.fromInt amt / Real32.fromInt mainAttackLimit
+              val alpha = 1.0
             in
               Field.lerp
                 (x, y, realSize, realSize, width, height, 0.7, 0.7, 1.0, alpha)

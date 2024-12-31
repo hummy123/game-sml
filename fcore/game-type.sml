@@ -19,7 +19,7 @@ sig
 
   datatype facing = FACING_LEFT | FACING_RIGHT
 
-  datatype main_attack = MAIN_NOT_ATTACKING | MAIN_ATTACKING of int
+  datatype main_attack = MAIN_NOT_ATTACKING | MAIN_ATTACKING | MAIN_CHARGING
 
   type defeated_enemies = {x: int, y: int}
 
@@ -50,8 +50,8 @@ sig
   | W_X of int
   | W_Y of int
   | W_JUMP_PRESSED of bool
-  | W_MAIN_ATTACK_PRESSED of bool
   | W_ENEMIES of defeated_enemies vector
+  | W_CHARGE of int
 
   type enemy = {id: int, health: int, x: int, y: int}
 
@@ -90,7 +90,7 @@ struct
 
   datatype facing = FACING_LEFT | FACING_RIGHT
 
-  datatype main_attack = MAIN_NOT_ATTACKING | MAIN_ATTACKING of int
+  datatype main_attack = MAIN_NOT_ATTACKING | MAIN_ATTACKING | MAIN_CHARGING
 
   type defeated_enemies = {x: int, y: int}
 
@@ -121,8 +121,8 @@ struct
   | W_X of int
   | W_Y of int
   | W_JUMP_PRESSED of bool
-  | W_MAIN_ATTACK_PRESSED of bool
   | W_ENEMIES of defeated_enemies vector
+  | W_CHARGE of int
 
   type enemy = {id: int, health: int, x: int, y: int}
 
