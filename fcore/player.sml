@@ -688,7 +688,9 @@ struct
               val y = (Real32.fromInt y - halfRealSize) * wratio + yOffset
 
               val realSize = (realSize * 2.0) * wratio
-              val alpha = 1.0
+
+              val {charge, ...} = player
+              val alpha = Real32.fromInt charge / 60.0
             in
               Field.lerp
                 (x, y, realSize, realSize, width, height, 0.7, 0.7, 1.0, alpha)
@@ -705,7 +707,9 @@ struct
               val y = (Real32.fromInt y - halfRealSize) * hratio
 
               val realSize = (realSize * 2.0) * hratio
-              val alpha = 1.0
+
+              val {charge, ...} = player
+              val alpha = Real32.fromInt charge / 60.0
             in
               Field.lerp
                 (x, y, realSize, realSize, width, height, 0.7, 0.7, 1.0, alpha)
