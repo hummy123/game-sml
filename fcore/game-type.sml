@@ -21,7 +21,7 @@ sig
 
   datatype main_attack = MAIN_NOT_ATTACKING | MAIN_ATTACKING | MAIN_CHARGING
 
-  type defeated_enemies = {x: int, y: int}
+  type defeated_enemies = {angle: int}
 
   type player =
     { yAxis: player_y_axis
@@ -92,7 +92,7 @@ struct
 
   datatype main_attack = MAIN_NOT_ATTACKING | MAIN_ATTACKING | MAIN_CHARGING
 
-  type defeated_enemies = {x: int, y: int}
+  type defeated_enemies = {angle: int}
 
   type player =
     { yAxis: player_y_axis
