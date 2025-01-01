@@ -95,6 +95,16 @@ struct
             val enemyCollisions = Vector.fromList enemyCollisions
             val enemies = filterEnemyCollisions
               (Vector.length enemies - 1, enemyCollisions, enemies, [])
+
+            (* add collided enemies to player record, 
+             * concatenating with the previous enemies defeated *)
+            val newDefeated = 
+              Vector.map (fn id => {angle = (id * 5) mod 360}) enemyCollisions
+
+            val oldDefeated = #enemies player
+            val allDefeated = Vector.concat [oldDefeated, newDefeated]
+
+            val player = Player.withPatches (player, [W_ENEMIES allDefeated])
           in
             (player, enemies)
           end
