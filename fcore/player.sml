@@ -262,6 +262,11 @@ struct
 
   val moveBy = 5
 
+  (* defeated enemy constants *)
+  val defeatedPi = Real32.Math.pi / 180.0
+  val defeatedSize = 9.0
+  val defeatedDistance = 55.0
+
   (* timing variables; always start at 0, 
    * and revert to default state when limit is hit *)
   val jumpLimit = 150
@@ -590,6 +595,20 @@ struct
             end
         | _ => player
 
+      val player =
+        let
+          val e = #enemies player
+          val e = Vector.map (fn {angle} => 
+          {
+            angle =
+              if angle < 360 then angle + 5 else 0
+          })
+           e
+          val patches = [W_ENEMIES e]
+        in
+          withPatches (player, patches)
+        end
+
       val patches = getMovePatches player
       val player = withPatches (player, patches)
 
@@ -715,4 +734,100 @@ struct
                 (x, y, realSize, realSize, width, height, 0.7, 0.7, 1.0, alpha)
             end
         end
+
+  fun degreesToRadians degrees = Real32.fromInt degrees * defeatedPi
+
+  fun helpGetPelletVec
+    ( playerX
+    , playerY
+    , pos
+    , enemies
+    , width
+    , height
+    , ratio
+    , xOffset
+    , yOffset
+    , acc
+    ) =
+    if pos = Vector.length enemies then
+      Vector.concat acc
+    else
+      let
+        val {angle} = Vector.sub (enemies, pos)
+        (* convert degrees to radians *)
+        val angle = degreesToRadians angle
+
+        (* calculate pellet's x and y *)
+        val pelletX = ((Real32.Math.cos angle) * defeatedDistance) + playerX
+        val pelletX = pelletX * ratio + xOffset
+
+        val pelletY = ((Real32.Math.sin angle) * defeatedDistance) + playerY
+        val pelletY = pelletY * ratio + yOffset
+
+        val vec = Field.lerp
+          ( pelletX
+          , pelletY
+          , defeatedSize
+          , defeatedSize
+          , width
+          , height
+          , 0.3
+          , 0.9
+          , 0.3
+          , 1.0
+          )
+        val acc = vec :: acc
+      in
+        helpGetPelletVec
+          ( playerX
+          , playerY
+          , pos + 1
+          , enemies
+          , width
+          , height
+          , ratio
+          , xOffset
+          , yOffset
+          , acc
+          )
+      end
+
+  fun getPelletVec (player: player, width, height) =
+    if Vector.length (#enemies player) = 0 then
+      Vector.fromList []
+    else
+      let
+        val {x, y, enemies, ...} = player
+
+        (* get centre (x, y) coordinates of player *)
+        val diff = halfRealSize - (defeatedSize / 2.0)
+        val x = Real32.fromInt x + diff
+        val y = Real32.fromInt y + diff
+
+        val wratio = width / 1920.0
+        val hratio = height / 1080.0
+      in
+        if wratio < hratio then
+          let
+            val scale = 1080.0 * wratio
+            val yOffset =
+              if height > scale then (height - scale) / 2.0
+              else if height < scale then (scale - height) / 2.0
+              else 0.0
+          in 
+            helpGetPelletVec
+              (x, y, 0, enemies, width, height, wratio, 0.0, yOffset, [])
+          end
+        else
+          let
+            val scale = 1920.0 * hratio
+            val xOffset =
+              if width > scale then (width - scale) / 2.0
+              else if width < scale then (scale - width) / 2.0
+              else 0.0
+          in
+            helpGetPelletVec
+              (x, y, 0, enemies, width, height, hratio, xOffset, 0.0, [])
+          end
+      end
 end

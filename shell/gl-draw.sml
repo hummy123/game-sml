@@ -245,6 +245,10 @@ struct
 
           val fieldVec = Player.getFieldVec (#player game, width, height)
 
+          (* temp *)
+          val pelletVec = Player.getPelletVec (#player game, width, height)
+          val fieldVec = Vector.concat [pelletVec, fieldVec]
+
           val shellState = uploadWall (shellState, wallVec)
           val shellState = uploadPlayer (shellState, playerVec)
           val shellState = uploadField (shellState, fieldVec)

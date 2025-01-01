@@ -99,7 +99,7 @@ struct
             (* add collided enemies to player record, 
              * concatenating with the previous enemies defeated *)
             val newDefeated = 
-              Vector.map (fn id => {angle = (id * 5) mod 360}) enemyCollisions
+              Vector.map (fn id => {angle = 360}) enemyCollisions
 
             val oldDefeated = #enemies player
             val allDefeated = Vector.concat [oldDefeated, newDefeated]
