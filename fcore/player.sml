@@ -495,10 +495,27 @@ struct
           end
     end
 
-  fun getMainAttackPatches (attackHeld, chargeHeld, charge) =
+  fun prevWasNotAttacking prevAttack = prevAttack <> MAIN_ATTACKING
+
+  (* called only when player has no projectiles or was not previously attacking *)
+  fun helpGetMainAttackPatches (attackHeld, chargeHeld, charge) =
     if attackHeld andalso charge > 0 then MAIN_ATTACKING
     else if chargeHeld andalso not attackHeld then MAIN_CHARGING
     else MAIN_NOT_ATTACKING
+
+  fun getMainAttackPatches
+    (prevAttack, defeteadEnemies, projectiles, attackHeld, chargeHeld, charge) =
+    if attackHeld then
+      if
+        prevWasNotAttacking prevAttack andalso Vector.length defeteadEnemies > 0
+      then
+        (* shoot projectiles if player was not attacking previously, 
+         * and there is more than one enemy *)
+        raise Match
+      else
+        helpGetMainAttackPatches (attackHeld, chargeHeld, charge)
+    else
+      helpGetMainAttackPatches (attackHeld, chargeHeld, charge)
 
   fun getInputPatches (player: player, input) =
     let
@@ -511,6 +528,8 @@ struct
         , mainAttack
         , mainAttackPressed
         , charge
+        , enemies
+        , projectiles
         , ...
         } = player
 
@@ -519,7 +538,9 @@ struct
 
       val xAxis = getXAxis (leftHeld, rightHeld)
       val facing = getFacing (facing, xAxis)
-      val mainAttack = getMainAttackPatches (attackHeld, chargeHeld, charge)
+
+      val mainAttack = getMainAttackPatches
+        (mainAttack, enemies, projectiles, attackHeld, chargeHeld, charge)
 
       val charge =
         case mainAttack of
@@ -613,12 +634,9 @@ struct
       val player =
         let
           val e = #enemies player
-          val e = Vector.map (fn {angle} => 
-          {
-            angle =
-              if angle < 360 then angle + 5 else 0
-          })
-           e
+          val e =
+            Vector.map
+              (fn {angle} => {angle = if angle < 360 then angle + 5 else 0}) e
           val patches = [W_ENEMIES e]
         in
           withPatches (player, patches)
@@ -831,7 +849,7 @@ struct
               if height > scale then (height - scale) / 2.0
               else if height < scale then (scale - height) / 2.0
               else 0.0
-          in 
+          in
             helpGetPelletVec
               (x, y, 0, enemies, width, height, wratio, 0.0, yOffset, [])
           end

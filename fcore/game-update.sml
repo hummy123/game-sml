@@ -150,15 +150,8 @@ struct
 
   fun update (game, input) =
     let
-      val
-        { player
-        , walls
-        , wallTree
-        , platforms
-        , platformTree
-        , enemies
-        , enemyTree
-        } = game
+      val {player, walls, wallTree, platforms, platformTree, enemies, enemyTree} =
+        game
 
       val player = Player.runPhysicsAndInput (game, input)
 

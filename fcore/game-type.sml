@@ -55,6 +55,7 @@ sig
   | W_JUMP_PRESSED of bool
   | W_ENEMIES of defeated_enemies vector
   | W_CHARGE of int
+  | W_PROJECTILES of player_projectile vector
 
   type enemy = {id: int, health: int, x: int, y: int}
 
@@ -129,6 +130,7 @@ struct
   | W_JUMP_PRESSED of bool
   | W_ENEMIES of defeated_enemies vector
   | W_CHARGE of int
+  | W_PROJECTILES of player_projectile vector
 
   type enemy = {id: int, health: int, x: int, y: int}
 
