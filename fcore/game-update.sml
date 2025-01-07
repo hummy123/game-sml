@@ -152,7 +152,6 @@ struct
     let
       val
         { player
-        , playerProjectileTree
         , playerProjectiles
         , walls
         , wallTree
@@ -172,7 +171,6 @@ struct
     in
       { player = player
       , playerProjectiles = playerProjectiles
-      , playerProjectileTree = playerProjectileTree
       , walls = walls
       , wallTree = wallTree
       , platforms = platforms

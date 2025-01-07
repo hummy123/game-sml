@@ -60,7 +60,6 @@ sig
   type game_type =
     { player: player
     , playerProjectiles: player_projectile vector
-    , playerProjectileTree: QuadTree.t
     , walls: wall vector
     , wallTree: QuadTree.t
     , platforms: platform vector
@@ -135,7 +134,6 @@ struct
   type game_type =
     { player: player
     , playerProjectiles: player_projectile vector
-    , playerProjectileTree: QuadTree.t
     , walls: wall vector
     , wallTree: QuadTree.t
     , platforms: platform vector
@@ -179,7 +177,6 @@ struct
       val enemyTree = Enemy.generateTree enemies
     in
       { player = player
-      , playerProjectileTree = QuadTree.empty
       , playerProjectiles = Vector.fromList []
       , walls = walls
       , wallTree = wallTree
