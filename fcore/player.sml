@@ -279,7 +279,7 @@ struct
 
   (* defeated enemy constants *)
   val defeatedPi = Real32.Math.pi / 180.0
-  val defeatedSize = 7.0
+  val defeatedSize = 9.0
   val defeatedDistance = 13.0
 
   (* timing variables; always start at 0, 
@@ -778,6 +778,8 @@ struct
 
         val pelletY = ((Real32.Math.sin angle) * defeatedDistance) + playerY
         val pelletY = pelletY * ratio + yOffset
+
+        val defeatedSize = defeatedSize * ratio
 
         val vec = Field.lerp
           ( pelletX
