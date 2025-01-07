@@ -98,7 +98,7 @@ struct
 
             (* add collided enemies to player record, 
              * concatenating with the previous enemies defeated *)
-            val newDefeated = 
+            val newDefeated =
               Vector.map (fn id => {angle = 360}) enemyCollisions
 
             val oldDefeated = #enemies player
@@ -150,8 +150,17 @@ struct
 
   fun update (game, input) =
     let
-      val {player, walls, wallTree, platforms, platformTree, enemies, enemyTree} =
-        game
+      val
+        { player
+        , playerProjectileTree
+        , playerProjectiles
+        , walls
+        , wallTree
+        , platforms
+        , platformTree
+        , enemies
+        , enemyTree
+        } = game
 
       val player = Player.runPhysicsAndInput (game, input)
 
@@ -162,6 +171,8 @@ struct
       val enemyTree = Enemy.generateTree enemies
     in
       { player = player
+      , playerProjectiles = playerProjectiles
+      , playerProjectileTree = playerProjectileTree
       , walls = walls
       , wallTree = wallTree
       , platforms = platforms

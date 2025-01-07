@@ -23,6 +23,8 @@ sig
 
   type defeated_enemies = {angle: int}
 
+  type player_projectile = {x: int, y: int}
+
   type player =
     { yAxis: player_y_axis
     , xAxis: player_x_axis
@@ -57,6 +59,8 @@ sig
 
   type game_type =
     { player: player
+    , playerProjectiles: player_projectile vector
+    , playerProjectileTree: QuadTree.t
     , walls: wall vector
     , wallTree: QuadTree.t
     , platforms: platform vector
@@ -94,6 +98,8 @@ struct
 
   type defeated_enemies = {angle: int}
 
+  type player_projectile = {x: int, y: int}
+
   type player =
     { yAxis: player_y_axis
     , xAxis: player_x_axis
@@ -128,6 +134,8 @@ struct
 
   type game_type =
     { player: player
+    , playerProjectiles: player_projectile vector
+    , playerProjectileTree: QuadTree.t
     , walls: wall vector
     , wallTree: QuadTree.t
     , platforms: platform vector
@@ -171,6 +179,8 @@ struct
       val enemyTree = Enemy.generateTree enemies
     in
       { player = player
+      , playerProjectileTree = QuadTree.empty
+      , playerProjectiles = Vector.fromList []
       , walls = walls
       , wallTree = wallTree
       , platforms = platforms
