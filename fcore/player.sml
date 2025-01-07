@@ -16,6 +16,7 @@ struct
     , mainAttackPressed
     , enemies
     , charge
+    , projectiles
     ) =
     { yAxis = yAxis
     , xAxis = xAxis
@@ -30,6 +31,7 @@ struct
     , jumpPressed = jumpPressed
     , enemies = enemies
     , charge = charge
+    , projectiles = projectiles
     }
 
   fun withPatch (player: player, patch) =
@@ -48,6 +50,7 @@ struct
         , jumpPressed
         , enemies
         , charge
+        , projectiles
         } = player
     in
       case patch of
@@ -66,6 +69,7 @@ struct
             , mainAttackPressed
             , enemies
             , charge
+            , projectiles
             )
       | W_Y_AXIS yAxis =>
           mkPlayer
@@ -82,6 +86,7 @@ struct
             , mainAttackPressed
             , enemies
             , charge
+            , projectiles
             )
       | W_RECOIL recoil =>
           mkPlayer
@@ -98,6 +103,7 @@ struct
             , mainAttackPressed
             , enemies
             , charge
+            , projectiles
             )
       | W_ATTACKED attacked =>
           mkPlayer
@@ -114,6 +120,7 @@ struct
             , mainAttackPressed
             , enemies
             , charge
+            , projectiles
             )
       | W_MAIN_ATTACK mainAttack =>
           mkPlayer
@@ -130,6 +137,7 @@ struct
             , mainAttackPressed
             , enemies
             , charge
+            , projectiles
             )
       | W_FACING facing =>
           mkPlayer
@@ -146,6 +154,7 @@ struct
             , mainAttackPressed
             , enemies
             , charge
+            , projectiles
             )
       | W_HEALTH health =>
           mkPlayer
@@ -162,6 +171,7 @@ struct
             , mainAttackPressed
             , enemies
             , charge
+            , projectiles
             )
       | W_X x =>
           mkPlayer
@@ -178,6 +188,7 @@ struct
             , mainAttackPressed
             , enemies
             , charge
+            , projectiles
             )
       | W_Y y =>
           mkPlayer
@@ -194,6 +205,7 @@ struct
             , mainAttackPressed
             , enemies
             , charge
+            , projectiles
             )
       | W_JUMP_PRESSED jumpPressed =>
           mkPlayer
@@ -210,6 +222,7 @@ struct
             , mainAttackPressed
             , enemies
             , charge
+            , projectiles
             )
       | W_ENEMIES enemies =>
           mkPlayer
@@ -226,6 +239,7 @@ struct
             , mainAttackPressed
             , enemies
             , charge
+            , projectiles
             )
       | W_CHARGE charge =>
           mkPlayer
@@ -242,6 +256,7 @@ struct
             , mainAttackPressed
             , enemies
             , charge
+            , projectiles
             )
     end
 

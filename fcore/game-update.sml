@@ -152,7 +152,6 @@ struct
     let
       val
         { player
-        , playerProjectiles
         , walls
         , wallTree
         , platforms
@@ -170,7 +169,6 @@ struct
       val enemyTree = Enemy.generateTree enemies
     in
       { player = player
-      , playerProjectiles = playerProjectiles
       , walls = walls
       , wallTree = wallTree
       , platforms = platforms

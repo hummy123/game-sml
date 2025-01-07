@@ -39,6 +39,7 @@ sig
     , jumpPressed: bool
     , enemies: defeated_enemies vector
     , charge: int
+    , projectiles: player_projectile vector
     }
 
   datatype player_patch =
@@ -59,7 +60,6 @@ sig
 
   type game_type =
     { player: player
-    , playerProjectiles: player_projectile vector
     , walls: wall vector
     , wallTree: QuadTree.t
     , platforms: platform vector
@@ -113,6 +113,7 @@ struct
     , jumpPressed: bool
     , enemies: defeated_enemies vector
     , charge: int
+    , projectiles: player_projectile vector
     }
 
   datatype player_patch =
@@ -133,7 +134,6 @@ struct
 
   type game_type =
     { player: player
-    , playerProjectiles: player_projectile vector
     , walls: wall vector
     , wallTree: QuadTree.t
     , platforms: platform vector
@@ -158,6 +158,7 @@ struct
         , jumpPressed = false
         , enemies = Vector.fromList []
         , charge = 60
+        , projectiles = Vector.fromList []
         }
 
       val wall1 = {id = 1, x = 0, y = 0, width = 100, height = 1080}
@@ -177,7 +178,6 @@ struct
       val enemyTree = Enemy.generateTree enemies
     in
       { player = player
-      , playerProjectiles = Vector.fromList []
       , walls = walls
       , wallTree = wallTree
       , platforms = platforms
