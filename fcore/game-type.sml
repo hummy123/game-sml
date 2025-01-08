@@ -19,7 +19,11 @@ sig
 
   datatype facing = FACING_LEFT | FACING_RIGHT
 
-  datatype main_attack = MAIN_NOT_ATTACKING | MAIN_ATTACKING | MAIN_CHARGING
+  datatype main_attack =
+    MAIN_NOT_ATTACKING
+  | MAIN_ATTACKING
+  | MAIN_CHARGING
+  | MAIN_THROWING
 
   type defeated_enemies = {angle: int}
 
@@ -94,7 +98,11 @@ struct
 
   datatype facing = FACING_LEFT | FACING_RIGHT
 
-  datatype main_attack = MAIN_NOT_ATTACKING | MAIN_ATTACKING | MAIN_CHARGING
+  datatype main_attack =
+    MAIN_NOT_ATTACKING
+  | MAIN_ATTACKING
+  | MAIN_CHARGING
+  | MAIN_THROWING
 
   type defeated_enemies = {angle: int}
 

@@ -546,6 +546,21 @@ struct
         defeatedEnemiesToProjectiles (pos + 1, defeteadEnemies, player, acc)
       end
 
+  fun getThrowPatches (defeteadEnemies, projectiles, player, acc) =
+    let
+      val newProjectiles =
+        defeatedEnemiesToProjectiles (0, defeteadEnemies, player, [])
+
+      (* concatenate new projectiles with previous projectiles *)
+      val allProjectiles = Vector.concat [newProjectiles, projectiles]
+
+      (* remove defeated enemies from player record *)
+      val enemies = Vector.fromList []
+    in
+      W_MAIN_ATTACK MAIN_THROWING :: W_PROJECTILES allProjectiles
+      :: W_ENEMIES enemies :: acc
+    end
+
   fun getMainAttackPatches
     ( prevAttack
     , defeteadEnemies
@@ -556,38 +571,46 @@ struct
     , player
     , acc
     ) =
-    if attackHeld then
-      if
-        prevWasNotAttacking prevAttack andalso Vector.length defeteadEnemies > 0
-      then
-        (* shoot projectiles if player was not attacking previously, 
-         * and there is more than one enemy *)
-        let
-          val newProjectiles =
-            defeatedEnemiesToProjectiles (0, defeteadEnemies, player, [])
-
-          (* concatenate new projectiles with previous projectiles *)
-          val allProjectiles = Vector.concat [newProjectiles, projectiles]
-
-          (* remove defeated enemies from player record *)
-          val enemies = Vector.fromList []
-        in
-          W_PROJECTILES allProjectiles :: W_ENEMIES enemies :: acc
-        end
-      else
+    case prevAttack of
+      MAIN_NOT_ATTACKING =>
+        if attackHeld andalso Vector.length defeteadEnemies > 0 then
+          (* shoot projectiles if player was not attacking previously, 
+           * and there is more than one enemy *)
+          getThrowPatches (defeteadEnemies, projectiles, player, acc)
+        else
+          let
+            val mainAttack =
+              helpGetMainAttackPatches (attackHeld, chargeHeld, charge)
+          in
+            mainAttack :: acc
+          end
+    | MAIN_CHARGING =>
+        if attackHeld andalso Vector.length defeteadEnemies > 0 then
+          getThrowPatches (defeteadEnemies, projectiles, player, acc)
+        else
+          let
+            val mainAttack =
+              helpGetMainAttackPatches (attackHeld, chargeHeld, charge)
+          in
+            mainAttack :: acc
+          end
+    | MAIN_ATTACKING =>
         let
           val mainAttack =
             helpGetMainAttackPatches (attackHeld, chargeHeld, charge)
         in
           mainAttack :: acc
         end
-    else
-      let
-        val mainAttack =
-          helpGetMainAttackPatches (attackHeld, chargeHeld, charge)
-      in
-        mainAttack :: acc
-      end
+    | MAIN_THROWING =>
+        if attackHeld then
+          acc
+        else
+          let
+            val mainAttack =
+              helpGetMainAttackPatches (attackHeld, chargeHeld, charge)
+          in
+            mainAttack :: acc
+          end
 
   fun getInputPatches (player: player, input) =
     let
@@ -615,7 +638,7 @@ struct
         case mainAttack of
           MAIN_CHARGING => Int.min (charge + 1, maxCharge)
         | MAIN_ATTACKING => Int.max (charge - 1, 0)
-        | MAIN_NOT_ATTACKING => charge
+        | _ => charge
 
       val acc = [W_X_AXIS xAxis, W_FACING facing, W_CHARGE charge]
 
@@ -730,6 +753,15 @@ struct
   fun helpGetDrawVec (x, y, size, width, height, attacked, mainAttack) =
     case mainAttack of
       MAIN_NOT_ATTACKING =>
+        (case attacked of
+           NOT_ATTACKED =>
+             Block.lerp (x, y, size, size, width, height, 0.5, 0.5, 0.5)
+         | ATTACKED amt =>
+             if amt mod 5 = 0 then
+               Block.lerp (x, y, size, size, width, height, 0.9, 0.9, 0.9)
+             else
+               Block.lerp (x, y, size, size, width, height, 0.5, 0.5, 0.5))
+    | MAIN_THROWING =>
         (case attacked of
            NOT_ATTACKED =>
              Block.lerp (x, y, size, size, width, height, 0.5, 0.5, 0.5)
