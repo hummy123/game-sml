@@ -258,6 +258,23 @@ struct
             , charge
             , projectiles
             )
+      | W_PROJECTILES projectiles =>
+          mkPlayer
+            ( health
+            , xAxis
+            , yAxis
+            , x
+            , y
+            , jumpPressed
+            , recoil
+            , attacked
+            , mainAttack
+            , facing
+            , mainAttackPressed
+            , enemies
+            , charge
+            , projectiles
+            )
     end
 
   fun withPatches (player: player, lst) =
@@ -499,23 +516,78 @@ struct
 
   (* called only when player has no projectiles or was not previously attacking *)
   fun helpGetMainAttackPatches (attackHeld, chargeHeld, charge) =
-    if attackHeld andalso charge > 0 then MAIN_ATTACKING
-    else if chargeHeld andalso not attackHeld then MAIN_CHARGING
-    else MAIN_NOT_ATTACKING
+    if attackHeld andalso charge > 0 then W_MAIN_ATTACK MAIN_ATTACKING
+    else if chargeHeld andalso not attackHeld then W_MAIN_ATTACK MAIN_CHARGING
+    else W_MAIN_ATTACK MAIN_NOT_ATTACKING
+
+  fun degreesToRadians degrees = Real32.fromInt degrees * defeatedPi
+
+  fun defeatedEnemiesToProjectiles
+    (pos, defeteadEnemies, player as {x, y, ...}, acc) =
+    if pos = Vector.length defeteadEnemies then
+      Vector.fromList acc
+    else
+      let
+        val diff = halfRealSize - (defeatedSize / 2.0)
+        val x = Real32.fromInt x + diff
+        val y = Real32.fromInt y + diff
+
+        val {angle} = Vector.sub (defeteadEnemies, pos)
+        val angle = degreesToRadians angle
+
+        val pelletX = ((Real32.Math.cos angle) * defeatedDistance) + x
+        val pelletY = ((Real32.Math.sin angle) * defeatedDistance) + y
+
+        val x = Real32.toInt IEEEReal.TO_NEAREST x
+        val y = Real32.toInt IEEEReal.TO_NEAREST y
+
+        val acc = {x = x, y = y} :: acc
+      in
+        defeatedEnemiesToProjectiles (pos + 1, defeteadEnemies, player, acc)
+      end
 
   fun getMainAttackPatches
-    (prevAttack, defeteadEnemies, projectiles, attackHeld, chargeHeld, charge) =
+    ( prevAttack
+    , defeteadEnemies
+    , projectiles
+    , attackHeld
+    , chargeHeld
+    , charge
+    , player
+    , acc
+    ) =
     if attackHeld then
       if
         prevWasNotAttacking prevAttack andalso Vector.length defeteadEnemies > 0
       then
         (* shoot projectiles if player was not attacking previously, 
          * and there is more than one enemy *)
-        raise Match
+        let
+          val newProjectiles =
+            defeatedEnemiesToProjectiles (0, defeteadEnemies, player, [])
+
+          (* concatenate new projectiles with previous projectiles *)
+          val allProjectiles = Vector.concat [newProjectiles, projectiles]
+
+          (* remove defeated enemies from player record *)
+          val enemies = Vector.fromList []
+        in
+          W_PROJECTILES allProjectiles :: W_ENEMIES enemies :: acc
+        end
       else
-        helpGetMainAttackPatches (attackHeld, chargeHeld, charge)
+        let
+          val mainAttack =
+            helpGetMainAttackPatches (attackHeld, chargeHeld, charge)
+        in
+          mainAttack :: acc
+        end
     else
-      helpGetMainAttackPatches (attackHeld, chargeHeld, charge)
+      let
+        val mainAttack =
+          helpGetMainAttackPatches (attackHeld, chargeHeld, charge)
+      in
+        mainAttack :: acc
+      end
 
   fun getInputPatches (player: player, input) =
     let
@@ -539,21 +611,25 @@ struct
       val xAxis = getXAxis (leftHeld, rightHeld)
       val facing = getFacing (facing, xAxis)
 
-      val mainAttack = getMainAttackPatches
-        (mainAttack, enemies, projectiles, attackHeld, chargeHeld, charge)
-
       val charge =
         case mainAttack of
           MAIN_CHARGING => Int.min (charge + 1, maxCharge)
         | MAIN_ATTACKING => Int.max (charge - 1, 0)
         | MAIN_NOT_ATTACKING => charge
 
-      val acc =
-        [ W_X_AXIS xAxis
-        , W_FACING facing
-        , W_MAIN_ATTACK mainAttack
-        , W_CHARGE charge
-        ]
+      val acc = [W_X_AXIS xAxis, W_FACING facing, W_CHARGE charge]
+
+      val acc = getMainAttackPatches
+        ( mainAttack
+        , enemies
+        , projectiles
+        , attackHeld
+        , chargeHeld
+        , charge
+        , player
+        , acc
+        )
+
       val acc = getJumpPatches (player, upHeld, downHeld, acc)
     in
       acc
@@ -767,8 +843,6 @@ struct
                 (x, y, realSize, realSize, width, height, 0.7, 0.7, 1.0, alpha)
             end
         end
-
-  fun degreesToRadians degrees = Real32.fromInt degrees * defeatedPi
 
   fun helpGetPelletVec
     ( playerX
