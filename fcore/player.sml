@@ -523,7 +523,7 @@ struct
   fun degreesToRadians degrees = Real32.fromInt degrees * defeatedPi
 
   fun defeatedEnemiesToProjectiles
-    (pos, defeteadEnemies, player as {x, y, ...}, acc) =
+    (pos, defeteadEnemies, player as {x, y, facing, ...}, acc) =
     if pos = Vector.length defeteadEnemies then
       Vector.fromList acc
     else
@@ -541,7 +541,7 @@ struct
         val x = Real32.toInt IEEEReal.TO_NEAREST x
         val y = Real32.toInt IEEEReal.TO_NEAREST y
 
-        val acc = {x = x, y = y} :: acc
+        val acc = {x = x, y = y, facing = facing} :: acc
       in
         defeatedEnemiesToProjectiles (pos + 1, defeteadEnemies, player, acc)
       end

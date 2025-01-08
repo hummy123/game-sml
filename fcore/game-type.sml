@@ -27,7 +27,7 @@ sig
 
   type defeated_enemies = {angle: int}
 
-  type player_projectile = {x: int, y: int}
+  type player_projectile = {x: int, y: int, facing: facing}
 
   type player =
     { yAxis: player_y_axis
@@ -106,7 +106,7 @@ struct
 
   type defeated_enemies = {angle: int}
 
-  type player_projectile = {x: int, y: int}
+  type player_projectile = {x: int, y: int, facing: facing}
 
   type player =
     { yAxis: player_y_axis
