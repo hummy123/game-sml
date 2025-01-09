@@ -596,6 +596,7 @@ struct
           end
     | MAIN_ATTACKING =>
         let
+          val () = print "601\n"
           val mainAttack =
             helpGetMainAttackPatches (attackHeld, chargeHeld, charge)
         in
@@ -606,6 +607,7 @@ struct
           acc
         else
           let
+            val () = print "612\n"
             val mainAttack =
               helpGetMainAttackPatches (attackHeld, chargeHeld, charge)
           in
@@ -830,6 +832,7 @@ struct
   fun getFieldVec (player: player, width, height) =
     case #mainAttack player of
       MAIN_NOT_ATTACKING => Vector.fromList []
+    | MAIN_THROWING => Vector.fromList []
     | _ =>
         let
           val {x, y, ...} = player
