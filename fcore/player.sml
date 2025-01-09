@@ -535,8 +535,8 @@ struct
         val {angle} = Vector.sub (defeteadEnemies, pos)
         val angle = degreesToRadians angle
 
-        val pelletX = ((Real32.Math.cos angle) * defeatedDistance) + x
-        val pelletY = ((Real32.Math.sin angle) * defeatedDistance) + y
+        val x = ((Real32.Math.cos angle) * defeatedDistance) + x
+        val y = ((Real32.Math.sin angle) * defeatedDistance) + y
 
         val x = Real32.toInt IEEEReal.TO_NEAREST x
         val y = Real32.toInt IEEEReal.TO_NEAREST y
