@@ -1007,4 +1007,36 @@ struct
               (x, y, 0, enemies, width, height, hratio, xOffset, 0.0, [])
           end
       end
+
+  fun helpGetProjectileVec (pos, projectiles, width, height, ratio, acc) =
+    if pos = Vector.length projectiles then
+      Vector.concat acc
+    else
+      let
+        val {x, y, ...} = Vector.sub (projectiles, pos)
+
+        val x = Real32.fromInt x * ratio
+        val y = Real32.fromInt y * ratio
+
+        val defeatedSize = defeatedSize * ratio
+
+        val vec = Field.lerp
+          (x, y, defeatedSize, defeatedSize, width, height, 0.3, 0.9, 0.3, 1.0)
+        val acc = vec :: acc
+      in
+        helpGetProjectileVec (pos + 1, projectiles, width, height, ratio, acc)
+      end
+
+  fun getProjectileVec (player: player, width, height) =
+    let
+      val {x, y, projectiles, ...} = player
+
+      val wratio = width / 1920.0
+      val hratio = height / 1080.0
+    in
+      if wratio < hratio then
+        helpGetProjectileVec (0, projectiles, width, height, wratio, [])
+      else
+        helpGetProjectileVec (0, projectiles, width, height, hratio, [])
+    end
 end
