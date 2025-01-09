@@ -721,7 +721,7 @@ struct
       let
         val {x, y, facing} = Vector.sub (projectiles, pos)
       in
-        if x <= 0 orelse x >= 1080 then
+        if x <= 0 orelse x >= 1920 then
           (* filter out since projectile is not visible *)
           helpMoveProjectiles (pos - 1, projectiles, acc)
         else
@@ -1008,15 +1008,16 @@ struct
           end
       end
 
-  fun helpGetProjectileVec (pos, projectiles, width, height, ratio, acc) =
+  fun helpGetProjectileVec
+    (pos, projectiles, width, height, ratio, xOffset, yOffset, acc) =
     if pos = Vector.length projectiles then
       Vector.concat acc
     else
       let
         val {x, y, ...} = Vector.sub (projectiles, pos)
 
-        val x = Real32.fromInt x * ratio
-        val y = Real32.fromInt y * ratio
+        val x = Real32.fromInt x * ratio + xOffset
+        val y = Real32.fromInt y * ratio + yOffset
 
         val defeatedSize = defeatedSize * ratio
 
@@ -1024,7 +1025,8 @@ struct
           (x, y, defeatedSize, defeatedSize, width, height, 0.3, 0.9, 0.3, 1.0)
         val acc = vec :: acc
       in
-        helpGetProjectileVec (pos + 1, projectiles, width, height, ratio, acc)
+        helpGetProjectileVec
+          (pos + 1, projectiles, width, height, ratio, xOffset, yOffset, acc)
       end
 
   fun getProjectileVec (player: player, width, height) =
@@ -1035,8 +1037,30 @@ struct
       val hratio = height / 1080.0
     in
       if wratio < hratio then
-        helpGetProjectileVec (0, projectiles, width, height, wratio, [])
+        let
+          val scale = 1080.0 * wratio
+          val yOffset =
+            if height > scale then (height - scale) / 2.0
+            else if height < scale then (scale - height) / 2.0
+            else 0.0
+
+          val xOffset = 0.0
+        in
+          helpGetProjectileVec
+            (0, projectiles, width, height, wratio, xOffset, yOffset, [])
+        end
       else
-        helpGetProjectileVec (0, projectiles, width, height, hratio, [])
+        let
+          val scale = 1920.0 * hratio
+          val xOffset =
+            if width > scale then (width - scale) / 2.0
+            else if width < scale then (scale - width) / 2.0
+            else 0.0
+
+          val yOffset = 0.0
+        in
+          helpGetProjectileVec
+            (0, projectiles, width, height, hratio, xOffset, yOffset, [])
+        end
     end
 end
