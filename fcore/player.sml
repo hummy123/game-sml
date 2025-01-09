@@ -596,7 +596,6 @@ struct
           end
     | MAIN_ATTACKING =>
         let
-          val () = print "601\n"
           val mainAttack =
             helpGetMainAttackPatches (attackHeld, chargeHeld, charge)
         in
@@ -607,7 +606,6 @@ struct
           acc
         else
           let
-            val () = print "612\n"
             val mainAttack =
               helpGetMainAttackPatches (attackHeld, chargeHeld, charge)
           in
@@ -716,9 +714,44 @@ struct
             ]
           end
 
+  fun helpMoveProjectiles (pos, projectiles, acc) =
+    if pos < 0 then
+      Vector.fromList acc
+    else
+      let
+        val {x, y, facing} = Vector.sub (projectiles, pos)
+      in
+        if x <= 0 orelse x >= 1080 then
+          (* filter out since projectile is not visible *)
+          helpMoveProjectiles (pos - 1, projectiles, acc)
+        else
+          let
+            val x =
+              case facing of
+                FACING_LEFT => x - moveBy
+              | FACING_RIGHT => x + moveBy
+
+            val newTile = {x = x, y = y, facing = facing}
+            val acc = newTile :: acc
+          in
+            helpMoveProjectiles (pos - 1, projectiles, acc)
+          end
+      end
+
+  fun getProjectilePatches ({projectiles, ...}) =
+    let
+      val newProjectiles = helpMoveProjectiles
+        (Vector.length projectiles - 1, projectiles, [])
+    in
+      [W_PROJECTILES newProjectiles]
+    end
+
   fun runPhysicsAndInput (game: game_type, input) =
     let
       val player = #player game
+
+      val patches = getProjectilePatches player
+      val player = withPatches (player, patches)
 
       val patches = getRecoilPatches player
       val player = withPatches (player, patches)
