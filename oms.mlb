@@ -18,6 +18,7 @@ fcore/game-type.sml
 
 fcore/player.sml
 
+fcore/player-enemy.sml
 fcore/game-update.sml
 
 (* shell *)
