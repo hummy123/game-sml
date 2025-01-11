@@ -422,7 +422,7 @@ struct
   (* only checks for collisions with environment (walls and platforms) *)
   fun getEnvironmentPatches (player, game) =
     let
-      val {walls, wallTree, platformTree, platforms, enemyTree, enemies, ...} =
+      val {walls, wallTree, platformTree, platforms, enemies, ...} =
         game
 
       val {x, y, attacked, mainAttack, ...} = player

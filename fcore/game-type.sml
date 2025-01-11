@@ -70,7 +70,6 @@ sig
     , platforms: platform vector
     , platformTree: QuadTree.t
     , enemies: enemy vector
-    , enemyTree: QuadTree.t
     }
 
   val initial: game_type
@@ -149,7 +148,6 @@ struct
     , platforms: platform vector
     , platformTree: QuadTree.t
     , enemies: enemy vector
-    , enemyTree: QuadTree.t
     }
 
   val initial: game_type =
@@ -185,7 +183,6 @@ struct
       val enemy2 = {id = 2, x = 555, y = 945, health = 5}
       val enemy3 = {id = 3, x = 979, y = 945, health = 5}
       val enemies = Vector.fromList [enemy1, enemy2, enemy3]
-      val enemyTree = Enemy.generateTree enemies
     in
       { player = player
       , walls = walls
@@ -193,7 +190,6 @@ struct
       , platforms = platforms
       , platformTree = platformTree
       , enemies = enemies
-      , enemyTree = enemyTree
       }
     end
 end
