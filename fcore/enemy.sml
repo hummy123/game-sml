@@ -3,14 +3,31 @@ struct
   val size = 35
   val realSize = 35.0
 
+  (* called when filtering enemies,
+   * to adjust enemy data on collision with projectile *)
+  fun onCollisionWithProjectile (enemy, projectileTree, acc) =
+    let
+      val {x, y, health, id} = enemy
+      val hasCollision = QuadTree.hasCollisionAt
+        (x, y, size, size, 0, 0, 1920, 1080, ~1, projectileTree)
+    in
+      if hasCollision then
+        if health = 1 then
+          (* filter out if decrementing health by one = 0 *)
+          acc
+        else
+          {health = health - 1, x = x, y = y, id = id} :: acc
+      else
+        enemy :: acc
+    end
+
   fun helpGenerateTree (pos, enemyVec, acc) =
     if pos = Vector.length enemyVec then
       acc
     else
       let
         val {id, x, y, health = _} = Vector.sub (enemyVec, pos)
-        val acc = QuadTree.insert
-          (x, y, size, size, 0, 0, 1920, 1080, id, acc)
+        val acc = QuadTree.insert (x, y, size, size, 0, 0, 1920, 1080, id, acc)
       in
         helpGenerateTree (pos + 1, enemyVec, acc)
       end
@@ -24,12 +41,9 @@ struct
       val enemy = Vector.sub (vec, mid)
       val {id = curNum, x = _, y = _, health = _} = enemy
     in
-      if curNum = findNum then
-        enemy
-      else if curNum < findNum then
-        helpFind (findNum, vec, mid + 1, high)
-      else
-        helpFind (findNum, vec, low, mid - 1)
+      if curNum = findNum then enemy
+      else if curNum < findNum then helpFind (findNum, vec, mid + 1, high)
+      else helpFind (findNum, vec, low, mid - 1)
     end
 
   fun find (findNum, vec) =
@@ -84,6 +98,6 @@ struct
         getDrawVecLoop (pos + 1, enemies, width, height, acc)
       end
 
-  fun getDrawVec (enemies, width, height) = 
+  fun getDrawVec (enemies, width, height) =
     getDrawVecLoop (0, enemies, width, height, [])
 end

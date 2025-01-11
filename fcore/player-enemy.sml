@@ -68,28 +68,10 @@ struct
       let
         val enemy = Vector.sub (enemies, pos)
         val acc =
-          if exists (#id enemy, collisions) then
-            (* filter out *)
-            acc
-          else
-            let
-              val {x, y, health, id} = enemy
-              val eSize = Enemy.size
-              val hasCollision = QuadTree.hasCollisionAt
-                (x, y, eSize, eSize, 0, 0, 1920, 1080, ~1, projectileTree)
-            in
-              if hasCollision then
-                if health = 1 then
-                  (* filter out if decrementing health by one = 0 *)
-                  acc
-                else
-                  {health = health - 1, x = x, y = y, id = id} :: acc
-              else
-                enemy :: acc
-            end
+          if exists (#id enemy, collisions) then (* filter out *) acc
+          else Enemy.onCollisionWithProjectile (enemy, projectileTree, acc)
       in
-        filterEnemyAttacked
-          (pos - 1, collisions, enemies, projectileTree, acc)
+        filterEnemyAttacked (pos - 1, collisions, enemies, projectileTree, acc)
       end
 
   (* filter enemy projectiles when player is not attacking *)
@@ -99,20 +81,7 @@ struct
     else
       let
         val enemy = Vector.sub (enemies, pos)
-        val {x, y, health, id} = enemy
-        val eSize = Enemy.size
-        val hasCollision = QuadTree.hasCollisionAt
-          (x, y, eSize, eSize, 0, 0, 1920, 1080, ~1, projectileTree)
-
-        val acc =
-          if hasCollision then
-            if health = 1 then
-              (* filter out if decrementing health by one = 0 *)
-              acc
-            else
-              {health = health - 1, x = x, y = y, id = id} :: acc
-          else
-            enemy :: acc
+        val acc = Enemy.onCollisionWithProjectile (enemy, projectileTree, acc)
       in
         filterEnemyProjectiles (pos - 1, enemies, projectileTree, acc)
       end

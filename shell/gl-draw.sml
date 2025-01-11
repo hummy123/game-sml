@@ -247,8 +247,8 @@ struct
 
           (* temp *)
           val pelletVec = Player.getPelletVec (#player game, width, height)
-          val projectileVec = 
-            Player.getProjectileVec (#player game, width, height)
+          val projectileVec =
+            Projectile.getProjectileVec (#player game, width, height)
           val fieldVec = Vector.concat [pelletVec, projectileVec, fieldVec]
 
           val shellState = uploadWall (shellState, wallVec)
