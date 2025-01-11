@@ -20,6 +20,11 @@ sig
                      int * int * int * int * 
                      int * t -> int list
 
+  val helpGetCollisions: int * int * int * int * 
+                         int * int * int * int * 
+                         int * int list * t 
+                         -> int list
+
   val getCollisionSides: int * int * int * int * int * int * int * int * int * t
                          -> (collision_side * int) list
 

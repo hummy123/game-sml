@@ -298,6 +298,7 @@ struct
   val defeatedPi = Real32.Math.pi / 180.0
   val defeatedSize = 9.0
   val defeatedDistance = 13.0
+  val defeatedSizeInt = 9
 
   (* timing variables; always start at 0, 
    * and revert to default state when limit is hit *)

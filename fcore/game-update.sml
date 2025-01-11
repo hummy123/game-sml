@@ -7,11 +7,15 @@ struct
 
       val player = Player.runPhysicsAndInput (game, input)
 
-      (* check player-enemy collisions and react *)
-      val (player, enemies) = PlayerEnemy.checkCollisions (player, game)
-
-      (* create enemy quad tree from list of new enemies *)
+      (* check and react to enemy collisions with player projectile *)
+      val enemies =
+        ProjectileEnemy.checkCollisions
+          (#projectiles player, enemies, enemyTree)
       val enemyTree = Enemy.generateTree enemies
+
+      (* check player-enemy collisions and react *)
+      val (player, enemies, enemyTree) =
+        PlayerEnemy.checkCollisions (player, enemies, enemyTree)
     in
       { player = player
       , walls = walls

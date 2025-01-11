@@ -47,14 +47,15 @@ struct
         end
     | [] => acc
 
-  fun checkEnemiesWhileAttacking (player, enemies, lst, acc) =
-    let
-      open QuadTree
-    in
-      case lst of
-        enemyID :: tl => (* placeholder *) acc
-      | [] => acc
-    end
+  fun helpExists (pos, id, collisions) =
+    if pos = Vector.length collisions then
+      false
+    else
+      let val current = Vector.sub (collisions, pos)
+      in current = id orelse helpExists (pos + 1, id, collisions)
+      end
+
+  fun exists (id, collisions) = helpExists (0, id, collisions)
 
   (* removes enemies from `enemies` vector when that enemy is in collisions *)
   fun filterEnemyCollisions (pos, collisions, enemies: enemy vector, acc) =
@@ -63,19 +64,16 @@ struct
     else
       let
         val enemy = Vector.sub (enemies, pos)
+        val acc =
+          if exists (#id enemy, collisions) then (* filter out *) acc
+          else (* don't filter out *) enemy :: acc
       in
-        if BinSearch.exists (#id enemy, collisions) then
-          (* filter out *)
-          filterEnemyCollisions (pos - 1, collisions, enemies, acc)
-        else
-          (* don't filter out *)
-          filterEnemyCollisions (pos - 1, collisions, enemies, enemy :: acc)
+        filterEnemyCollisions (pos - 1, collisions, enemies, acc)
       end
 
-  fun checkCollisions (player, game: game_type) =
+  fun checkCollisions (player, enemies, enemyTree) =
     let
       val {x, y, mainAttack, attacked, ...} = player
-      val {enemies, enemyTree, ...} = game
       val size = Player.size
     in
       case mainAttack of
@@ -86,27 +84,25 @@ struct
             val y = y - Player.halfSize
             val size = size * 2
 
+            (* get list of enemies player has collided with *)
             val enemyCollisions = QuadTree.getCollisions
               (x, y, size, size, 0, 0, 1920, 1080, 0, enemyTree)
-            val patches =
-              checkEnemiesWhileAttacking (player, enemies, enemyCollisions, [])
-            val player = Player.withPatches (player, patches)
 
+            (* filter enemies based on collisions *)
             val enemyCollisions = Vector.fromList enemyCollisions
             val enemies = filterEnemyCollisions
               (Vector.length enemies - 1, enemyCollisions, enemies, [])
+            val enemyTree = Enemy.generateTree enemies
 
             (* add collided enemies to player record, 
              * concatenating with the previous enemies defeated *)
             val newDefeated =
               Vector.map (fn id => {angle = 360}) enemyCollisions
-
             val oldDefeated = #enemies player
             val allDefeated = Vector.concat [oldDefeated, newDefeated]
-
             val player = Player.withPatches (player, [W_ENEMIES allDefeated])
           in
-            (player, enemies)
+            (player, enemies, enemyTree)
           end
       | _ =>
           (case attacked of
@@ -119,7 +115,7 @@ struct
                    checkEnemies (player, enemies, enemyCollisions, [])
                  val player = Player.withPatches (player, patches)
                in
-                 (player, enemies)
+                 (player, enemies, enemyTree)
                end
            | ATTACKED amt =>
                if amt = Player.attackedLimit then
@@ -132,7 +128,7 @@ struct
                      checkEnemies (player, enemies, enemyCollisions, lst)
                    val player = Player.withPatches (player, patches)
                  in
-                   (player, enemies)
+                   (player, enemies, enemyTree)
                  end
                else
                  (* if attacked, don't detect collisions, 
@@ -144,7 +140,7 @@ struct
                    val player = Player.withPatches
                      (player, [W_ATTACKED attacked])
                  in
-                   (player, enemies)
+                   (player, enemies, enemyTree)
                  end)
     end
 end
