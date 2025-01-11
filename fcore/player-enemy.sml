@@ -57,24 +57,71 @@ struct
 
   fun exists (id, collisions) = helpExists (0, id, collisions)
 
-  (* removes enemies from `enemies` vector when that enemy is in collisions *)
-  fun filterEnemyCollisions (pos, collisions, enemies: enemy vector, acc) =
+  (* removes enemies from `enemies` vector when player is attacking that enemy
+   * and also filter enemy (or change enemyh health)
+   * if enemy has collided with projectile *)
+  fun filterEnemyAttacked
+    (pos, collisions, enemies: enemy vector, projectileTree, acc) =
     if pos < 0 then
       Vector.fromList acc
     else
       let
         val enemy = Vector.sub (enemies, pos)
         val acc =
-          if exists (#id enemy, collisions) then (* filter out *) acc
-          else (* don't filter out *) enemy :: acc
+          if exists (#id enemy, collisions) then
+            (* filter out *)
+            acc
+          else
+            let
+              val {x, y, health, id} = enemy
+              val eSize = Enemy.size
+              val hasCollision = QuadTree.hasCollisionAt
+                (x, y, eSize, eSize, 0, 0, 1920, 1080, ~1, projectileTree)
+            in
+              if hasCollision then
+                if health = 1 then
+                  (* filter out if decrementing health by one = 0 *)
+                  acc
+                else
+                  {health = health - 1, x = x, y = y, id = id} :: acc
+              else
+                enemy :: acc
+            end
       in
-        filterEnemyCollisions (pos - 1, collisions, enemies, acc)
+        filterEnemyAttacked
+          (pos - 1, collisions, enemies, projectileTree, acc)
       end
 
-  fun checkCollisions (player, enemies, enemyTree) =
+  (* filter enemy projectiles when player is not attacking *)
+  fun filterEnemyProjectiles (pos, enemies, projectileTree, acc) =
+    if pos < 0 then
+      Vector.fromList acc
+    else
+      let
+        val enemy = Vector.sub (enemies, pos)
+        val {x, y, health, id} = enemy
+        val eSize = Enemy.size
+        val hasCollision = QuadTree.hasCollisionAt
+          (x, y, eSize, eSize, 0, 0, 1920, 1080, ~1, projectileTree)
+
+        val acc =
+          if hasCollision then
+            if health = 1 then
+              (* filter out if decrementing health by one = 0 *)
+              acc
+            else
+              {health = health - 1, x = x, y = y, id = id} :: acc
+          else
+            enemy :: acc
+      in
+        filterEnemyProjectiles (pos - 1, enemies, projectileTree, acc)
+      end
+
+  fun checkCollisions (player, enemies, enemyTree, projectiles) =
     let
       val {x, y, mainAttack, attacked, ...} = player
       val size = Player.size
+      val projectileTree = Projectile.generateTree projectiles
     in
       case mainAttack of
         MAIN_ATTACKING =>
@@ -90,8 +137,13 @@ struct
 
             (* filter enemies based on collisions *)
             val enemyCollisions = Vector.fromList enemyCollisions
-            val enemies = filterEnemyCollisions
-              (Vector.length enemies - 1, enemyCollisions, enemies, [])
+            val enemies = filterEnemyAttacked
+              ( Vector.length enemies - 1
+              , enemyCollisions
+              , enemies
+              , projectileTree
+              , []
+              )
             val enemyTree = Enemy.generateTree enemies
 
             (* add collided enemies to player record, 
@@ -114,6 +166,9 @@ struct
                  val patches =
                    checkEnemies (player, enemies, enemyCollisions, [])
                  val player = Player.withPatches (player, patches)
+
+                 val enemies = filterEnemyProjectiles
+                   (Vector.length enemies - 1, enemies, projectileTree, [])
                in
                  (player, enemies, enemyTree)
                end
@@ -127,6 +182,9 @@ struct
                    val patches =
                      checkEnemies (player, enemies, enemyCollisions, lst)
                    val player = Player.withPatches (player, patches)
+
+                   val enemies = filterEnemyProjectiles
+                     (Vector.length enemies - 1, enemies, projectileTree, [])
                  in
                    (player, enemies, enemyTree)
                  end
@@ -139,6 +197,9 @@ struct
                    val attacked = ATTACKED amt
                    val player = Player.withPatches
                      (player, [W_ATTACKED attacked])
+
+                   val enemies = filterEnemyProjectiles
+                     (Vector.length enemies - 1, enemies, projectileTree, [])
                  in
                    (player, enemies, enemyTree)
                  end)

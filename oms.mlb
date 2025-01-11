@@ -17,8 +17,8 @@ fcore/enemy.sml
 fcore/game-type.sml
 
 fcore/player.sml
+fcore/projectile.sml
 
-fcore/projectile-enemy.sml
 fcore/player-enemy.sml
 fcore/game-update.sml
 

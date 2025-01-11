@@ -181,9 +181,9 @@ struct
       val platforms = Vector.fromList [plat1]
       val platformTree = Platform.generateTree platforms
 
-      val enemy1 = {id = 1, x = 300, y = 945, health = 2}
-      val enemy2 = {id = 2, x = 555, y = 945, health = 2}
-      val enemy3 = {id = 3, x = 979, y = 945, health = 2}
+      val enemy1 = {id = 1, x = 300, y = 945, health = 5}
+      val enemy2 = {id = 2, x = 555, y = 945, health = 5}
+      val enemy3 = {id = 3, x = 979, y = 945, health = 5}
       val enemies = Vector.fromList [enemy1, enemy2, enemy3]
       val enemyTree = Enemy.generateTree enemies
     in
