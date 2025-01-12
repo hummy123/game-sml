@@ -4,7 +4,7 @@ struct
    * to adjust enemy data on collision with projectile *)
   fun onCollisionWithProjectile (enemy, projectileTree, acc) =
     let
-      val {x, y, health, id} = enemy
+      val {x, y, health, id, xAxis, yAxis} = enemy
 
       val size = Constants.enemySize
       val ww = Constants.worldWidth
@@ -18,7 +18,13 @@ struct
           (* filter out if decrementing health by one = 0 *)
           acc
         else
-          {health = health - 1, x = x, y = y, id = id} :: acc
+          { health = health - 1
+          , x = x
+          , y = y
+          , id = id
+          , xAxis = xAxis
+          , yAxis = yAxis
+          } :: acc
       else
         enemy :: acc
     end
@@ -28,7 +34,8 @@ struct
       acc
     else
       let
-        val {id, x, y, health = _} = Vector.sub (enemyVec, pos)
+        val {id, x, y, health = _, xAxis = _, yAxis = _} =
+          Vector.sub (enemyVec, pos)
 
         val size = Constants.enemySize
         val ww = Constants.worldWidth
@@ -46,7 +53,7 @@ struct
     let
       val mid = low + ((high - low) div 2)
       val enemy = Vector.sub (vec, mid)
-      val {id = curNum, x = _, y = _, health = _} = enemy
+      val {id = curNum, x = _, y = _, health = _, xAxis = _, yAxis = _} = enemy
     in
       if curNum = findNum then enemy
       else if curNum < findNum then helpFind (findNum, vec, mid + 1, high)
@@ -56,8 +63,9 @@ struct
   fun find (findNum, vec) =
     helpFind (findNum, vec, 0, Vector.length vec - 1)
 
-  fun helpGetDrawVec ({x, y, id = _, health = _}, width, height) =
+  fun helpGetDrawVec (enemy, width, height) =
     let
+      val {x, y, id = _, health = _, xAxis = _, yAxis = _} = enemy
       val wratio = width / Constants.worldWidthReal
       val hratio = height / Constants.worldHeightReal
     in

@@ -61,7 +61,8 @@ sig
   | W_CHARGE of int
   | W_PROJECTILES of player_projectile vector
 
-  type enemy = {id: int, health: int, x: int, y: int}
+  type enemy =
+    {id: int, health: int, x: int, y: int, xAxis: x_axis, yAxis: y_axis}
 
   type game_type =
     { player: player
@@ -139,7 +140,8 @@ struct
   | W_CHARGE of int
   | W_PROJECTILES of player_projectile vector
 
-  type enemy = {id: int, health: int, x: int, y: int}
+  type enemy =
+    {id: int, health: int, x: int, y: int, xAxis: x_axis, yAxis: y_axis}
 
   type game_type =
     { player: player
@@ -179,9 +181,30 @@ struct
       val platforms = Vector.fromList [plat1]
       val platformTree = Platform.generateTree platforms
 
-      val enemy1 = {id = 1, x = 300, y = 945, health = 5}
-      val enemy2 = {id = 2, x = 555, y = 945, health = 5}
-      val enemy3 = {id = 3, x = 979, y = 945, health = 5}
+      val enemy1 =
+        { id = 1
+        , x = 300
+        , y = 945
+        , health = 5
+        , xAxis = STAY_STILL
+        , yAxis = ON_GROUND
+        }
+      val enemy2 =
+        { id = 2
+        , x = 555
+        , y = 945
+        , health = 5
+        , xAxis = STAY_STILL
+        , yAxis = ON_GROUND
+        }
+      val enemy3 =
+        { id = 3
+        , x = 979
+        , y = 945
+        , health = 5
+        , xAxis = STAY_STILL
+        , yAxis = ON_GROUND
+        }
       val enemies = Vector.fromList [enemy1, enemy2, enemy3]
     in
       { player = player
