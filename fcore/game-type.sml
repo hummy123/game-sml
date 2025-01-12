@@ -157,7 +157,7 @@ struct
         , y = 945
         , health = 5
         , xAxis = STAY_STILL
-        , yAxis = ON_GROUND
+        , yAxis = FALLING
         }
       val enemy2 =
         { id = 2
@@ -165,7 +165,7 @@ struct
         , y = 945
         , health = 5
         , xAxis = STAY_STILL
-        , yAxis = ON_GROUND
+        , yAxis = FALLING
         }
       val enemy3 =
         { id = 3
@@ -173,7 +173,7 @@ struct
         , y = 945
         , health = 5
         , xAxis = STAY_STILL
-        , yAxis = ON_GROUND
+        , yAxis = FALLING
         }
       val enemies = Vector.fromList [enemy1, enemy2, enemy3]
     in

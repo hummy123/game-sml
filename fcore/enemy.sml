@@ -28,15 +28,20 @@ struct
           (* filter out if decrementing health by one = 0 *)
           acc
         else
-          { health = health - 1
-          , x = x
-          , y = y
-          , id = id
-          , xAxis = xAxis
-          , yAxis = yAxis
-          } :: acc
+          let
+            val patches = EnemyPhysics.getPatches enemy
+            val patches = EnemyPatch.W_HEALTH (health - 1) :: patches
+            val enemy = EnemyPatch.withPatches (enemy, patches)
+          in
+            enemy :: acc
+          end
       else
-        enemy :: acc
+        let
+          val patches = EnemyPhysics.getPatches enemy
+          val enemy = EnemyPatch.withPatches (enemy, patches)
+        in
+          enemy :: acc
+        end
     end
 
   (* filter enemy projectiles when player is not attacking *)
