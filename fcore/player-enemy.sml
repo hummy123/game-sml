@@ -114,7 +114,6 @@ struct
               , projectileTree
               , []
               )
-            val enemyTree = Enemy.generateTree enemies
 
             (* add collided enemies to player record, 
              * concatenating with the previous enemies defeated *)
@@ -124,7 +123,7 @@ struct
             val allDefeated = Vector.concat [oldDefeated, newDefeated]
             val player = Player.withPatches (player, [W_ENEMIES allDefeated])
           in
-            (player, enemies, enemyTree)
+            (player, enemies)
           end
       | _ =>
           (case attacked of
@@ -140,7 +139,7 @@ struct
                  val enemies = filterEnemyProjectiles
                    (Vector.length enemies - 1, enemies, projectileTree, [])
                in
-                 (player, enemies, enemyTree)
+                 (player, enemies)
                end
            | ATTACKED amt =>
                if amt = Constants.attackedLimit then
@@ -156,7 +155,7 @@ struct
                    val enemies = filterEnemyProjectiles
                      (Vector.length enemies - 1, enemies, projectileTree, [])
                  in
-                   (player, enemies, enemyTree)
+                   (player, enemies)
                  end
                else
                  (* if attacked, don't detect collisions, 
@@ -171,7 +170,7 @@ struct
                    val enemies = filterEnemyProjectiles
                      (Vector.length enemies - 1, enemies, projectileTree, [])
                  in
-                   (player, enemies, enemyTree)
+                   (player, enemies)
                  end)
     end
 end

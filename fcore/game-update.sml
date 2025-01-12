@@ -9,7 +9,7 @@ struct
       val enemyTree = Enemy.generateTree enemies
 
       (* check player-enemy collisions and react *)
-      val (player, enemies, enemyTree) =
+      val (player, enemies) =
         PlayerEnemy.checkCollisions
           (player, enemies, enemyTree, #projectiles player)
     in
