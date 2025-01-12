@@ -24,4 +24,8 @@ struct
   val projectileSize: Real32.real = 9.0
   val projectileDistance: Real32.real = 13.0
   val projectileSizeInt = 9
+
+  (* constants for enemy *)
+  val enemySize = 35
+  val enemySizeReal: Real32.real = 35.0
 end

@@ -1,15 +1,17 @@
 structure Enemy =
 struct
-  val size = 35
-  val realSize = 35.0
-
   (* called when filtering enemies,
    * to adjust enemy data on collision with projectile *)
   fun onCollisionWithProjectile (enemy, projectileTree, acc) =
     let
       val {x, y, health, id} = enemy
+
+      val size = Constants.enemySize
+      val ww = Constants.worldWidth
+      val wh = Constants.worldHeight
+
       val hasCollision = QuadTree.hasCollisionAt
-        (x, y, size, size, 0, 0, 1920, 1080, ~1, projectileTree)
+        (x, y, size, size, 0, 0, ww, wh, ~1, projectileTree)
     in
       if hasCollision then
         if health = 1 then
@@ -27,7 +29,12 @@ struct
     else
       let
         val {id, x, y, health = _} = Vector.sub (enemyVec, pos)
-        val acc = QuadTree.insert (x, y, size, size, 0, 0, 1920, 1080, id, acc)
+
+        val size = Constants.enemySize
+        val ww = Constants.worldWidth
+        val wh = Constants.worldHeight
+
+        val acc = QuadTree.insert (x, y, size, size, 0, 0, ww, wh, id, acc)
       in
         helpGenerateTree (pos + 1, enemyVec, acc)
       end
@@ -51,12 +58,12 @@ struct
 
   fun helpGetDrawVec ({x, y, id = _, health = _}, width, height) =
     let
-      val wratio = width / 1920.0
-      val hratio = height / 1080.0
+      val wratio = width / Constants.worldWidthReal
+      val hratio = height / Constants.worldHeightReal
     in
       if wratio < hratio then
         let
-          val scale = 1080.0 * wratio
+          val scale = Constants.worldHeightReal * wratio
           val yOffset =
             if height > scale then (height - scale) / 2.0
             else if height < scale then (scale - height) / 2.0
@@ -65,13 +72,13 @@ struct
           val x = Real32.fromInt x * wratio
           val y = Real32.fromInt y * wratio + yOffset
 
-          val realSize = realSize * wratio
+          val realSize = Constants.enemySizeReal * wratio
         in
           Block.lerp (x, y, realSize, realSize, width, height, 0.5, 0.5, 1.0)
         end
       else
         let
-          val scale = 1920.0 * hratio
+          val scale = Constants.worldWidthReal * hratio
           val xOffset =
             if width > scale then (width - scale) / 2.0
             else if width < scale then (scale - width) / 2.0
@@ -80,7 +87,7 @@ struct
           val x = Real32.fromInt x * hratio + xOffset
           val y = Real32.fromInt y * hratio
 
-          val realSize = realSize * hratio
+          val realSize = Constants.enemySizeReal * hratio
         in
           Block.lerp (x, y, realSize, realSize, width, height, 0.5, 0.5, 1.0)
         end

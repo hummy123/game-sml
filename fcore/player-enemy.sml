@@ -34,8 +34,8 @@ struct
               val pCentreX = x + pHalfW
 
               val {x = ex, y = ey, ...} = Enemy.find (id, enemies)
-              val eFinishX = ex + Enemy.size
-              val eHalfW = Enemy.size div 2
+              val eFinishX = ex + Constants.enemySize
+              val eHalfW = Constants.enemySize div 2
               val eCentreX = ex + eHalfW
             in
               eCentreX < pCentreX
