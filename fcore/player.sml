@@ -511,8 +511,8 @@ struct
 
       val ww = Constants.worldWidth
       val wh = Constants.worldHeight
-            val enemyCollisions = QuadTree.getCollisions
-              (x, y, size, size, 0, 0, ww, wh, 0, enemyTree)
+      val enemyCollisions = QuadTree.getCollisions
+        (x, y, size, size, 0, 0, ww, wh, 0, enemyTree)
     in
       Vector.fromList enemyCollisions
     end

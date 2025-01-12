@@ -12,17 +12,9 @@ struct
       case mainAttack of
         MAIN_ATTACKING =>
           let
-            (* when attacking, player collision should be larger than player themselves *)
-            val x = x - Constants.halfPlayerSize
-            val y = y - Constants.halfPlayerSize
-            val size = size * 2
-
-            (* get list of enemies player has collided with *)
-            val enemyCollisions = QuadTree.getCollisions
-              (x, y, size, size, 0, 0, 1920, 1080, 0, enemyTree)
-
             (* filter enemies based on collisions *)
-            val enemyCollisions = Vector.fromList enemyCollisions
+            val enemyCollisions =
+              Player.getEnemyCollisionsWhenAttacking (x, y, enemyTree)
             val enemies = Enemy.filterWhenAttacked
               ( Vector.length enemies - 1
               , enemyCollisions
