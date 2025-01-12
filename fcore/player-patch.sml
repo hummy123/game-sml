@@ -15,6 +15,7 @@ sig
   | W_CHARGE of int
   | W_PROJECTILES of GameType.player_projectile vector
 
+  val withPatch: GameType.player * player_patch -> GameType.player
   val withPatches: GameType.player * player_patch list -> GameType.player
 end
 

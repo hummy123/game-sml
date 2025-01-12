@@ -1,5 +1,15 @@
 structure Enemy =
 struct
+  fun helpExists (pos, id, collisions) =
+    if pos = Vector.length collisions then
+      false
+    else
+      let val current = Vector.sub (collisions, pos)
+      in current = id orelse helpExists (pos + 1, id, collisions)
+      end
+
+  fun exists (id, collisions) = helpExists (0, id, collisions)
+
   (* called when filtering enemies,
    * to adjust enemy data on collision with projectile *)
   fun onCollisionWithProjectile (enemy, projectileTree, acc) =
@@ -28,6 +38,34 @@ struct
       else
         enemy :: acc
     end
+
+  (* filter enemy projectiles when player is not attacking *)
+  fun filterProjectileCollisions (pos, enemies, projectileTree, acc) =
+    if pos < 0 then
+      Vector.fromList acc
+    else
+      let
+        val enemy = Vector.sub (enemies, pos)
+        val acc = onCollisionWithProjectile (enemy, projectileTree, acc)
+      in
+        filterProjectileCollisions (pos - 1, enemies, projectileTree, acc)
+      end
+
+  (* removes enemies from `enemies` vector when player is attacking that enemy
+   * and also filter enemy (or change enemyh health)
+   * if enemy has collided with projectile *)
+  fun filterWhenAttacked (pos, collisions, enemies, projectileTree, acc) =
+    if pos < 0 then
+      Vector.fromList acc
+    else
+      let
+        val enemy = Vector.sub (enemies, pos)
+        val acc =
+          if exists (#id enemy, collisions) then (* filter out *) acc
+          else onCollisionWithProjectile (enemy, projectileTree, acc)
+      in
+        filterWhenAttacked (pos - 1, collisions, enemies, projectileTree, acc)
+      end
 
   fun helpGenerateTree (pos, enemyVec, acc) =
     if pos = Vector.length enemyVec then
