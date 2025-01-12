@@ -23,7 +23,7 @@ functor MakePhysics(Fn: PHYSICS_INPUT) =
 struct
   open GameType
 
-  fun run input =
+  fun getPatches input =
     let
       val x = Fn.getX input
       val y = Fn.getY input
@@ -71,3 +71,26 @@ struct
             end
     end
 end
+
+structure PlayerPhysics =
+  MakePhysics
+    (struct
+       type t = GameType.player
+       type patch = GameType.player_patch
+
+       (* constants for physics *)
+       val moveBy = Constants.movePlayerBy
+       val floatLimit = Constants.floatLimit
+       val jumpLimit = Constants.jumpLimit
+
+       (* destructuring functions *)
+       fun getX ({x, ...}: t) = x
+       fun getY ({y, ...}: t) = y
+
+       fun getXAxis ({xAxis, ...}: t) = xAxis
+       fun getYAxis ({yAxis, ...}: t) = yAxis
+
+       val W_X = GameType.W_X
+       val W_Y = GameType.W_Y
+       val W_Y_AXIS = GameType.W_Y_AXIS
+     end)

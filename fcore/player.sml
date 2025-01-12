@@ -417,51 +417,6 @@ struct
       checkWalls (player, walls, wallCollisions, acc)
     end
 
-  fun getMovePatches player =
-    let
-      val {xAxis, yAxis, x, y, ...} = player
-
-      val desiredX =
-        case xAxis of
-          STAY_STILL => x
-        | MOVE_LEFT => x - Constants.movePlayerBy
-        | MOVE_RIGHT => x + Constants.movePlayerBy
-    in
-      case yAxis of
-        ON_GROUND => [W_X desiredX]
-      | FLOATING floated =>
-          let
-            val yAxis =
-              if floated = Constants.floatLimit then FALLING
-              else FLOATING (floated + 1)
-          in
-            [W_X desiredX, W_Y_AXIS yAxis]
-          end
-      | FALLING =>
-          let val desiredY = y + Constants.movePlayerBy
-          in [W_X desiredX, W_Y desiredY]
-          end
-      | DROP_BELOW_PLATFORM =>
-          let val desiredY = y + Constants.movePlayerBy
-          in [W_X desiredX, W_Y desiredY]
-          end
-      | JUMPING jumped =>
-          if jumped + Constants.movePlayerBy > Constants.jumpLimit then
-            (* if we are above the jump limit, trigger a fall *)
-            let val newYAxis = FLOATING 0
-            in [W_X desiredX, W_Y_AXIS newYAxis]
-            end
-          else
-            (* jump *)
-            let
-              val newJumped = jumped + Constants.movePlayerBy
-              val newYAxis = JUMPING newJumped
-              val desiredY = y - Constants.movePlayerBy
-            in
-              [W_X desiredX, W_Y desiredY, W_Y_AXIS newYAxis]
-            end
-    end
-
   fun getJumpPatches (player, upHeld, downHeld, acc) =
     let
       val {yAxis, jumpPressed, ...} = player
@@ -759,7 +714,7 @@ struct
           withPatches (player, patches)
         end
 
-      val patches = getMovePatches player
+      val patches = PlayerPhysics.getPatches player
       val player = withPatches (player, patches)
 
       val patches = getEnvironmentPatches (player, game)

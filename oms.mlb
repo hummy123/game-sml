@@ -17,6 +17,7 @@ fcore/platform.sml
 fcore/enemy.sml
 fcore/game-type.sml
 
+fcore/physics.sml
 fcore/player.sml
 fcore/projectile.sml
 
@@ -38,5 +39,3 @@ shell/input-state.sml
 shell/gl-shaders.sml
 shell/gl-draw.sml
 shell/shell.sml
-
-fcore/physics.sml
