@@ -59,10 +59,10 @@ struct
                  let
                    val enemyCollisions = QuadTree.getCollisions
                      (x, y, size, size, 0, 0, 1920, 1080, 0, enemyTree)
-                   val lst = [W_ATTACKED NOT_ATTACKED]
+
                    val player =
-                     Player.enemyCollisionReaction
-                       (player, enemies, enemyCollisions, lst)
+                     Player.exitAttackedAndCheckEnemies
+                       (player, enemies, enemyCollisions)
 
                    val enemies = Enemy.filterProjectileCollisions
                      (Vector.length enemies - 1, enemies, projectileTree, [])
@@ -74,10 +74,7 @@ struct
                   * allowing a brief invincibility period as is common in many games 
                   * *)
                  let
-                   val amt = amt + 1
-                   val attacked = ATTACKED amt
-                   val player = Player.withPatch (player, W_ATTACKED attacked)
-
+                   val player = Player.incrementAttacked (player, amt)
                    val enemies = Enemy.filterProjectileCollisions
                      (Vector.length enemies - 1, enemies, projectileTree, [])
                  in

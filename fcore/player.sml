@@ -494,6 +494,29 @@ struct
         end
     | [] => PlayerPatch.withPatches (player, acc)
 
+  fun incrementAttacked (player, amt) =
+    let val patch = ATTACKED (amt + 1)
+    in PlayerPatch.withPatch (player, W_ATTACKED patch)
+    end
+
+  fun exitAttackedAndCheckEnemies (player, enemies, enemyCollisions) =
+    enemyCollisionReaction
+      (player, enemies, enemyCollisions, [W_ATTACKED NOT_ATTACKED])
+
+  fun getEnemyCollisionsWhenAttacking (x, y, enemyTree) =
+    let
+      val x = x - Constants.halfPlayerSize
+      val y = y - Constants.halfPlayerSize
+      val size = Constants.playerSize * 2
+
+      val ww = Constants.worldWidth
+      val wh = Constants.worldHeight
+            val enemyCollisions = QuadTree.getCollisions
+              (x, y, size, size, 0, 0, ww, wh, 0, enemyTree)
+    in
+      Vector.fromList enemyCollisions
+    end
+
   (* block is placeholder asset *)
   fun helpGetDrawVec (x, y, size, width, height, attacked, mainAttack) =
     case mainAttack of
