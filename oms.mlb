@@ -1,6 +1,7 @@
 $(SML_LIB)/basis/basis.mlb
 
 (* fcore *)
+fcore/constants.sml
 fcore/quad-tree.sml
 fcore/bin-search.sml
 
@@ -37,3 +38,5 @@ shell/input-state.sml
 shell/gl-shaders.sml
 shell/gl-draw.sml
 shell/shell.sml
+
+fcore/physics.sml

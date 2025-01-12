@@ -294,12 +294,6 @@ struct
 
   val moveBy = 5
 
-  (* defeated enemy constants *)
-  val defeatedPi = Real32.Math.pi / 180.0
-  val defeatedSize = 9.0
-  val defeatedDistance = 13.0
-  val defeatedSizeInt = 9
-
   (* timing variables; always start at 0, 
    * and revert to default state when limit is hit *)
   val jumpLimit = 150
@@ -422,10 +416,9 @@ struct
   (* only checks for collisions with environment (walls and platforms) *)
   fun getEnvironmentPatches (player, game) =
     let
-      val {walls, wallTree, platformTree, platforms, enemies, ...} =
-        game
+      val {walls, wallTree, platformTree, platforms, ...} = game
 
-      val {x, y, attacked, mainAttack, ...} = player
+      val {x, y, ...} = player
 
       val platCollisions = QuadTree.getCollisionsBelow
         (x, y, size, size, 0, 0, 1920, 1080, 0, platformTree)
@@ -521,7 +514,7 @@ struct
     else if chargeHeld andalso not attackHeld then W_MAIN_ATTACK MAIN_CHARGING
     else W_MAIN_ATTACK MAIN_NOT_ATTACKING
 
-  fun degreesToRadians degrees = Real32.fromInt degrees * defeatedPi
+  fun degreesToRadians degrees = Real32.fromInt degrees * Constants.projectilePi
 
   fun defeatedEnemiesToProjectiles
     (pos, defeteadEnemies, player as {x, y, facing, ...}, acc) =
@@ -529,15 +522,15 @@ struct
       Vector.fromList acc
     else
       let
-        val diff = halfRealSize - (defeatedSize / 2.0)
+        val diff = halfRealSize - (Constants.projectileSize / 2.0)
         val x = Real32.fromInt x + diff
         val y = Real32.fromInt y + diff
 
         val {angle} = Vector.sub (defeteadEnemies, pos)
         val angle = degreesToRadians angle
 
-        val x = ((Real32.Math.cos angle) * defeatedDistance) + x
-        val y = ((Real32.Math.sin angle) * defeatedDistance) + y
+        val x = ((Real32.Math.cos angle) * Constants.projectileDistance) + x
+        val y = ((Real32.Math.sin angle) * Constants.projectileDistance) + y
 
         val x = Real32.toInt IEEEReal.TO_NEAREST x
         val y = Real32.toInt IEEEReal.TO_NEAREST y
@@ -934,13 +927,15 @@ struct
         val angle = degreesToRadians angle
 
         (* calculate pellet's x and y *)
-        val pelletX = ((Real32.Math.cos angle) * defeatedDistance) + playerX
+        val pelletX =
+          ((Real32.Math.cos angle) * Constants.projectileDistance) + playerX
         val pelletX = pelletX * ratio + xOffset
 
-        val pelletY = ((Real32.Math.sin angle) * defeatedDistance) + playerY
+        val pelletY =
+          ((Real32.Math.sin angle) * Constants.projectileDistance) + playerY
         val pelletY = pelletY * ratio + yOffset
 
-        val defeatedSize = defeatedSize * ratio
+        val defeatedSize = Constants.projectileSize * ratio
 
         val vec = Field.lerp
           ( pelletX
@@ -978,7 +973,7 @@ struct
         val {x, y, enemies, ...} = player
 
         (* get centre (x, y) coordinates of player *)
-        val diff = halfRealSize - (defeatedSize / 2.0)
+        val diff = halfRealSize - (Constants.projectileSize / 2.0)
         val x = Real32.fromInt x + diff
         val y = Real32.fromInt y + diff
 

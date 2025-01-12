@@ -4,14 +4,14 @@ sig
 
   type platform = {id: int, x: int, y: int, width: int}
 
-  datatype player_y_axis =
+  datatype y_axis =
     ON_GROUND
   | FALLING
   | DROP_BELOW_PLATFORM
   | JUMPING of int
   | FLOATING of int
 
-  datatype player_x_axis = MOVE_LEFT | STAY_STILL | MOVE_RIGHT
+  datatype x_axis = MOVE_LEFT | STAY_STILL | MOVE_RIGHT
 
   datatype player_recoil = NO_RECOIL | RECOIL_LEFT of int | RECOIL_RIGHT of int
 
@@ -30,8 +30,8 @@ sig
   type player_projectile = {x: int, y: int, facing: facing}
 
   type player =
-    { yAxis: player_y_axis
-    , xAxis: player_x_axis
+    { yAxis: y_axis
+    , xAxis: x_axis
     , recoil: player_recoil
     , attacked: player_attacked
     , mainAttack: main_attack
@@ -47,8 +47,8 @@ sig
     }
 
   datatype player_patch =
-    W_X_AXIS of player_x_axis
-  | W_Y_AXIS of player_y_axis
+    W_X_AXIS of x_axis
+  | W_Y_AXIS of y_axis
   | W_RECOIL of player_recoil
   | W_ATTACKED of player_attacked
   | W_MAIN_ATTACK of main_attack
@@ -82,14 +82,14 @@ struct
   (* all platforms have a fixed visual height and a fixed collision height *)
   type platform = {id: int, x: int, y: int, width: int}
 
-  datatype player_y_axis =
+  datatype y_axis =
     ON_GROUND
   | FALLING
   | DROP_BELOW_PLATFORM
   | JUMPING of int
   | FLOATING of int
 
-  datatype player_x_axis = MOVE_LEFT | STAY_STILL | MOVE_RIGHT
+  datatype x_axis = MOVE_LEFT | STAY_STILL | MOVE_RIGHT
 
   datatype player_recoil = NO_RECOIL | RECOIL_LEFT of int | RECOIL_RIGHT of int
 
@@ -108,8 +108,8 @@ struct
   type player_projectile = {x: int, y: int, facing: facing}
 
   type player =
-    { yAxis: player_y_axis
-    , xAxis: player_x_axis
+    { yAxis: y_axis
+    , xAxis: x_axis
     , recoil: player_recoil
     , attacked: player_attacked
     , mainAttack: main_attack
@@ -125,8 +125,8 @@ struct
     }
 
   datatype player_patch =
-    W_X_AXIS of player_x_axis
-  | W_Y_AXIS of player_y_axis
+    W_X_AXIS of x_axis
+  | W_Y_AXIS of y_axis
   | W_RECOIL of player_recoil
   | W_ATTACKED of player_attacked
   | W_MAIN_ATTACK of main_attack
