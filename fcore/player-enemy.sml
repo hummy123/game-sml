@@ -1,6 +1,7 @@
 structure PlayerEnemy =
 struct
   open GameType
+  open PlayerPatch
 
   fun getEnemyRecoilPatches (player, playerOnRight, acc) =
     if playerOnRight then

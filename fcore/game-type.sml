@@ -46,21 +46,6 @@ sig
     , projectiles: player_projectile vector
     }
 
-  datatype player_patch =
-    W_X_AXIS of x_axis
-  | W_Y_AXIS of y_axis
-  | W_RECOIL of player_recoil
-  | W_ATTACKED of player_attacked
-  | W_MAIN_ATTACK of main_attack
-  | W_FACING of facing
-  | W_HEALTH of int
-  | W_X of int
-  | W_Y of int
-  | W_JUMP_PRESSED of bool
-  | W_ENEMIES of defeated_enemies vector
-  | W_CHARGE of int
-  | W_PROJECTILES of player_projectile vector
-
   type enemy =
     {id: int, health: int, x: int, y: int, xAxis: x_axis, yAxis: y_axis}
 
@@ -124,21 +109,6 @@ struct
     , charge: int
     , projectiles: player_projectile vector
     }
-
-  datatype player_patch =
-    W_X_AXIS of x_axis
-  | W_Y_AXIS of y_axis
-  | W_RECOIL of player_recoil
-  | W_ATTACKED of player_attacked
-  | W_MAIN_ATTACK of main_attack
-  | W_FACING of facing
-  | W_HEALTH of int
-  | W_X of int
-  | W_Y of int
-  | W_JUMP_PRESSED of bool
-  | W_ENEMIES of defeated_enemies vector
-  | W_CHARGE of int
-  | W_PROJECTILES of player_projectile vector
 
   type enemy =
     {id: int, health: int, x: int, y: int, xAxis: x_axis, yAxis: y_axis}

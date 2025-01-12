@@ -17,6 +17,8 @@ fcore/platform.sml
 fcore/enemy.sml
 fcore/game-type.sml
 
+fcore/player-patch.sml
+
 fcore/physics.sml
 fcore/player.sml
 fcore/projectile.sml

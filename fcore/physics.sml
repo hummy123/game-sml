@@ -76,7 +76,7 @@ structure PlayerPhysics =
   MakePhysics
     (struct
        type t = GameType.player
-       type patch = GameType.player_patch
+       type patch = PlayerPatch.player_patch
 
        (* constants for physics *)
        val moveBy = Constants.movePlayerBy
@@ -90,7 +90,7 @@ structure PlayerPhysics =
        fun getXAxis ({xAxis, ...}: t) = xAxis
        fun getYAxis ({yAxis, ...}: t) = yAxis
 
-       val W_X = GameType.W_X
-       val W_Y = GameType.W_Y
-       val W_Y_AXIS = GameType.W_Y_AXIS
+       val W_X = PlayerPatch.W_X
+       val W_Y = PlayerPatch.W_Y
+       val W_Y_AXIS = PlayerPatch.W_Y_AXIS
      end)

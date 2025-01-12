@@ -1,289 +1,7 @@
 structure Player =
 struct
   open GameType
-
-  fun mkPlayer
-    ( health
-    , xAxis
-    , yAxis
-    , x
-    , y
-    , jumpPressed
-    , recoil
-    , attacked
-    , mainAttack
-    , facing
-    , mainAttackPressed
-    , enemies
-    , charge
-    , projectiles
-    ) =
-    { yAxis = yAxis
-    , xAxis = xAxis
-    , recoil = recoil
-    , attacked = attacked
-    , mainAttack = mainAttack
-    , mainAttackPressed = mainAttackPressed
-    , facing = facing
-    , health = health
-    , x = x
-    , y = y
-    , jumpPressed = jumpPressed
-    , enemies = enemies
-    , charge = charge
-    , projectiles = projectiles
-    }
-
-  fun withPatch (player: player, patch) =
-    let
-      val
-        { yAxis
-        , xAxis
-        , recoil
-        , attacked
-        , mainAttack
-        , mainAttackPressed
-        , facing
-        , health
-        , x
-        , y
-        , jumpPressed
-        , enemies
-        , charge
-        , projectiles
-        } = player
-    in
-      case patch of
-        W_X_AXIS xAxis =>
-          mkPlayer
-            ( health
-            , xAxis
-            , yAxis
-            , x
-            , y
-            , jumpPressed
-            , recoil
-            , attacked
-            , mainAttack
-            , facing
-            , mainAttackPressed
-            , enemies
-            , charge
-            , projectiles
-            )
-      | W_Y_AXIS yAxis =>
-          mkPlayer
-            ( health
-            , xAxis
-            , yAxis
-            , x
-            , y
-            , jumpPressed
-            , recoil
-            , attacked
-            , mainAttack
-            , facing
-            , mainAttackPressed
-            , enemies
-            , charge
-            , projectiles
-            )
-      | W_RECOIL recoil =>
-          mkPlayer
-            ( health
-            , xAxis
-            , yAxis
-            , x
-            , y
-            , jumpPressed
-            , recoil
-            , attacked
-            , mainAttack
-            , facing
-            , mainAttackPressed
-            , enemies
-            , charge
-            , projectiles
-            )
-      | W_ATTACKED attacked =>
-          mkPlayer
-            ( health
-            , xAxis
-            , yAxis
-            , x
-            , y
-            , jumpPressed
-            , recoil
-            , attacked
-            , mainAttack
-            , facing
-            , mainAttackPressed
-            , enemies
-            , charge
-            , projectiles
-            )
-      | W_MAIN_ATTACK mainAttack =>
-          mkPlayer
-            ( health
-            , xAxis
-            , yAxis
-            , x
-            , y
-            , jumpPressed
-            , recoil
-            , attacked
-            , mainAttack
-            , facing
-            , mainAttackPressed
-            , enemies
-            , charge
-            , projectiles
-            )
-      | W_FACING facing =>
-          mkPlayer
-            ( health
-            , xAxis
-            , yAxis
-            , x
-            , y
-            , jumpPressed
-            , recoil
-            , attacked
-            , mainAttack
-            , facing
-            , mainAttackPressed
-            , enemies
-            , charge
-            , projectiles
-            )
-      | W_HEALTH health =>
-          mkPlayer
-            ( health
-            , xAxis
-            , yAxis
-            , x
-            , y
-            , jumpPressed
-            , recoil
-            , attacked
-            , mainAttack
-            , facing
-            , mainAttackPressed
-            , enemies
-            , charge
-            , projectiles
-            )
-      | W_X x =>
-          mkPlayer
-            ( health
-            , xAxis
-            , yAxis
-            , x
-            , y
-            , jumpPressed
-            , recoil
-            , attacked
-            , mainAttack
-            , facing
-            , mainAttackPressed
-            , enemies
-            , charge
-            , projectiles
-            )
-      | W_Y y =>
-          mkPlayer
-            ( health
-            , xAxis
-            , yAxis
-            , x
-            , y
-            , jumpPressed
-            , recoil
-            , attacked
-            , mainAttack
-            , facing
-            , mainAttackPressed
-            , enemies
-            , charge
-            , projectiles
-            )
-      | W_JUMP_PRESSED jumpPressed =>
-          mkPlayer
-            ( health
-            , xAxis
-            , yAxis
-            , x
-            , y
-            , jumpPressed
-            , recoil
-            , attacked
-            , mainAttack
-            , facing
-            , mainAttackPressed
-            , enemies
-            , charge
-            , projectiles
-            )
-      | W_ENEMIES enemies =>
-          mkPlayer
-            ( health
-            , xAxis
-            , yAxis
-            , x
-            , y
-            , jumpPressed
-            , recoil
-            , attacked
-            , mainAttack
-            , facing
-            , mainAttackPressed
-            , enemies
-            , charge
-            , projectiles
-            )
-      | W_CHARGE charge =>
-          mkPlayer
-            ( health
-            , xAxis
-            , yAxis
-            , x
-            , y
-            , jumpPressed
-            , recoil
-            , attacked
-            , mainAttack
-            , facing
-            , mainAttackPressed
-            , enemies
-            , charge
-            , projectiles
-            )
-      | W_PROJECTILES projectiles =>
-          mkPlayer
-            ( health
-            , xAxis
-            , yAxis
-            , x
-            , y
-            , jumpPressed
-            , recoil
-            , attacked
-            , mainAttack
-            , facing
-            , mainAttackPressed
-            , enemies
-            , charge
-            , projectiles
-            )
-    end
-
-  fun withPatches (player: player, lst) =
-    case lst of
-      hd :: tl =>
-        let val player = withPatch (player, hd)
-        in withPatches (player, tl)
-        end
-    | [] => player
+  open PlayerPatch
 
   (* helper functions checking input *)
   fun getXAxis (lh, rh) =
@@ -689,17 +407,17 @@ struct
       val player = #player game
 
       val patches = getProjectilePatches player
-      val player = withPatches (player, patches)
+      val player = PlayerPatch.withPatches (player, patches)
 
       val patches = getRecoilPatches player
-      val player = withPatches (player, patches)
+      val player = PlayerPatch.withPatches (player, patches)
 
       val player =
         (* we only accept and handle input if player is not recoiling *)
         case #recoil player of
           NO_RECOIL =>
             let val patches = getInputPatches (player, input)
-            in withPatches (player, patches)
+            in PlayerPatch.withPatches (player, patches)
             end
         | _ => player
 
@@ -711,15 +429,15 @@ struct
               (fn {angle} => {angle = if angle < 360 then angle + 5 else 0}) e
           val patches = [W_ENEMIES e]
         in
-          withPatches (player, patches)
+          PlayerPatch.withPatches (player, patches)
         end
 
       val patches = PlayerPhysics.getPatches player
-      val player = withPatches (player, patches)
+      val player = PlayerPatch.withPatches (player, patches)
 
       val patches = getEnvironmentPatches (player, game)
     in
-      withPatches (player, patches)
+      PlayerPatch.withPatches (player, patches)
     end
 
   (* block is placeholder asset *)
