@@ -94,3 +94,26 @@ structure PlayerPhysics =
        val W_Y = PlayerPatch.W_Y
        val W_Y_AXIS = PlayerPatch.W_Y_AXIS
      end)
+
+structure EnemyPhysics =
+  MakePhysics
+    (struct
+       type t = GameType.enemy
+       type patch = EnemyPatch.enemy_patch
+
+       (* constants for physics *)
+       val moveBy = Constants.moveEnemyBy
+       val floatLimit = Constants.floatLimit
+       val jumpLimit = Constants.jumpLimit
+
+       (* destructuring functions *)
+       fun getX ({x, ...}: t) = x
+       fun getY ({y, ...}: t) = y
+
+       fun getXAxis ({xAxis, ...}: t) = xAxis
+       fun getYAxis ({yAxis, ...}: t) = yAxis
+
+       val W_X = EnemyPatch.W_X
+       val W_Y = EnemyPatch.W_Y
+       val W_Y_AXIS = EnemyPatch.W_Y_AXIS
+     end)

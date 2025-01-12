@@ -1,4 +1,18 @@
-structure EnemyPatch =
+signature ENEMY_PATCH =
+sig
+  datatype enemy_patch =
+    W_HEALTH of int
+  | W_X of int
+  | W_Y of int
+  | W_X_AXIS of GameType.x_axis
+  | W_Y_AXIS of GameType.y_axis
+
+  val withPatch: GameType.enemy * enemy_patch -> GameType.enemy
+
+  val withPatches: GameType.enemy * enemy_patch list -> GameType.enemy
+end
+
+structure EnemyPatch: ENEMY_PATCH =
 struct
   datatype enemy_patch =
     W_HEALTH of int
