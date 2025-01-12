@@ -165,7 +165,7 @@ struct
         , y = 500
         , jumpPressed = false
         , enemies = Vector.fromList []
-        , charge = 60
+        , charge = Constants.maxCharge
         , projectiles = Vector.fromList []
         }
 

@@ -285,23 +285,6 @@ struct
         end
     | [] => player
 
-  (* width/height *)
-  val size = 35
-  val realSize = 35.0
-
-  val halfSize = 35 div 2
-  val halfRealSize = 35.0 / 2.0
-
-  val moveBy = 5
-
-  (* timing variables; always start at 0, 
-   * and revert to default state when limit is hit *)
-  val jumpLimit = 150
-  val floatLimit = 3
-  val recoilLimit = 15
-  val attackedLimit = 55
-  val maxCharge = 60
-
   (* helper functions checking input *)
   fun getXAxis (lh, rh) =
     case (lh, rh) of
@@ -368,7 +351,7 @@ struct
             val {x = wallX, width = wallWidth, ...} =
               Vector.sub (walls, wallID - 1)
 
-            val newX = wallX - size
+            val newX = wallX - Constants.playerSize
             val acc = W_X newX :: acc
           in
             checkWalls (player, walls, tl, acc)
@@ -377,7 +360,7 @@ struct
           let
             val {y = wallY, ...} = Vector.sub (walls, wallID - 1)
 
-            val newY = wallY - size
+            val newY = wallY - Constants.playerSize
             val acc = W_Y_AXIS ON_GROUND :: W_Y newY :: acc
           in
             checkWalls (player, walls, tl, acc)
@@ -405,7 +388,7 @@ struct
                   * player will land on platform and stay on the ground there. *)
                  val {y = platY, ...} = Vector.sub (platforms, platID - 1)
 
-                 val newY = platY - size
+                 val newY = platY - Constants.playerSize
                  val acc = W_Y_AXIS ON_GROUND :: W_Y newY :: acc
                in
                  checkPlatforms (player, platforms, tl, acc)
@@ -420,12 +403,16 @@ struct
 
       val {x, y, ...} = player
 
+      val size = Constants.playerSize
+      val ww = Constants.worldWidth
+      val wh = Constants.worldHeight
+
       val platCollisions = QuadTree.getCollisionsBelow
-        (x, y, size, size, 0, 0, 1920, 1080, 0, platformTree)
+        (x, y, size, size, 0, 0, ww, wh, 0, platformTree)
       val acc = checkPlatforms (player, platforms, platCollisions, [])
 
       val wallCollisions = QuadTree.getCollisionSides
-        (x, y, size, size, 0, 0, 1920, 1080, 0, wallTree)
+        (x, y, size, size, 0, 0, ww, wh, 0, wallTree)
     in
       checkWalls (player, walls, wallCollisions, acc)
     end
@@ -437,28 +424,29 @@ struct
       val desiredX =
         case xAxis of
           STAY_STILL => x
-        | MOVE_LEFT => x - moveBy
-        | MOVE_RIGHT => x + moveBy
+        | MOVE_LEFT => x - Constants.movePlayerBy
+        | MOVE_RIGHT => x + Constants.movePlayerBy
     in
       case yAxis of
         ON_GROUND => [W_X desiredX]
       | FLOATING floated =>
           let
             val yAxis =
-              if floated = floatLimit then FALLING else FLOATING (floated + 1)
+              if floated = Constants.floatLimit then FALLING
+              else FLOATING (floated + 1)
           in
             [W_X desiredX, W_Y_AXIS yAxis]
           end
       | FALLING =>
-          let val desiredY = y + moveBy
+          let val desiredY = y + Constants.movePlayerBy
           in [W_X desiredX, W_Y desiredY]
           end
       | DROP_BELOW_PLATFORM =>
-          let val desiredY = y + moveBy
+          let val desiredY = y + Constants.movePlayerBy
           in [W_X desiredX, W_Y desiredY]
           end
       | JUMPING jumped =>
-          if jumped + moveBy > jumpLimit then
+          if jumped + Constants.movePlayerBy > Constants.jumpLimit then
             (* if we are above the jump limit, trigger a fall *)
             let val newYAxis = FLOATING 0
             in [W_X desiredX, W_Y_AXIS newYAxis]
@@ -466,9 +454,9 @@ struct
           else
             (* jump *)
             let
-              val newJumped = jumped + moveBy
+              val newJumped = jumped + Constants.movePlayerBy
               val newYAxis = JUMPING newJumped
-              val desiredY = y - moveBy
+              val desiredY = y - Constants.movePlayerBy
             in
               [W_X desiredX, W_Y desiredY, W_Y_AXIS newYAxis]
             end
@@ -522,7 +510,8 @@ struct
       Vector.fromList acc
     else
       let
-        val diff = halfRealSize - (Constants.projectileSize / 2.0)
+        val diff =
+          Constants.halfPlayerSizeReal - (Constants.projectileSize / 2.0)
         val x = Real32.fromInt x + diff
         val y = Real32.fromInt y + diff
 
@@ -630,7 +619,7 @@ struct
 
       val charge =
         case mainAttack of
-          MAIN_CHARGING => Int.min (charge + 1, maxCharge)
+          MAIN_CHARGING => Int.min (charge + 1, Constants.maxCharge)
         | MAIN_ATTACKING => Int.max (charge - 1, 0)
         | _ => charge
 
@@ -660,7 +649,7 @@ struct
          * However, if player has reached the recoil limit, exit the recoil
          * state and accept input.
          * *)
-        if recoiled = recoilLimit then
+        if recoiled = Constants.recoilLimit then
           [W_RECOIL NO_RECOIL]
         else
           let
@@ -685,7 +674,7 @@ struct
             ]
           end
     | RECOIL_RIGHT recoiled =>
-        if recoiled = recoilLimit then
+        if recoiled = Constants.recoilLimit then
           [W_RECOIL NO_RECOIL]
         else
           let
@@ -715,15 +704,15 @@ struct
       let
         val {x, y, facing} = Vector.sub (projectiles, pos)
       in
-        if x <= 0 orelse x >= 1920 then
+        if x <= 0 orelse x >= Constants.worldWidth then
           (* filter out since projectile is not visible *)
           helpMoveProjectiles (pos - 1, projectiles, acc)
         else
           let
             val x =
               case facing of
-                FACING_LEFT => x - moveBy
-              | FACING_RIGHT => x + moveBy
+                FACING_LEFT => x - Constants.movePlayerBy
+              | FACING_RIGHT => x + Constants.movePlayerBy
 
             val newTile = {x = x, y = y, facing = facing}
             val acc = newTile :: acc
@@ -821,12 +810,12 @@ struct
   fun getDrawVec (player: player, width, height) =
     let
       val {x, y, attacked, mainAttack, ...} = player
-      val wratio = width / 1920.0
-      val hratio = height / 1080.0
+      val wratio = width / Constants.worldWidthReal
+      val hratio = height / Constants.worldHeightReal
     in
       if wratio < hratio then
         let
-          val scale = 1080.0 * wratio
+          val scale = Constants.worldHeightReal * wratio
           val yOffset =
             if height > scale then (height - scale) / 2.0
             else if height < scale then (scale - height) / 2.0
@@ -835,13 +824,13 @@ struct
           val x = Real32.fromInt x * wratio
           val y = Real32.fromInt y * wratio + yOffset
 
-          val realSize = realSize * wratio
+          val realSize = Constants.playerSizeReal * wratio
         in
           helpGetDrawVec (x, y, realSize, width, height, attacked, mainAttack)
         end
       else
         let
-          val scale = 1920.0 * hratio
+          val scale = Constants.worldWidthReal * hratio
           val xOffset =
             if width > scale then (width - scale) / 2.0
             else if width < scale then (scale - width) / 2.0
@@ -850,7 +839,7 @@ struct
           val x = Real32.fromInt x * hratio + xOffset
           val y = Real32.fromInt y * hratio
 
-          val realSize = realSize * hratio
+          val realSize = Constants.playerSizeReal * hratio
         in
           helpGetDrawVec (x, y, realSize, width, height, attacked, mainAttack)
         end
@@ -863,21 +852,23 @@ struct
     | _ =>
         let
           val {x, y, ...} = player
-          val wratio = width / 1920.0
-          val hratio = height / 1080.0
+          val wratio = width / Constants.worldWidthReal
+          val hratio = height / Constants.worldHeightReal
         in
           if wratio < hratio then
             let
-              val scale = 1080.0 * wratio
+              val scale = Constants.worldHeightReal * wratio
               val yOffset =
                 if height > scale then (height - scale) / 2.0
                 else if height < scale then (scale - height) / 2.0
                 else 0.0
 
-              val x = (Real32.fromInt x - halfRealSize) * wratio
-              val y = (Real32.fromInt y - halfRealSize) * wratio + yOffset
+              val x = (Real32.fromInt x - Constants.halfPlayerSizeReal) * wratio
+              val y =
+                (Real32.fromInt y - Constants.halfPlayerSizeReal) * wratio
+                + yOffset
 
-              val realSize = (realSize * 2.0) * wratio
+              val realSize = (Constants.playerSizeReal * 2.0) * wratio
 
               val {charge, ...} = player
               val alpha = Real32.fromInt charge / 60.0
@@ -887,16 +878,18 @@ struct
             end
           else
             let
-              val scale = 1920.0 * hratio
+              val scale = Constants.worldWidthReal * hratio
               val xOffset =
                 if width > scale then (width - scale) / 2.0
                 else if width < scale then (scale - width) / 2.0
                 else 0.0
 
-              val x = (Real32.fromInt x - halfRealSize) * hratio + xOffset
-              val y = (Real32.fromInt y - halfRealSize) * hratio
+              val x =
+                (Real32.fromInt x - Constants.halfPlayerSizeReal) * hratio
+                + xOffset
+              val y = (Real32.fromInt y - Constants.halfPlayerSizeReal) * hratio
 
-              val realSize = (realSize * 2.0) * hratio
+              val realSize = (Constants.playerSizeReal * 2.0) * hratio
 
               val {charge, ...} = player
               val alpha = Real32.fromInt charge / 60.0
@@ -973,16 +966,17 @@ struct
         val {x, y, enemies, ...} = player
 
         (* get centre (x, y) coordinates of player *)
-        val diff = halfRealSize - (Constants.projectileSize / 2.0)
+        val diff =
+          Constants.halfPlayerSizeReal - (Constants.projectileSize / 2.0)
         val x = Real32.fromInt x + diff
         val y = Real32.fromInt y + diff
 
-        val wratio = width / 1920.0
-        val hratio = height / 1080.0
+        val wratio = width / Constants.worldWidthReal
+        val hratio = height / Constants.worldHeightReal
       in
         if wratio < hratio then
           let
-            val scale = 1080.0 * wratio
+            val scale = Constants.worldHeightReal * wratio
             val yOffset =
               if height > scale then (height - scale) / 2.0
               else if height < scale then (scale - height) / 2.0
@@ -993,7 +987,7 @@ struct
           end
         else
           let
-            val scale = 1920.0 * hratio
+            val scale = Constants.worldWidthReal * hratio
             val xOffset =
               if width > scale then (width - scale) / 2.0
               else if width < scale then (scale - width) / 2.0

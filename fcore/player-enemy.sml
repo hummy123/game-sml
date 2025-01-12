@@ -29,8 +29,8 @@ struct
              * and then chose appropriate direction to recoil in *)
             let
               val {x, ...} = player
-              val pFinishX = x + Player.size
-              val pHalfW = Player.size div 2
+              val pFinishX = x + Constants.playerSize
+              val pHalfW = Constants.playerSize div 2
               val pCentreX = x + pHalfW
 
               val {x = ex, y = ey, ...} = Enemy.find (id, enemies)
@@ -89,15 +89,15 @@ struct
   fun checkCollisions (player, enemies, enemyTree, projectiles) =
     let
       val {x, y, mainAttack, attacked, ...} = player
-      val size = Player.size
+      val size = Constants.playerSize
       val projectileTree = Projectile.generateTree projectiles
     in
       case mainAttack of
         MAIN_ATTACKING =>
           let
             (* when attacking, player collision should be larger than player themselves *)
-            val x = x - Player.halfSize
-            val y = y - Player.halfSize
+            val x = x - Constants.halfPlayerSize
+            val y = y - Constants.halfPlayerSize
             val size = size * 2
 
             (* get list of enemies player has collided with *)
@@ -142,7 +142,7 @@ struct
                  (player, enemies, enemyTree)
                end
            | ATTACKED amt =>
-               if amt = Player.attackedLimit then
+               if amt = Constants.attackedLimit then
                  (* if reached limit, detect enemies again *)
                  let
                    val enemyCollisions = QuadTree.getCollisions

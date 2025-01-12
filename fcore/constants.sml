@@ -2,12 +2,14 @@ structure Constants =
 struct
   val worldWidth = 1920
   val worldHeight = 1080
+  val worldWidthReal: Real32.real = 1920.0
+  val worldHeightReal: Real32.real = 1080.0
 
   (* constants for player *)
   val playerSize = 35
-  val playerSizeReal = 35.0
+  val playerSizeReal: Real32.real = 35.0
   val halfPlayerSize = 35 div 2
-  val halfPlayerSizeReal = 35.0 / 2.0
+  val halfPlayerSizeReal: Real32.real = 35.0 / 2.0
   val movePlayerBy = 5
 
   (* player timing values *)
