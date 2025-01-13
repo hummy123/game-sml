@@ -12,6 +12,24 @@ struct
 
   fun exists (id, collisions) = helpExists (0, id, collisions)
 
+  fun canWalkAhead (x, y, wallTree, platformTree) =
+    let
+      val ww = Constants.worldWidth
+      val wh = Constants.worldHeight
+
+      val searchWidth = Constants.enemySize
+
+      val y = y + Constants.enemySize - 5
+      val searchHeight = 10
+    in
+      QuadTree.hasCollisionAt
+        (x, y, searchWidth, searchHeight, 0, 0, ww, wh, ~1, wallTree)
+      orelse
+      QuadTree.hasCollisionAt
+        (x, y, searchWidth, searchHeight, 0, 0, ww, wh, ~1, platformTree)
+    end
+
+
   fun getPatrollPatches (enemy: enemy, wallTree, platformTree, acc) =
     let
       (* This function is meant to check 
@@ -58,12 +76,14 @@ struct
               , wallTree
               )
           in
-            if hasWallAhead then
-              EnemyPatch.W_X_AXIS MOVE_RIGHT :: acc
-            else
-              (* todo: invert direction if moving further left 
-               * will result in falling down  *)
-              acc
+            if
+              hasWallAhead
+            then EnemyPatch.W_X_AXIS MOVE_RIGHT :: acc
+            else (* invert direction if moving further left 
+                  * will result in falling down  *) if
+              canWalkAhead (searchStartX, y, wallTree, platformTree)
+            then acc
+            else EnemyPatch.W_X_AXIS MOVE_RIGHT :: acc
           end
       | MOVE_RIGHT =>
           let
@@ -90,12 +110,14 @@ struct
               , wallTree
               )
           in
-            if hasWallAhead then
-              EnemyPatch.W_X_AXIS MOVE_LEFT :: acc
-            else
-              (* todo: invert direction if moving further left 
-               * will result in falling down  *)
-              acc
+            if
+              hasWallAhead
+            then EnemyPatch.W_X_AXIS MOVE_LEFT :: acc
+            else (* invert direction if moving further right
+                  * will result in falling down  *) if
+              canWalkAhead (searchStartX, y, wallTree, platformTree)
+            then acc
+            else EnemyPatch.W_X_AXIS MOVE_LEFT :: acc
           end
       | STAY_STILL => acc
     end
