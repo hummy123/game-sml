@@ -49,92 +49,6 @@ struct
         if jumpPressed then (* apply gravity *) FALLING else JUMPING 0
     | _ => prevAxis
 
-  fun checkWalls (player, walls, lst, acc) =
-    let
-      open QuadTree
-    in
-      case lst of
-        (QUERY_ON_LEFT_SIDE, wallID) :: tl =>
-          let
-            val {x = wallX, width = wallWidth, ...} =
-              Vector.sub (walls, wallID - 1)
-
-            val newX = wallX + wallWidth
-            val acc = W_X newX :: acc
-          in
-            checkWalls (player, walls, tl, acc)
-          end
-      | (QUERY_ON_RIGHT_SIDE, wallID) :: tl =>
-          let
-            val {x = wallX, width = wallWidth, ...} =
-              Vector.sub (walls, wallID - 1)
-
-            val newX = wallX - Constants.playerSize
-            val acc = W_X newX :: acc
-          in
-            checkWalls (player, walls, tl, acc)
-          end
-      | (QUERY_ON_BOTTOM_SIDE, wallID) :: tl =>
-          let
-            val {y = wallY, ...} = Vector.sub (walls, wallID - 1)
-
-            val newY = wallY - Constants.playerSize
-            val acc = W_Y_AXIS ON_GROUND :: W_Y newY :: acc
-          in
-            checkWalls (player, walls, tl, acc)
-          end
-      | (QUERY_ON_TOP_SIDE, wallID) :: tl => checkWalls (player, walls, tl, acc)
-      | [] => acc
-    end
-
-  fun checkPlatforms (player, platforms, lst, acc) =
-    let
-      open QuadTree
-    in
-      case lst of
-        platID :: tl =>
-          (case #yAxis player of
-             DROP_BELOW_PLATFORM =>
-               (* pass through, allowing player to drop below the platform *)
-               checkPlatforms (player, platforms, tl, acc)
-           | JUMPING _ =>
-               (* pass through, allowing player to jump above the platform *)
-               checkPlatforms (player, platforms, tl, acc)
-           | _ =>
-               let
-                 (* default case: 
-                  * player will land on platform and stay on the ground there. *)
-                 val {y = platY, ...} = Vector.sub (platforms, platID - 1)
-
-                 val newY = platY - Constants.playerSize
-                 val acc = W_Y_AXIS ON_GROUND :: W_Y newY :: acc
-               in
-                 checkPlatforms (player, platforms, tl, acc)
-               end)
-      | [] => acc
-    end
-
-  (* only checks for collisions with environment (walls and platforms) *)
-  fun getEnvironmentPatches (player, game) =
-    let
-      val {walls, wallTree, platformTree, platforms, ...} = game
-
-      val {x, y, ...} = player
-
-      val size = Constants.playerSize
-      val ww = Constants.worldWidth
-      val wh = Constants.worldHeight
-
-      val platCollisions = QuadTree.getCollisionsBelow
-        (x, y, size, size, 0, 0, ww, wh, 0, platformTree)
-      val acc = checkPlatforms (player, platforms, platCollisions, [])
-
-      val wallCollisions = QuadTree.getCollisionSides
-        (x, y, size, size, 0, 0, ww, wh, 0, wallTree)
-    in
-      checkWalls (player, walls, wallCollisions, acc)
-    end
-
   fun getJumpPatches (player, upHeld, downHeld, acc) =
     let
       val {yAxis, jumpPressed, ...} = player
@@ -432,10 +346,12 @@ struct
           PlayerPatch.withPatches (player, patches)
         end
 
-      val patches = PlayerPhysics.getPatches player
+      val patches = PlayerPhysics.getPhysicsPatches player
       val player = PlayerPatch.withPatches (player, patches)
 
-      val patches = getEnvironmentPatches (player, game)
+      val {walls, wallTree, platforms, platformTree, ...} = game
+      val patches = PlayerPhysics.getEnvironmentPatches
+        (player, walls, wallTree, platforms, platformTree)
     in
       PlayerPatch.withPatches (player, patches)
     end

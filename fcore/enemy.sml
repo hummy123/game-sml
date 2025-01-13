@@ -29,7 +29,7 @@ struct
           acc
         else
           let
-            val patches = EnemyPhysics.getPatches enemy
+            val patches = EnemyPhysics.getPhysicsPatches enemy
             val patches = EnemyPatch.W_HEALTH (health - 1) :: patches
             val enemy = EnemyPatch.withPatches (enemy, patches)
           in
@@ -37,7 +37,7 @@ struct
           end
       else
         let
-          val patches = EnemyPhysics.getPatches enemy
+          val patches = EnemyPhysics.getPhysicsPatches enemy
           val enemy = EnemyPatch.withPatches (enemy, patches)
         in
           enemy :: acc

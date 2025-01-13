@@ -3,6 +3,8 @@ sig
   type t
   type patch
 
+  val entitySize: int
+
   (* constants for physics *)
   val moveBy: int
   val floatLimit: int
@@ -23,7 +25,7 @@ functor MakePhysics(Fn: PHYSICS_INPUT) =
 struct
   open GameType
 
-  fun getPatches input =
+  fun getPhysicsPatches input =
     let
       val x = Fn.getX input
       val y = Fn.getY input
@@ -70,6 +72,94 @@ struct
               [Fn.W_X desiredX, Fn.W_Y desiredY, Fn.W_Y_AXIS newYAxis]
             end
     end
+
+  fun getPlatformPatches (yAxis, platforms: platform vector, lst, acc) =
+    let
+      open QuadTree
+    in
+      case lst of
+        platID :: tl =>
+          (case yAxis of
+             DROP_BELOW_PLATFORM =>
+               (* pass through, allowing player to drop below the platform *)
+               getPlatformPatches (yAxis, platforms, tl, acc)
+           | JUMPING _ =>
+               (* pass through, allowing player to jump above the platform *)
+               getPlatformPatches (yAxis, platforms, tl, acc)
+           | _ =>
+               let
+                 (* default case: 
+                  * player will land on platform and stay on the ground there. *)
+                 val {y = platY, ...} = Vector.sub (platforms, platID - 1)
+
+                 val newY = platY - Fn.entitySize
+                 val acc = Fn.W_Y_AXIS ON_GROUND :: Fn.W_Y newY :: acc
+               in
+                 getPlatformPatches (yAxis, platforms, tl, acc)
+               end)
+      | [] => acc
+    end
+
+  fun getWallPatches (walls: wall vector, lst, acc) =
+    let
+      open QuadTree
+    in
+      case lst of
+        (QUERY_ON_LEFT_SIDE, wallID) :: tl =>
+          let
+            val {x = wallX, width = wallWidth, ...} =
+              Vector.sub (walls, wallID - 1)
+
+            val newX = wallX + wallWidth
+            val acc = Fn.W_X newX :: acc
+          in
+            getWallPatches (walls, tl, acc)
+          end
+      | (QUERY_ON_RIGHT_SIDE, wallID) :: tl =>
+          let
+            val {x = wallX, width = wallWidth, ...} =
+              Vector.sub (walls, wallID - 1)
+
+            val newX = wallX - Fn.entitySize
+            val acc = Fn.W_X newX :: acc
+          in
+            getWallPatches (walls, tl, acc)
+          end
+      | (QUERY_ON_BOTTOM_SIDE, wallID) :: tl =>
+          let
+            val {y = wallY, ...} = Vector.sub (walls, wallID - 1)
+
+            val newY = wallY - Fn.entitySize
+            val acc = Fn.W_Y_AXIS ON_GROUND :: Fn.W_Y newY :: acc
+          in
+            getWallPatches (walls, tl, acc)
+          end
+      | (QUERY_ON_TOP_SIDE, wallID) :: tl => getWallPatches (walls, tl, acc)
+      | [] => acc
+    end
+
+  fun getEnvironmentPatches (input, walls, wallTree, platforms, platformTree) =
+    let
+      (* first apply physics *)
+
+      (* then react to platform and environment collisions  *)
+      val x = Fn.getX input
+      val y = Fn.getY input
+      val yAxis = Fn.getYAxis input
+
+      val size = Fn.entitySize
+      val ww = Constants.worldWidth
+      val wh = Constants.worldHeight
+
+      val platCollisions = QuadTree.getCollisionsBelow
+        (x, y, size, size, 0, 0, ww, wh, 0, platformTree)
+      val acc = getPlatformPatches (yAxis, platforms, platCollisions, [])
+
+      val wallCollisions = QuadTree.getCollisionSides
+        (x, y, size, size, 0, 0, ww, wh, 0, wallTree)
+    in
+      getWallPatches (walls, wallCollisions, acc)
+    end
 end
 
 structure PlayerPhysics =
@@ -77,6 +167,8 @@ structure PlayerPhysics =
     (struct
        type t = GameType.player
        type patch = PlayerPatch.player_patch
+
+       val entitySize = Constants.playerSize
 
        (* constants for physics *)
        val moveBy = Constants.movePlayerBy
@@ -100,6 +192,8 @@ structure EnemyPhysics =
     (struct
        type t = GameType.enemy
        type patch = EnemyPatch.enemy_patch
+
+       val entitySize = Constants.enemySize
 
        (* constants for physics *)
        val moveBy = Constants.moveEnemyBy
