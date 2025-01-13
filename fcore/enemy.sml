@@ -10,6 +10,29 @@ struct
 
   fun exists (id, collisions) = helpExists (0, id, collisions)
 
+  fun getPatrollPatches (enemy, wallTree, platformTree, acc) =
+    let
+      (* This function is meant to check 
+       * if enemy should switch the horizontal direction 
+       * if the enemy is patrolling.
+       *
+       * Algorithm:
+       * 1. Check if enemy there is a wall ahead of the enemy
+       *    in the direction the enemy is walking.
+       * 1.1. If there is a wall, then invert the direction.
+       *
+       * 2. If there is no wall, check if there is space to 
+       *    walk ahead on, such that enemy will not fall
+       *    if enemy continues to walk.
+       * 2.1. If continuing to walk will cause the enemy to fall,
+       *      then invert the direction.
+       *
+       * 3. Else, do not invert direction and simply return given list.
+       * *)
+    in
+
+    end
+
   (* called when filtering enemies,
    * to adjust enemy data on collision with projectile *)
   fun onCollisionWithProjectile

@@ -140,9 +140,7 @@ struct
 
   fun getEnvironmentPatches (input, walls, wallTree, platforms, platformTree) =
     let
-      (* first apply physics *)
-
-      (* then react to platform and environment collisions  *)
+      (* react to platform and wall collisions  *)
       val x = Fn.getX input
       val y = Fn.getY input
       val yAxis = Fn.getYAxis input
