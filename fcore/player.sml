@@ -298,8 +298,8 @@ struct
           let
             val x =
               case facing of
-                FACING_LEFT => x - Constants.movePlayerBy
-              | FACING_RIGHT => x + Constants.movePlayerBy
+                FACING_LEFT => x - Constants.moveProjectileBy
+              | FACING_RIGHT => x + Constants.moveProjectileBy
 
             val newTile = {x = x, y = y, facing = facing}
             val acc = newTile :: acc
