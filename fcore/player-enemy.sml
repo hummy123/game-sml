@@ -3,7 +3,8 @@ struct
   open GameType
   open PlayerPatch
 
-  fun checkCollisions (player, enemies, enemyTree, projectiles) =
+  fun checkCollisions (player, enemies, enemyTree, projectiles, walls, wallTree,
+    platforms, platformTree) =
     let
       val {x, y, mainAttack, attacked, ...} = player
       val size = Constants.playerSize
@@ -21,6 +22,10 @@ struct
               , enemies
               , projectileTree
               , []
+              , walls
+              , wallTree
+              , platforms
+              , platformTree
               )
 
             (* add collided enemies to player record, 
@@ -41,7 +46,8 @@ struct
                      (player, enemies, enemyCollisions, [])
 
                  val enemies = Enemy.filterProjectileCollisions
-                   (Vector.length enemies - 1, enemies, projectileTree, [])
+                   (Vector.length enemies - 1, enemies, projectileTree, [],
+                   walls, wallTree, platforms, platformTree)
                in
                  (player, enemies)
                end
@@ -57,7 +63,8 @@ struct
                        (player, enemies, enemyCollisions)
 
                    val enemies = Enemy.filterProjectileCollisions
-                     (Vector.length enemies - 1, enemies, projectileTree, [])
+                     (Vector.length enemies - 1, enemies, projectileTree, [],
+                     walls, wallTree, platforms, platformTree)
                  in
                    (player, enemies)
                  end
@@ -68,7 +75,8 @@ struct
                  let
                    val player = Player.incrementAttacked (player, amt)
                    val enemies = Enemy.filterProjectileCollisions
-                     (Vector.length enemies - 1, enemies, projectileTree, [])
+                     (Vector.length enemies - 1, enemies, projectileTree, [],
+                     walls, wallTree, platforms, platformTree)
                  in
                    (player, enemies)
                  end)

@@ -12,7 +12,8 @@ struct
 
   (* called when filtering enemies,
    * to adjust enemy data on collision with projectile *)
-  fun onCollisionWithProjectile (enemy, projectileTree, acc) =
+  fun onCollisionWithProjectile
+    (enemy, projectileTree, acc, walls, wallTree, platforms, platformTree) =
     let
       val {x, y, health, id, xAxis, yAxis} = enemy
 
@@ -32,6 +33,10 @@ struct
             val patches = EnemyPhysics.getPhysicsPatches enemy
             val patches = EnemyPatch.W_HEALTH (health - 1) :: patches
             val enemy = EnemyPatch.withPatches (enemy, patches)
+
+            val patches = EnemyPhysics.getEnvironmentPatches
+              (enemy, walls, wallTree, platforms, platformTree)
+            val enemy = EnemyPatch.withPatches (enemy, patches)
           in
             enemy :: acc
           end
@@ -39,37 +44,90 @@ struct
         let
           val patches = EnemyPhysics.getPhysicsPatches enemy
           val enemy = EnemyPatch.withPatches (enemy, patches)
+
+          val patches = EnemyPhysics.getEnvironmentPatches
+            (enemy, walls, wallTree, platforms, platformTree)
+          val enemy = EnemyPatch.withPatches (enemy, patches)
         in
           enemy :: acc
         end
     end
 
   (* filter enemy projectiles when player is not attacking *)
-  fun filterProjectileCollisions (pos, enemies, projectileTree, acc) =
+  fun filterProjectileCollisions
+    ( pos
+    , enemies
+    , projectileTree
+    , acc
+    , walls
+    , wallTree
+    , platforms
+    , platformTree
+    ) =
     if pos < 0 then
       Vector.fromList acc
     else
       let
         val enemy = Vector.sub (enemies, pos)
-        val acc = onCollisionWithProjectile (enemy, projectileTree, acc)
+        val acc = onCollisionWithProjectile
+          (enemy, projectileTree, acc, walls, wallTree, platforms, platformTree)
       in
-        filterProjectileCollisions (pos - 1, enemies, projectileTree, acc)
+        filterProjectileCollisions
+          ( pos - 1
+          , enemies
+          , projectileTree
+          , acc
+          , walls
+          , wallTree
+          , platforms
+          , platformTree
+          )
       end
 
   (* removes enemies from `enemies` vector when player is attacking that enemy
    * and also filter enemy (or change enemyh health)
    * if enemy has collided with projectile *)
-  fun filterWhenAttacked (pos, collisions, enemies, projectileTree, acc) =
+  fun filterWhenAttacked
+    ( pos
+    , collisions
+    , enemies
+    , projectileTree
+    , acc
+    , walls
+    , wallTree
+    , platforms
+    , platformTree
+    ) =
     if pos < 0 then
       Vector.fromList acc
     else
       let
         val enemy = Vector.sub (enemies, pos)
         val acc =
-          if exists (#id enemy, collisions) then (* filter out *) acc
-          else onCollisionWithProjectile (enemy, projectileTree, acc)
+          if exists (#id enemy, collisions) then (* filter out *)
+            acc
+          else
+            onCollisionWithProjectile
+              ( enemy
+              , projectileTree
+              , acc
+              , walls
+              , wallTree
+              , platforms
+              , platformTree
+              )
       in
-        filterWhenAttacked (pos - 1, collisions, enemies, projectileTree, acc)
+        filterWhenAttacked
+          ( pos - 1
+          , collisions
+          , enemies
+          , projectileTree
+          , acc
+          , walls
+          , wallTree
+          , platforms
+          , platformTree
+          )
       end
 
   fun helpGenerateTree (pos, enemyVec, acc) =
