@@ -28,7 +28,7 @@ struct
   (* constants for enemy *)
   val enemySize = 35
   val enemySizeReal: Real32.real = 35.0
-  val moveEnemyBy = 5
+  val moveEnemyBy = 3
 
-  val moveProjectileBy = 15
+  val moveProjectileBy = 11
 end
