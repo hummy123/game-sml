@@ -1,5 +1,7 @@
 structure Enemy =
 struct
+  open GameType
+
   fun helpExists (pos, id, collisions) =
     if pos = Vector.length collisions then
       false
@@ -10,7 +12,7 @@ struct
 
   fun exists (id, collisions) = helpExists (0, id, collisions)
 
-  fun getPatrollPatches (enemy, wallTree, platformTree, acc) =
+  fun getPatrollPatches (enemy: enemy, wallTree, platformTree, acc) =
     let
       (* This function is meant to check 
        * if enemy should switch the horizontal direction 
@@ -29,8 +31,73 @@ struct
        *
        * 3. Else, do not invert direction and simply return given list.
        * *)
-    in
 
+      val {x, y, xAxis, ...} = enemy
+    in
+      case xAxis of
+        MOVE_LEFT =>
+          let
+            (* search to see if there is wall on left side *)
+            val searchStartX = x - Constants.moveEnemyBy
+            val searchWidth = Constants.enemySize
+            val searchHeight = Constants.enemySize - 5
+
+            val ww = Constants.worldWidth
+            val wh = Constants.worldHeight
+
+            val hasWallAhead = QuadTree.hasCollisionAt
+              ( searchStartX
+              , y
+              , searchWidth
+              , searchHeight
+              , 0
+              , 0
+              , ww
+              , wh
+              , ~1
+              , wallTree
+              )
+          in
+            if hasWallAhead then
+              EnemyPatch.W_X_AXIS MOVE_RIGHT :: acc
+            else
+              (* todo: invert direction if moving further left 
+               * will result in falling down  *)
+              acc
+          end
+      | MOVE_RIGHT =>
+          let
+            (* enemy's x field is top left coordinate 
+             * but we want to check top * right coordinate, 
+             * so add enemySize *)
+            val searchStartX = x + Constants.enemySize + Constants.moveEnemyBy
+            val searchWidth = Constants.enemySize
+            val searchHeight = Constants.enemySize - 5
+
+            val ww = Constants.worldWidth
+            val wh = Constants.worldHeight
+
+            val hasWallAhead = QuadTree.hasCollisionAt
+              ( searchStartX
+              , y
+              , searchWidth
+              , searchHeight
+              , 0
+              , 0
+              , ww
+              , wh
+              , ~1
+              , wallTree
+              )
+          in
+            if hasWallAhead then
+              EnemyPatch.W_X_AXIS MOVE_LEFT :: acc
+            else
+              (* todo: invert direction if moving further left 
+               * will result in falling down  *)
+              acc
+          end
+      | STAY_STILL => acc
     end
 
   (* called when filtering enemies,
@@ -53,23 +120,34 @@ struct
           acc
         else
           let
+            val enemy =
+              EnemyPatch.withPatch (enemy, EnemyPatch.W_Y_AXIS FALLING)
+
             val patches = EnemyPhysics.getPhysicsPatches enemy
             val patches = EnemyPatch.W_HEALTH (health - 1) :: patches
             val enemy = EnemyPatch.withPatches (enemy, patches)
 
             val patches = EnemyPhysics.getEnvironmentPatches
               (enemy, walls, wallTree, platforms, platformTree)
+            val patches =
+              getPatrollPatches (enemy, wallTree, platformTree, patches)
+
             val enemy = EnemyPatch.withPatches (enemy, patches)
           in
             enemy :: acc
           end
       else
         let
+          val enemy = EnemyPatch.withPatch (enemy, EnemyPatch.W_Y_AXIS FALLING)
+
           val patches = EnemyPhysics.getPhysicsPatches enemy
           val enemy = EnemyPatch.withPatches (enemy, patches)
 
           val patches = EnemyPhysics.getEnvironmentPatches
             (enemy, walls, wallTree, platforms, platformTree)
+          val patches =
+            getPatrollPatches (enemy, wallTree, platformTree, patches)
+
           val enemy = EnemyPatch.withPatches (enemy, patches)
         in
           enemy :: acc

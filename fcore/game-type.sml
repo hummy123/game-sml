@@ -154,9 +154,9 @@ struct
       val enemy1 =
         { id = 1
         , x = 300
-        , y = 945
+        , y = 745
         , health = 5
-        , xAxis = STAY_STILL
+        , xAxis = MOVE_LEFT
         , yAxis = FALLING
         }
       val enemy2 =
@@ -164,7 +164,7 @@ struct
         , x = 555
         , y = 945
         , health = 5
-        , xAxis = STAY_STILL
+        , xAxis = MOVE_LEFT
         , yAxis = FALLING
         }
       val enemy3 =
@@ -172,7 +172,7 @@ struct
         , x = 979
         , y = 945
         , health = 5
-        , xAxis = STAY_STILL
+        , xAxis = MOVE_RIGHT
         , yAxis = FALLING
         }
       val enemies = Vector.fromList [enemy1, enemy2, enemy3]
