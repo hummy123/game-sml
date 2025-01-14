@@ -47,7 +47,14 @@ sig
     }
 
   type enemy =
-    {id: int, health: int, x: int, y: int, xAxis: x_axis, yAxis: y_axis}
+    { id: int
+    , health: int
+    , x: int
+    , y: int
+    , xAxis: x_axis
+    , yAxis: y_axis
+    , variant: EnemyVariants.t
+    }
 
   type game_type =
     { player: player
@@ -111,7 +118,14 @@ struct
     }
 
   type enemy =
-    {id: int, health: int, x: int, y: int, xAxis: x_axis, yAxis: y_axis}
+    { id: int
+    , health: int
+    , x: int
+    , y: int
+    , xAxis: x_axis
+    , yAxis: y_axis
+    , variant: EnemyVariants.t
+    }
 
   type game_type =
     { player: player
@@ -158,6 +172,7 @@ struct
         , health = 1
         , xAxis = MOVE_LEFT
         , yAxis = FALLING
+        , variant = EnemyVariants.PATROL_SLIME
         }
       val enemy2 =
         { id = 2
@@ -166,6 +181,7 @@ struct
         , health = 1
         , xAxis = MOVE_LEFT
         , yAxis = FALLING
+        , variant = EnemyVariants.PATROL_SLIME
         }
       val enemy3 =
         { id = 3
@@ -174,6 +190,7 @@ struct
         , health = 1
         , xAxis = MOVE_RIGHT
         , yAxis = FALLING
+        , variant = EnemyVariants.PATROL_SLIME
         }
       val enemies = Vector.fromList [enemy1, enemy2, enemy3]
     in

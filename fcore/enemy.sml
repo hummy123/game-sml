@@ -12,122 +12,19 @@ struct
 
   fun exists (id, collisions) = helpExists (0, id, collisions)
 
-  fun canWalkAhead (x, y, wallTree, platformTree) =
-    let
-      val ww = Constants.worldWidth
-      val wh = Constants.worldHeight
-
-      val searchWidth = Constants.enemySize
-
-      val y = y + Constants.enemySize - 5
-      val searchHeight = 10
-    in
-      QuadTree.hasCollisionAt
-        (x, y, searchWidth, searchHeight, 0, 0, ww, wh, ~1, wallTree)
-      orelse
-      QuadTree.hasCollisionAt
-        (x, y, searchWidth, searchHeight, 0, 0, ww, wh, ~1, platformTree)
-    end
-
-
-  fun getPatrollPatches (enemy: enemy, wallTree, platformTree, acc) =
-    let
-      (* This function is meant to check 
-       * if enemy should switch the horizontal direction 
-       * if the enemy is patrolling.
-       *
-       * Algorithm:
-       * 1. Check if enemy there is a wall ahead of the enemy
-       *    in the direction the enemy is walking.
-       * 1.1. If there is a wall, then invert the direction.
-       *
-       * 2. If there is no wall, check if there is space to 
-       *    walk ahead on, such that enemy will not fall
-       *    if enemy continues to walk.
-       * 2.1. If continuing to walk will cause the enemy to fall,
-       *      then invert the direction.
-       *
-       * 3. Else, do not invert direction and simply return given list.
-       * *)
-
-      val {x, y, xAxis, ...} = enemy
-    in
-      case xAxis of
-        MOVE_LEFT =>
-          let
-            (* search to see if there is wall on left side *)
-            val searchStartX = x - Constants.moveEnemyBy
-            val searchWidth = Constants.enemySize
-            val searchHeight = Constants.enemySize - 5
-
-            val ww = Constants.worldWidth
-            val wh = Constants.worldHeight
-
-            val hasWallAhead = QuadTree.hasCollisionAt
-              ( searchStartX
-              , y
-              , searchWidth
-              , searchHeight
-              , 0
-              , 0
-              , ww
-              , wh
-              , ~1
-              , wallTree
-              )
-          in
-            if
-              hasWallAhead
-            then EnemyPatch.W_X_AXIS MOVE_RIGHT :: acc
-            else (* invert direction if moving further left 
-                  * will result in falling down  *) if
-              canWalkAhead (searchStartX, y, wallTree, platformTree)
-            then acc
-            else EnemyPatch.W_X_AXIS MOVE_RIGHT :: acc
-          end
-      | MOVE_RIGHT =>
-          let
-            (* enemy's x field is top left coordinate 
-             * but we want to check top * right coordinate, 
-             * so add enemySize *)
-            val searchStartX = x + Constants.enemySize + Constants.moveEnemyBy
-            val searchWidth = Constants.enemySize
-            val searchHeight = Constants.enemySize - 5
-
-            val ww = Constants.worldWidth
-            val wh = Constants.worldHeight
-
-            val hasWallAhead = QuadTree.hasCollisionAt
-              ( searchStartX
-              , y
-              , searchWidth
-              , searchHeight
-              , 0
-              , 0
-              , ww
-              , wh
-              , ~1
-              , wallTree
-              )
-          in
-            if
-              hasWallAhead
-            then EnemyPatch.W_X_AXIS MOVE_LEFT :: acc
-            else (* invert direction if moving further right
-                  * will result in falling down  *) if
-              canWalkAhead (searchStartX, y, wallTree, platformTree)
-            then acc
-            else EnemyPatch.W_X_AXIS MOVE_LEFT :: acc
-          end
-      | STAY_STILL => acc
-    end
-
   (* called when filtering enemies,
    * to adjust enemy data on collision with projectile *)
   fun onCollisionWithProjectile
-    (enemy, projectileTree, acc, walls, wallTree, platforms, platformTree) =
+    ( enemy: enemy
+    , projectileTree
+    , acc
+    , walls
+    , wallTree
+    , platforms
+    , platformTree
+    ) =
     let
-      val {x, y, health, id, xAxis, yAxis} = enemy
+      val {x, y, health, ...} = enemy
 
       val size = Constants.enemySize
       val ww = Constants.worldWidth
@@ -151,8 +48,10 @@ struct
 
             val patches = EnemyPhysics.getEnvironmentPatches
               (enemy, walls, wallTree, platforms, platformTree)
-            val patches =
-              getPatrollPatches (enemy, wallTree, platformTree, patches)
+
+            (* get patches specific to this type of enemy *)
+            val patches = EnemyBehaviour.getVariantPatches
+              (enemy, walls, wallTree, platforms, platformTree, patches)
 
             val enemy = EnemyPatch.withPatches (enemy, patches)
           in
@@ -167,8 +66,10 @@ struct
 
           val patches = EnemyPhysics.getEnvironmentPatches
             (enemy, walls, wallTree, platforms, platformTree)
-          val patches =
-            getPatrollPatches (enemy, wallTree, platformTree, patches)
+
+          (* get patches specific to this type of enemy *)
+          val patches = EnemyBehaviour.getVariantPatches
+            (enemy, walls, wallTree, platforms, platformTree, patches)
 
           val enemy = EnemyPatch.withPatches (enemy, patches)
         in
@@ -253,13 +154,12 @@ struct
           )
       end
 
-  fun helpGenerateTree (pos, enemyVec, acc) =
+  fun helpGenerateTree (pos, enemyVec: enemy vector, acc) =
     if pos = Vector.length enemyVec then
       acc
     else
       let
-        val {id, x, y, health = _, xAxis = _, yAxis = _} =
-          Vector.sub (enemyVec, pos)
+        val {id, x, y, ...} = Vector.sub (enemyVec, pos)
 
         val size = Constants.enemySize
         val ww = Constants.worldWidth
@@ -272,12 +172,12 @@ struct
 
   fun generateTree enemyVec = helpGenerateTree (0, enemyVec, QuadTree.empty)
 
-  fun helpFind (findNum, vec, low, high) =
+  fun helpFind (findNum, vec: enemy vector, low, high) =
     (* should only be called when we know enemy already exists in vec *)
     let
       val mid = low + ((high - low) div 2)
       val enemy = Vector.sub (vec, mid)
-      val {id = curNum, x = _, y = _, health = _, xAxis = _, yAxis = _} = enemy
+      val {id = curNum, ...} = enemy
     in
       if curNum = findNum then enemy
       else if curNum < findNum then helpFind (findNum, vec, mid + 1, high)
@@ -287,9 +187,9 @@ struct
   fun find (findNum, vec) =
     helpFind (findNum, vec, 0, Vector.length vec - 1)
 
-  fun helpGetDrawVec (enemy, width, height) =
+  fun helpGetDrawVec (enemy: enemy, width, height) =
     let
-      val {x, y, id = _, health = _, xAxis = _, yAxis = _} = enemy
+      val {x, y, ...} = enemy
       val wratio = width / Constants.worldWidthReal
       val hratio = height / Constants.worldHeightReal
     in

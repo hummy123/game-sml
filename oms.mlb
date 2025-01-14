@@ -14,12 +14,14 @@ end
 
 fcore/wall.sml
 fcore/platform.sml
+fcore/enemy-variants.sml
 fcore/game-type.sml
 
 fcore/player-patch.sml
 fcore/enemy-patch.sml
 fcore/physics.sml
 
+fcore/enemy-behaviour.sml
 fcore/enemy.sml
 fcore/player.sml
 fcore/projectile.sml
