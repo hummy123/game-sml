@@ -112,7 +112,8 @@ struct
     end
 
 
-  fun getVariantPatches (enemy, walls, wallTree, platforms, platformTree, acc) =
+  fun getVariantPatches
+    (enemy, walls, wallTree, platforms, platformTree, player, acc) =
     let
       open EnemyVariants
     in

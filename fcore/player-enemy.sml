@@ -3,8 +3,16 @@ struct
   open GameType
   open PlayerPatch
 
-  fun checkCollisions (player, enemies, enemyTree, projectiles, walls, wallTree,
-    platforms, platformTree) =
+  fun checkCollisions
+    ( player
+    , enemies
+    , enemyTree
+    , projectiles
+    , walls
+    , wallTree
+    , platforms
+    , platformTree
+    ) =
     let
       val {x, y, mainAttack, attacked, ...} = player
       val size = Constants.playerSize
@@ -26,6 +34,7 @@ struct
               , wallTree
               , platforms
               , platformTree
+              , player
               )
 
             (* add collided enemies to player record, 
@@ -46,8 +55,16 @@ struct
                      (player, enemies, enemyCollisions, [])
 
                  val enemies = Enemy.filterProjectileCollisions
-                   (Vector.length enemies - 1, enemies, projectileTree, [],
-                   walls, wallTree, platforms, platformTree)
+                   ( Vector.length enemies - 1
+                   , enemies
+                   , projectileTree
+                   , []
+                   , walls
+                   , wallTree
+                   , platforms
+                   , platformTree
+                   , player
+                   )
                in
                  (player, enemies)
                end
@@ -63,8 +80,16 @@ struct
                        (player, enemies, enemyCollisions)
 
                    val enemies = Enemy.filterProjectileCollisions
-                     (Vector.length enemies - 1, enemies, projectileTree, [],
-                     walls, wallTree, platforms, platformTree)
+                     ( Vector.length enemies - 1
+                     , enemies
+                     , projectileTree
+                     , []
+                     , walls
+                     , wallTree
+                     , platforms
+                     , platformTree
+                     , player
+                     )
                  in
                    (player, enemies)
                  end
@@ -75,8 +100,16 @@ struct
                  let
                    val player = Player.incrementAttacked (player, amt)
                    val enemies = Enemy.filterProjectileCollisions
-                     (Vector.length enemies - 1, enemies, projectileTree, [],
-                     walls, wallTree, platforms, platformTree)
+                     ( Vector.length enemies - 1
+                     , enemies
+                     , projectileTree
+                     , []
+                     , walls
+                     , wallTree
+                     , platforms
+                     , platformTree
+                     , player
+                     )
                  in
                    (player, enemies)
                  end)

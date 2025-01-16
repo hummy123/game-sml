@@ -22,6 +22,7 @@ struct
     , wallTree
     , platforms
     , platformTree
+    , player
     ) =
     let
       val {x, y, health, ...} = enemy
@@ -51,7 +52,7 @@ struct
 
             (* get patches specific to this type of enemy *)
             val patches = EnemyBehaviour.getVariantPatches
-              (enemy, walls, wallTree, platforms, platformTree, patches)
+              (enemy, walls, wallTree, platforms, platformTree, player, patches)
 
             val enemy = EnemyPatch.withPatches (enemy, patches)
           in
@@ -69,7 +70,7 @@ struct
 
           (* get patches specific to this type of enemy *)
           val patches = EnemyBehaviour.getVariantPatches
-            (enemy, walls, wallTree, platforms, platformTree, patches)
+            (enemy, walls, wallTree, platforms, platformTree, player, patches)
 
           val enemy = EnemyPatch.withPatches (enemy, patches)
         in
@@ -87,6 +88,7 @@ struct
     , wallTree
     , platforms
     , platformTree
+    , player
     ) =
     if pos < 0 then
       Vector.fromList acc
@@ -94,7 +96,15 @@ struct
       let
         val enemy = Vector.sub (enemies, pos)
         val acc = onCollisionWithProjectile
-          (enemy, projectileTree, acc, walls, wallTree, platforms, platformTree)
+          ( enemy
+          , projectileTree
+          , acc
+          , walls
+          , wallTree
+          , platforms
+          , platformTree
+          , player
+          )
       in
         filterProjectileCollisions
           ( pos - 1
@@ -105,6 +115,7 @@ struct
           , wallTree
           , platforms
           , platformTree
+          , player
           )
       end
 
@@ -121,6 +132,7 @@ struct
     , wallTree
     , platforms
     , platformTree
+    , player
     ) =
     if pos < 0 then
       Vector.fromList acc
@@ -139,6 +151,7 @@ struct
               , wallTree
               , platforms
               , platformTree
+              , player
               )
       in
         filterWhenAttacked
@@ -151,6 +164,7 @@ struct
           , wallTree
           , platforms
           , platformTree
+          , player
           )
       end
 
