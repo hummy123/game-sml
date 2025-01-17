@@ -34,6 +34,10 @@ sig
   val hasCollisionAt: int * int * int * int *
                       int * int * int * int *
                       int * t -> bool
+
+  val getItemID: int * int * int * int *
+                 int * int * int * int *
+                 t -> int
 end
 
 structure QuadTree: QUAD_TREE =
@@ -1273,4 +1277,104 @@ struct
     | LEAF elements =>
         hasCollisionAtVec
           (itemX, itemY, itemWidth, itemHeight, itemID, 0, elements)
+
+  fun getItemIDVec (iX, iY, iW, iH, pos, elements) =
+    if pos = Vector.length elements then
+      ~1
+    else
+      let
+        val item = Vector.sub (elements, pos)
+      in
+        if isColliding (iX, iY, iW, iH, ~1, item) then #itemID item
+        else getItemIDVec (iX, iY, iW, iH, pos + 1, elements)
+      end
+
+  fun getItemID (itemX, itemY, itemW, itemH, quadX, quadY, quadW, quadH, tree) =
+    case tree of
+      NODE {topLeft, topRight, bottomLeft, bottomRight, elements} =>
+        let
+          val tryID = getItemIDVec (itemX, itemY, itemW, itemH, 0, elements)
+        in
+          if tryID = ~1 then
+            (case
+               whichQuadrant
+                 (itemX, itemY, itemW, itemH, quadX, quadY, quadW, quadH)
+             of
+               TOP_LEFT =>
+                 let
+                   val halfWidth = quadW div 2
+                   val halfHeight = quadH div 2
+                 in
+                   getItemID
+                     ( itemX
+                     , itemY
+                     , itemW
+                     , itemH
+                     , quadX
+                     , quadY
+                     , halfWidth
+                     , halfHeight
+                     , tree
+                     )
+                 end
+             | TOP_RIGHT =>
+                 let
+                   val halfWidth = quadW div 2
+                   val halfHeight = quadH div 2
+                   val middleX = quadX + halfWidth
+                 in
+                   getItemID
+                     ( itemX
+                     , itemY
+                     , itemW
+                     , itemH
+                     , middleX
+                     , quadY
+                     , halfWidth
+                     , halfHeight
+                     , tree
+                     )
+                 end
+             | BOTTOM_LEFT =>
+                 let
+                   val halfWidth = quadW div 2
+                   val halfHeight = quadH div 2
+                   val middleY = quadY + halfHeight
+                 in
+                   getItemID
+                     ( itemX
+                     , itemY
+                     , itemW
+                     , itemH
+                     , quadX
+                     , middleY
+                     , halfWidth
+                     , halfHeight
+                     , tree
+                     )
+                 end
+             | BOTTOM_RIGHT =>
+                 let
+                   val halfWidth = quadW div 2
+                   val halfHeight = quadH div 2
+                   val middleX = quadX + halfWidth
+                   val middleY = quadY + halfHeight
+                 in
+                   getItemID
+                     ( itemX
+                     , itemY
+                     , itemW
+                     , itemH
+                     , middleX
+                     , middleY
+                     , halfWidth
+                     , halfHeight
+                     , tree
+                     )
+                 end
+             | PARENT_QUADRANT => ~1)
+          else
+            tryID
+        end
+    | LEAF elements => getItemIDVec (itemX, itemY, itemW, itemH, 0, elements)
 end
