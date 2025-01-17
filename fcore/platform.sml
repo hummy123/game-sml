@@ -19,6 +19,20 @@ struct
 
   fun generateTree platVec = helpGenerateTree (0, platVec, QuadTree.empty)
 
+  fun helpFind (findNum, vec, low, high) =
+    let
+      val mid = low + ((high - low) div 2)
+      val platform = Vector.sub (vec, mid)
+      val {id = curNum, x = _, y = _, width = _} = platform
+    in
+      if curNum = findNum then platform
+      else if curNum < findNum then helpFind (findNum, vec, mid + 1, high)
+      else helpFind (findNum, vec, low, mid - 1)
+    end
+
+  fun find (findNum, vec) =
+    helpFind (findNum, vec, 0, Vector.length vec - 1)
+
   fun helpGetDrawVecWider
     (pos, platVec, acc, winWidth, winHeight, ratio, yOffset) =
     if pos = Vector.length platVec then

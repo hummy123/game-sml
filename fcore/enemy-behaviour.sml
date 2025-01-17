@@ -131,8 +131,44 @@ struct
       | STAY_STILL => acc
     end
 
-  fun canJumpOnPlatform (enemy: enemy, platformTree) =
+  fun getHighestPlatform (collisions, platforms, highestY, highestID) =
+    case collisions of
+      id :: tl =>
+        let
+          val {y = platY, ...} = Platform.find (id, platforms)
+        in
+          (* platY < highestY is correct because lowest number = highest 
+           * in * this case *)
+          if platY < highestY then getHighestPlatform (tl, platforms, platY, id)
+          else getHighestPlatform (tl, platforms, highestY, highestID)
+        end
+    | [] => highestID
+
+  fun getPlatformBelowPlayer (player: player, platformTree, platforms) =
     let
+      val {x, y, ...} = player
+
+      val searchWidth = Constants.playerSize
+      val searchHeight = Constants.worldHeight - y
+
+      val ww = Constants.worldWidth
+      val wh = Constants.worldHeight
+
+      val collisions = QuadTree.getCollisions
+        (x, y, searchWidth, searchHeight, 0, 0, ww, wh, ~1, platformTree)
+    in
+      getHighestPlatform (collisions, platforms, wh, ~1)
+    end
+
+  fun canJumpOnPID (collisions, pID) =
+    case collisions of
+      id :: tl => (id = pID) orelse canJumpOnPID (tl, pID)
+    | [] => false
+
+  fun canJumpOnPlatform (player, platforms, enemy: enemy, platformTree) =
+    let
+      val pID = getPlatformBelowPlayer (player, platformTree, platforms)
+
       val {x, y, ...} = enemy
 
       val distance = Constants.moveEnemyBy * Constants.jumpLimit
@@ -146,16 +182,20 @@ struct
       val wh = Constants.worldHeight
 
       val mx = x - distance
-    in
-      QuadTree.hasCollisionAt
+
+      val rightCollisions = QuadTree.getCollisions
         (x, y, distance, yDistance, 0, 0, ww, wh, ~1, platformTree)
-      orelse
-      QuadTree.hasCollisionAt
+
+      val leftCollisions = QuadTree.getCollisions
         (mx, y, distance, yDistance, 0, 0, ww, wh, ~1, platformTree)
+    in
+      canJumpOnPID (rightCollisions, pID)
+      orelse canJumpOnPID (leftCollisions, pID)
     end
 
   (* pathfinding *)
-  fun getFollowPatches (player: player, enemy, wallTree, platformTree, acc) =
+  fun getFollowPatches
+    (player: player, enemy, wallTree, platformTree, platforms, acc) =
     let
       val {x = px, y = py, ...} = player
       val {x = ex, y = ey, yAxis = eyAxis, ...} = enemy
@@ -164,7 +204,8 @@ struct
 
       val isOnWall = standingOnArea (enemy, wallTree)
       val isOnPlatform = standingOnArea (enemy, platformTree)
-      val hasPlatformAbove = canJumpOnPlatform (enemy, platformTree)
+      val hasPlatformAbove =
+        canJumpOnPlatform (player, platforms, enemy, platformTree)
       val () = print ("canJump: " ^ Bool.toString hasPlatformAbove ^ "\n")
       val shouldJump = (isOnWall orelse isOnPlatform) andalso hasPlatformAbove
 
@@ -188,6 +229,7 @@ struct
       case #variant enemy of
         PATROL_SLIME => getPatrollPatches (enemy, wallTree, platformTree, acc)
       | FOLLOW_SIME =>
-          getFollowPatches (player, enemy, wallTree, platformTree, acc)
+          getFollowPatches
+            (player, enemy, wallTree, platformTree, platforms, acc)
     end
 end

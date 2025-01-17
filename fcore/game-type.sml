@@ -162,7 +162,9 @@ struct
       val wallTree = Wall.generateTree walls
 
       val plat1 = {id = 1, x = 155, y = 911, width = 199}
-      val platforms = Vector.fromList [plat1]
+      val plat2 = {id = 2, x = 355, y = 759, width = 555}
+      val plat3 = {id = 3, x = 355, y = 659, width = 555}
+      val platforms = Vector.fromList [plat1, plat2, plat3]
       val platformTree = Platform.generateTree platforms
 
       val enemy1 =
