@@ -19,6 +19,25 @@ struct
         (x, y, searchWidth, searchHeight, 0, 0, ww, wh, ~1, platformTree)
     end
 
+  fun isOnGround (enemy, wallTree, platformTree) =
+    let
+      val {x = ex, y = ey, ...} = enemy
+
+      val ey = ey + Constants.enemySize - 1
+
+      val width = Constants.enemySize
+      val height = 2
+
+      val ww = Constants.worldWidth
+      val wh = Constants.worldHeight
+    in
+      QuadTree.hasCollisionAt
+        (ex, ey, width, height, 0, 0, ww, wh, ~1, wallTree)
+      orelse
+      QuadTree.hasCollisionAt
+        (ex, ey, width, height, 0, 0, ww, wh, ~1, platformTree)
+    end
+
   fun getPatrollPatches (enemy: enemy, wallTree, platformTree, acc) =
     let
       (* This function is meant to check 
@@ -111,6 +130,26 @@ struct
       | STAY_STILL => acc
     end
 
+  (* pathfinding *)
+  fun getFollowPatches (player: player, enemy, wallTree, platformTree, acc) =
+    let
+      val {x = px, y = py, ...} = player
+      val {x = ex, y = ey, yAxis = eyAxis, ...} = enemy
+
+      val xAxis = if px < ex then MOVE_LEFT else MOVE_RIGHT
+
+      val isOnGround = isOnGround (enemy, wallTree, platformTree)
+      val yAxis =
+        if ey > py andalso isOnGround then
+          case eyAxis of
+            ON_GROUND => JUMPING 0
+          | FALLING => JUMPING 0
+          | _ => eyAxis
+        else
+          eyAxis
+    in
+      EnemyPatch.W_Y_AXIS yAxis :: EnemyPatch.W_X_AXIS xAxis :: acc
+    end
 
   fun getVariantPatches
     (enemy, walls, wallTree, platforms, platformTree, player, acc) =
@@ -119,5 +158,7 @@ struct
     in
       case #variant enemy of
         PATROL_SLIME => getPatrollPatches (enemy, wallTree, platformTree, acc)
+      | FOLLOW_SIME =>
+          getFollowPatches (player, enemy, wallTree, platformTree, acc)
     end
 end

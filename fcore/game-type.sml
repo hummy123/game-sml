@@ -172,7 +172,7 @@ struct
         , health = 1
         , xAxis = MOVE_LEFT
         , yAxis = FALLING
-        , variant = EnemyVariants.PATROL_SLIME
+        , variant = EnemyVariants.FOLLOW_SLIME
         }
       val enemy2 =
         { id = 2
@@ -192,7 +192,7 @@ struct
         , yAxis = FALLING
         , variant = EnemyVariants.PATROL_SLIME
         }
-      val enemies = Vector.fromList [enemy1, enemy2, enemy3]
+      val enemies = Vector.fromList [enemy1]
     in
       { player = player
       , walls = walls

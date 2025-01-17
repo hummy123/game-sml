@@ -2,6 +2,12 @@ structure Enemy =
 struct
   open GameType
 
+  fun withDefaultYAxis (enemy: enemy) =
+    case #yAxis enemy of
+      ON_GROUND =>
+        EnemyPatch.withPatch (enemy, EnemyPatch.W_Y_AXIS FALLING)
+    | _ => enemy
+
   fun helpExists (pos, id, collisions) =
     if pos = Vector.length collisions then
       false
@@ -40,8 +46,12 @@ struct
           acc
         else
           let
-            val enemy =
-              EnemyPatch.withPatch (enemy, EnemyPatch.W_Y_AXIS FALLING)
+            val enemy = withDefaultYAxis enemy
+
+            (* get patches specific to this type of enemy *)
+            val patches = EnemyBehaviour.getVariantPatches
+              (enemy, walls, wallTree, platforms, platformTree, player, [])
+            val enemy = EnemyPatch.withPatches (enemy, patches)
 
             val patches = EnemyPhysics.getPhysicsPatches enemy
             val patches = EnemyPatch.W_HEALTH (health - 1) :: patches
@@ -49,28 +59,24 @@ struct
 
             val patches = EnemyPhysics.getEnvironmentPatches
               (enemy, walls, wallTree, platforms, platformTree)
-
-            (* get patches specific to this type of enemy *)
-            val patches = EnemyBehaviour.getVariantPatches
-              (enemy, walls, wallTree, platforms, platformTree, player, patches)
-
             val enemy = EnemyPatch.withPatches (enemy, patches)
           in
             enemy :: acc
           end
       else
         let
-          val enemy = EnemyPatch.withPatch (enemy, EnemyPatch.W_Y_AXIS FALLING)
+          val enemy = withDefaultYAxis enemy
+
+          (* get patches specific to this type of enemy *)
+          val patches = EnemyBehaviour.getVariantPatches
+            (enemy, walls, wallTree, platforms, platformTree, player, [])
+          val enemy = EnemyPatch.withPatches (enemy, patches)
 
           val patches = EnemyPhysics.getPhysicsPatches enemy
           val enemy = EnemyPatch.withPatches (enemy, patches)
 
           val patches = EnemyPhysics.getEnvironmentPatches
             (enemy, walls, wallTree, platforms, platformTree)
-
-          (* get patches specific to this type of enemy *)
-          val patches = EnemyBehaviour.getVariantPatches
-            (enemy, walls, wallTree, platforms, platformTree, player, patches)
 
           val enemy = EnemyPatch.withPatches (enemy, patches)
         in
