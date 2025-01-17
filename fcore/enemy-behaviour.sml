@@ -131,6 +131,29 @@ struct
       | STAY_STILL => acc
     end
 
+  fun canJumpOnPlatform (enemy: enemy, platformTree) =
+    let
+      val {x, y, ...} = enemy
+
+      val distance = Constants.moveEnemyBy * Constants.jumpLimit
+
+      val distance = distance div 2
+      val yDistance = distance
+
+      val y = y - yDistance + Constants.enemySize
+
+      val ww = Constants.worldWidth
+      val wh = Constants.worldHeight
+
+      val mx = x - distance
+    in
+      QuadTree.hasCollisionAt
+        (x, y, distance, yDistance, 0, 0, ww, wh, ~1, platformTree)
+      orelse
+      QuadTree.hasCollisionAt
+        (mx, y, distance, yDistance, 0, 0, ww, wh, ~1, platformTree)
+    end
+
   (* pathfinding *)
   fun getFollowPatches (player: player, enemy, wallTree, platformTree, acc) =
     let
@@ -141,8 +164,12 @@ struct
 
       val isOnWall = standingOnArea (enemy, wallTree)
       val isOnPlatform = standingOnArea (enemy, platformTree)
+      val hasPlatformAbove = canJumpOnPlatform (enemy, platformTree)
+      val () = print ("canJump: " ^ Bool.toString hasPlatformAbove ^ "\n")
+      val shouldJump = (isOnWall orelse isOnPlatform) andalso hasPlatformAbove
+
       val yAxis =
-        if ey > py andalso (isOnWall orelse isOnPlatform) then
+        if ey > py andalso shouldJump then
           case eyAxis of
             ON_GROUND => JUMPING 0
           | FALLING => JUMPING 0
