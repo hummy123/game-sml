@@ -19,7 +19,12 @@ struct
         (x, y, searchWidth, searchHeight, 0, 0, ww, wh, ~1, platformTree)
     end
 
-  fun isOnGround (enemy, wallTree, platformTree) =
+  (* same function takes either wallTree or platformTree and returns true
+   * if standing on tree.
+   * Function is monomorphic in the sense that wallTree and platformTree 
+   * are both same type (no generics/parametric polymorphism).
+   * *)
+  fun standingOnArea (enemy, tree) =
     let
       val {x = ex, y = ey, ...} = enemy
 
@@ -31,11 +36,7 @@ struct
       val ww = Constants.worldWidth
       val wh = Constants.worldHeight
     in
-      QuadTree.hasCollisionAt
-        (ex, ey, width, height, 0, 0, ww, wh, ~1, wallTree)
-      orelse
-      QuadTree.hasCollisionAt
-        (ex, ey, width, height, 0, 0, ww, wh, ~1, platformTree)
+      QuadTree.hasCollisionAt (ex, ey, width, height, 0, 0, ww, wh, ~1, tree)
     end
 
   fun getPatrollPatches (enemy: enemy, wallTree, platformTree, acc) =
@@ -138,9 +139,10 @@ struct
 
       val xAxis = if px < ex then MOVE_LEFT else MOVE_RIGHT
 
-      val isOnGround = isOnGround (enemy, wallTree, platformTree)
+      val isOnWall = standingOnArea (enemy, wallTree)
+      val isOnPlatform = standingOnArea (enemy, platformTree)
       val yAxis =
-        if ey > py andalso isOnGround then
+        if ey > py andalso (isOnWall orelse isOnPlatform) then
           case eyAxis of
             ON_GROUND => JUMPING 0
           | FALLING => JUMPING 0
