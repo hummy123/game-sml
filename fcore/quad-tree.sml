@@ -4,6 +4,10 @@ sig
 
   val empty: t
 
+  val whichQuadrant: int * int * int * int *
+                     int * int * int * int 
+                     -> QuadTreeType.quadrant
+
   datatype collision_side =
     QUERY_ON_LEFT_SIDE
   | QUERY_ON_TOP_SIDE
@@ -42,7 +46,9 @@ end
 
 structure QuadTree: QUAD_TREE =
 struct
-  type item = {itemID: int, startX: int, startY: int, width: int, height: int}
+  open QuadTreeType
+
+  type item = QuadTreeType.item
 
   fun mkItem (id, startX, startY, width, height) : item =
     { itemID = id
@@ -52,15 +58,7 @@ struct
     , height = height
     }
 
-  datatype t =
-    NODE of
-      { topLeft: t
-      , topRight: t
-      , bottomLeft: t
-      , bottomRight: t
-      , elements: item vector
-      }
-  | LEAF of item vector
+  type t = QuadTreeType.t
 
   val empty = LEAF (Vector.fromList [])
 
@@ -78,13 +76,6 @@ struct
   fun isItemInQuad (iX, iY, iWidth, iHeight, qX, qY, qWidth, qHeight) =
     iX >= qX andalso iY >= qY andalso iWidth <= qWidth
     andalso iHeight <= qHeight
-
-  datatype quadrant =
-    TOP_LEFT
-  | TOP_RIGHT
-  | BOTTOM_LEFT
-  | BOTTOM_RIGHT
-  | PARENT_QUADRANT
 
   fun whichQuadrant
     (itemX, itemY, itemWidth, itemHeight, quadX, quadY, quadWidth, quadHeight) =
