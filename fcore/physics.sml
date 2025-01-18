@@ -153,6 +153,22 @@ struct
         (x, y, size, size, 0, 0, ww, wh, 0, platformTree)
       val acc = getPlatformPatches (yAxis, platforms, platCollisions, [])
 
+      val acc = 
+        case yAxis of
+          DROP_BELOW_PLATFORM =>
+            (* if we dropped below platform before 
+            * but we have fully passed the platform now 
+            * such that there are no platform collisions
+            * then set new yAxis to FALLING
+            * so we do not drop below any platforms again
+            * *)
+            if QuadTree.hasCollisionAt (x, y, size, size, 0, 0, ww, wh, ~1,
+            platformTree)
+            then
+              Fn.W_Y_AXIS FALLING :: acc
+            else acc
+        | _ => acc
+
       val wallCollisions = QuadTree.getCollisionSides
         (x, y, size, size, 0, 0, ww, wh, 0, wallTree)
     in

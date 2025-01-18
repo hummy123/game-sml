@@ -1,4 +1,4 @@
-structure EnemyBehaviour =
+1tructure EnemyBehaviour =
 struct
   open GameType
 
@@ -142,6 +142,22 @@ struct
 
   fun hasVisted (find, visited) =
     helpHasVisited (0, Char.chr find, visited)
+
+  fun isBetween (p1, check, p2) = check >= p1 andalso check <= p2
+
+  fun isReachableFromBottom (prevPlat: platform, currentPlat: platform) =
+    let
+      val {x = prevX, y = prevY, width = prevWidth, ...} = prevPlat
+      val {x = curX, y = curY, width = curWidth, ...} = currentPlat
+
+      val prevFinishX = prevX + prevWidth
+      val curFinishX = curX + curWidth
+    in
+      (isBetween (prevX, curX, prevFinishX)
+       orelse
+       isBetween (prevX, curFinishX, prevFinishX)
+       andalso prevY + Constants.jumpLimit >= curY)
+    end
 
   fun isReachableFromLeft (prevPlat, currentPlat) =
     (* prev = right/from, current = left/to *)
