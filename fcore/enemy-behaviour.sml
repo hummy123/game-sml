@@ -132,17 +132,32 @@ struct
     end
 
   (* new pathfinding using quad tree *)
+  fun helpHasVisited (pos, find, visited) =
+    if pos = Vector.length visited then
+      false
+    else
+      let val cur = Vector.sub (visited, pos)
+      in cur = find orelse helpHasVisited (pos + 1, find, visited)
+      end
+
+  fun hasVisted (find, visited) =
+    helpHasVisited (0, Char.chr find, visited)
+
   fun getUpwardsPath
-    (playerPlatID, currentPlatID, platforms, platformTree, dist) =
+    (playerPlatID, currentPlatID, platforms, platformTree, dist, visited) =
     if playerPlatID = currentPlatID then
       (dist, [currentPlatID])
     else
       let
+        (* add current node to list of visited nodes *)
+        val chr = Char.chr currentPlatID
+        val visited = Vector.concat [Vector.fromList [chr], visited]
+
         val currentPlat = Platform.find (currentPlatID, platforms)
         val {x, y, width, ...} = currentPlat
 
-        val searchY = y - Constants.jumpLimit - 1
-        val searchH = Constants.jumpLimit
+        val searchY = y - Constants.jumpLimit
+        val searchH = Constants.jumpLimit + 1
 
         (* todo: x/width are placeholder values.
          * They should define values that let reachable platforms 
@@ -166,6 +181,7 @@ struct
           , currentPlat
           , ~1
           , []
+          , visited
           )
       in
         if bestDist = ~1 then
@@ -185,67 +201,85 @@ struct
     , prevPlat
     , bestDist
     , bestPath
+    , visited
     ) =
     case lst of
       id :: tl =>
-        let
-          val currentPlat = Platform.find (id, platforms)
-          val {y = cy, ...} = currentPlat
-          val {y = py, ...} = prevPlat
+        if hasVisted (id, visited) then
+          helpGetUpwardsPath
+            ( playerPlatID
+            , platforms
+            , platformTree
+            , tl
+            , dist
+            , prevPlat
+            , bestDist
+            , bestPath
+            , visited
+            )
+        else
+          let
+            val currentPlat = Platform.find (id, platforms)
+            val {y = cy, ...} = currentPlat
+            val {y = py, ...} = prevPlat
 
-          val diff = py - cy
-          val platDist = dist + diff
+            val diff = py - cy
+            val platDist = dist + diff
 
-          val (newDist, newPath) = getUpwardsPath
-            (playerPlatID, id, platforms, platformTree, platDist)
-        in
-          if newDist = ~1 then
-            (* newPath is invalid, so reuse old path *)
-            helpGetUpwardsPath
-              ( playerPlatID
-              , platforms
-              , platformTree
-              , tl
-              , dist
-              , prevPlat
-              , bestDist
-              , bestPath
-              )
-          else if bestDist = ~1 then
-            (* bestPath is invalid *)
-            helpGetUpwardsPath
-              ( playerPlatID
-              , platforms
-              , platformTree
-              , tl
-              , dist
-              , prevPlat
-              , newDist
-              , newPath
-              )
-          else if newDist < bestDist then
-            helpGetUpwardsPath
-              ( playerPlatID
-              , platforms
-              , platformTree
-              , tl
-              , dist
-              , prevPlat
-              , newDist
-              , newPath
-              )
-          else
-            helpGetUpwardsPath
-              ( playerPlatID
-              , platforms
-              , platformTree
-              , tl
-              , dist
-              , prevPlat
-              , bestDist
-              , bestPath
-              )
-        end
+            val (newDist, newPath) = getUpwardsPath
+              (playerPlatID, id, platforms, platformTree, platDist, visited)
+          in
+            if newDist = ~1 then
+              (* newPath is invalid, so reuse old path *)
+              helpGetUpwardsPath
+                ( playerPlatID
+                , platforms
+                , platformTree
+                , tl
+                , dist
+                , prevPlat
+                , bestDist
+                , bestPath
+                , visited
+                )
+            else if bestDist = ~1 then
+              (* bestPath is invalid *)
+              helpGetUpwardsPath
+                ( playerPlatID
+                , platforms
+                , platformTree
+                , tl
+                , dist
+                , prevPlat
+                , newDist
+                , newPath
+                , visited
+                )
+            else if newDist < bestDist then
+              helpGetUpwardsPath
+                ( playerPlatID
+                , platforms
+                , platformTree
+                , tl
+                , dist
+                , prevPlat
+                , newDist
+                , newPath
+                , visited
+                )
+            else
+              helpGetUpwardsPath
+                ( playerPlatID
+                , platforms
+                , platformTree
+                , tl
+                , dist
+                , prevPlat
+                , bestDist
+                , bestPath
+                , visited
+                )
+          end
     | [] => (bestDist, bestPath)
 
   (* pathfinding *)
@@ -309,7 +343,7 @@ struct
 
       val (bestDist, bestPath) =
         if eID > ~1 andalso pID > ~1 then
-          getUpwardsPath (pID, eID, platforms, platformTree, 0)
+          getUpwardsPath (pID, eID, platforms, platformTree, 0, "")
         else
           (~1, [])
 
