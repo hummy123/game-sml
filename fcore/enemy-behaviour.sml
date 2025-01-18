@@ -143,8 +143,33 @@ struct
   fun hasVisted (find, visited) =
     helpHasVisited (0, Char.chr find, visited)
 
+  fun isReachableFromLeft (prevPlat, currentPlat) =
+    (* prev = right/from, current = left/to *)
+    let
+      val {x = prevX, y = prevY, width = prevWidth, ...} = prevPlat
+      val {x = curX, y = curY, width = curWidth, ...} = currentPlat
+
+      val enemyX = prevX
+      val xDiff = prevX - curX
+    in
+      if xDiff <= Constants.jumpLimit then
+        true
+      else
+        let
+          val enemyApexX = enemyX - Constants.jumpLimit
+          val enemyApexY = prevY + Constants.jumpLimit
+
+          val curFinishX = curX + curWidth
+
+          val diffApexY = enemyApexY - curY
+          val diffApexX = enemyApexX - curFinishX
+        in
+          diffApexX <= diffApexY orelse diffApexY <= 0
+        end
+    end
+
   fun isReachableFromRight (prevPlat, currentPlat) =
-    (* prev = from, current = to *)
+    (* prev = left/from, current = right/to *)
     let
       val {x = prevX, y = prevY, width = prevWidth, ...} = prevPlat
       val {x = curX, y = curY, width = curWidth, ...} = currentPlat
@@ -168,6 +193,166 @@ struct
           diffApexY <= 0 orelse diffApexX <= diffApexY
         end
     end
+
+  fun getLeftwardsPath
+    (playerPlatID, currentPlatID, platforms, platformTree, dist, visited) =
+    if playerPlatID = currentPlatID then
+      (dist, [currentPlatID])
+    else
+      let
+        val chr = Char.chr currentPlatID
+        val visited = Vector.concat [Vector.fromList [chr], visited]
+
+        val currentPlat = Platform.find (currentPlatID, platforms)
+        val {x, y, width, ...} = currentPlat
+
+        (* include all platforms we can jump leftwards to,
+         * whether above or below. 
+         * *)
+
+        val searchY = y - Constants.jumpLimit
+        val searchH = Constants.worldHeight - searchY
+
+        val searchX = 0
+        val searchW = x
+
+        val ww = Constants.worldWidth
+        val wh = Constants.worldHeight
+
+        val leftList = QuadTree.getCollisions
+          (searchX, searchY, searchW, searchH, 0, 0, ww, wh, ~1, platformTree)
+
+        val (bestDist, bestPath) = helpGetLeftwardsPath
+          ( playerPlatID
+          , platforms
+          , platformTree
+          , leftList
+          , dist
+          , currentPlat
+          , ~1
+          , []
+          , visited
+          )
+      in
+        if bestDist = ~1 then (* invalid *) (~1, [])
+        else (bestDist, currentPlatID :: bestPath)
+      end
+
+  and helpGetLeftwardsPath
+    ( playerPlatID
+    , platforms
+    , platformTree
+    , lst
+    , dist
+    , prevPlat
+    , bestDist
+    , bestPath
+    , visited
+    ) =
+    case lst of
+      id :: tl =>
+        if hasVisted (id, visited) then
+          helpGetLeftwardsPath
+            ( playerPlatID
+            , platforms
+            , platformTree
+            , tl
+            , dist
+            , prevPlat
+            , bestDist
+            , bestPath
+            , visited
+            )
+        else
+          let
+            val currentPlat = Platform.find (id, platforms)
+          in
+            if isReachableFromLeft (prevPlat, currentPlat) then
+              (* is reachable, so reach *)
+              let
+                (* considering horizontal distance only.
+                 * todo: can consider diagonal/vertical distance too 
+                 * (by pythagoras) 
+                 * also todo: lFinishX might be to the right of rx
+                 * if currentPlat intersects with prevPlat in the y axis
+                 * in which case the distance calculated is wrong.
+                 * *)
+                val {x = lx, width = lWidth, ...} = currentPlat
+                val {x = rx, width = rWidth, ...} = prevPlat
+
+                val lFinishX = lx + lWidth
+                val diff = rx - lFinishX
+                val platDist = dist + diff
+
+                val (newDist, newPath) = getLeftwardsPath
+                  (playerPlatID, id, platforms, platformTree, platDist, visited)
+              in
+                if newDist = ~1 then
+                  (* newPath is invalid, so reuse old path *)
+                  helpGetLeftwardsPath
+                    ( playerPlatID
+                    , platforms
+                    , platformTree
+                    , tl
+                    , dist
+                    , prevPlat
+                    , bestDist
+                    , bestPath
+                    , visited
+                    )
+                else if bestDist = ~1 then
+                  (* bestPath is invalid *)
+                  helpGetLeftwardsPath
+                    ( playerPlatID
+                    , platforms
+                    , platformTree
+                    , tl
+                    , dist
+                    , prevPlat
+                    , newDist
+                    , newPath
+                    , visited
+                    )
+                else if newDist < bestDist then
+                  helpGetLeftwardsPath
+                    ( playerPlatID
+                    , platforms
+                    , platformTree
+                    , tl
+                    , dist
+                    , prevPlat
+                    , newDist
+                    , newPath
+                    , visited
+                    )
+                else
+                  helpGetLeftwardsPath
+                    ( playerPlatID
+                    , platforms
+                    , platformTree
+                    , tl
+                    , dist
+                    , prevPlat
+                    , bestDist
+                    , bestPath
+                    , visited
+                    )
+              end
+            else
+              (* ignore node and filter out if we cannot reach *)
+              helpGetLeftwardsPath
+                ( playerPlatID
+                , platforms
+                , platformTree
+                , tl
+                , dist
+                , prevPlat
+                , bestDist
+                , bestPath
+                , visited
+                )
+          end
+    | [] => (bestDist, bestPath)
 
   fun getRightwardsPath
     (playerPlatID, currentPlatID, platforms, platformTree, dist, visited) =
