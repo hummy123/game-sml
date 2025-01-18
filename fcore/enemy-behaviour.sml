@@ -1,4 +1,4 @@
-1tructure EnemyBehaviour =
+structure EnemyBehaviour =
 struct
   open GameType
 
@@ -145,7 +145,7 @@ struct
 
   fun isBetween (p1, check, p2) = check >= p1 andalso check <= p2
 
-  fun isReachableFromBottom (prevPlat: platform, currentPlat: platform) =
+  fun isReachableFromBelow (prevPlat: platform, currentPlat: platform) =
     let
       val {x = prevX, y = prevY, width = prevWidth, ...} = prevPlat
       val {x = curX, y = curY, width = curWidth, ...} = currentPlat
@@ -157,6 +157,18 @@ struct
        orelse
        isBetween (prevX, curFinishX, prevFinishX)
        andalso prevY + Constants.jumpLimit >= curY)
+    end
+
+  fun isReachableFromAbove (prevPlat: platform, currentPlat: platform) =
+    let
+      val {x = prevX, y = prevY, width = prevWidth, ...} = prevPlat
+      val {x = curX, y = curY, width = curWidth, ...} = currentPlat
+
+      val prevFinishX = prevX + prevWidth
+      val curFinishX = curX + curWidth
+    in
+      (isBetween (prevX, curX, prevFinishX)
+       orelse isBetween (prevX, curFinishX, prevFinishX) andalso prevY <= curY)
     end
 
   fun isReachableFromLeft (prevPlat, currentPlat) =
