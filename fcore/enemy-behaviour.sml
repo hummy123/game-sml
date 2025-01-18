@@ -251,10 +251,13 @@ struct
             if isReachableFromRight (prevPlat, currentPlat) then
               (* is reachable, so reach *)
               let
-                val {y = cy, ...} = currentPlat
-                val {y = py, ...} = prevPlat
+                (* considering horizontal distance only.
+                 * todo: can consider diagonal/vertical distance too 
+                 * (by pythagoras) *)
+                val {x = cx, ...} = currentPlat
+                val {x = px, ...} = prevPlat
 
-                val diff = py - cy
+                val diff = cx - px
                 val platDist = dist + diff
 
                 val (newDist, newPath) = getRightwardsPath
@@ -405,6 +408,10 @@ struct
         else
           let
             val currentPlat = Platform.find (id, platforms)
+            (* considering vertical distance only.
+             * This is okay because the scan box is a simple square
+             * directly above prev platform which does not care about 
+             * top right or top left). *)
             val {y = cy, ...} = currentPlat
             val {y = py, ...} = prevPlat
 
