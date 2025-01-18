@@ -143,6 +143,190 @@ struct
   fun hasVisted (find, visited) =
     helpHasVisited (0, Char.chr find, visited)
 
+  fun isReachableFromRight (prevPlat, currentPlat) =
+    (* prev = from, current = to *)
+    let
+      val {x = prevX, y = prevY, width = prevWidth, ...} = prevPlat
+      val {x = curX, y = curY, width = curWidth, ...} = currentPlat
+
+      (* last x coordinate where enemy can fully fit on prevPlat *)
+      val enemyX = prevX + prevWidth - Constants.enemySize
+
+      val xDiff = curX - prevX
+    in
+      if xDiff <= Constants.jumpLimit then
+        (* platform is possible to jump to without falling *)
+        true
+      else
+        let
+          val enemyApexX = enemyX + Constants.jumpLimit
+          val enemyApexY = prevY + Constants.jumpLimit
+
+          val diffApexY = enemyApexY - curY
+          val diffApexX = enemyApexX - curX
+        in
+          diffApexY <= 0 orelse diffApexX <= diffApexY
+        end
+    end
+
+  fun getRightwardsPath
+    (playerPlatID, currentPlatID, platforms, platformTree, dist, visited) =
+    if playerPlatID = currentPlatID then
+      (dist, [currentPlatID])
+    else
+      let
+        val chr = Char.chr currentPlatID
+        val visited = Vector.concat [Vector.fromList [chr], visited]
+
+        val currentPlat = Platform.find (currentPlatID, platforms)
+        val {x, y, width, ...} = currentPlat
+
+        (* include all platforms we can jump rightwards to,
+         * whether above or below. 
+         * Note: Collision list may contain platforms which we can't jump to
+         * as player will eventually fall from jump, 
+         * and our query to the QuadTree is a simple rectangular box 
+         * which is not the correct shape to model diagonal descent.
+         * Thus, we perform additional filtering in the collision list
+         * to see if the platform is reachable.
+         * *)
+
+        val searchY = y - Constants.jumpLimit
+        val searchH = Constants.worldHeight - searchY
+
+        val searchX = x + width
+        val searchW = Constants.worldWidth - searchX
+
+        val ww = Constants.worldWidth
+        val wh = Constants.worldHeight
+
+        val rightList = QuadTree.getCollisions
+          (searchX, searchY, searchW, searchH, 0, 0, ww, wh, ~1, platformTree)
+
+        val (bestDist, bestPath) = helpGetRightwardsPath
+          ( playerPlatID
+          , platforms
+          , platformTree
+          , rightList
+          , dist
+          , currentPlat
+          , ~1
+          , []
+          , visited
+          )
+      in
+        if bestDist = ~1 then (* invalid *) (~1, [])
+        else (bestDist, currentPlatID :: bestPath)
+      end
+
+  and helpGetRightwardsPath
+    ( playerPlatID
+    , platforms
+    , platformTree
+    , lst
+    , dist
+    , prevPlat
+    , bestDist
+    , bestPath
+    , visited
+    ) =
+    case lst of
+      id :: tl =>
+        if hasVisted (id, visited) then
+          helpGetRightwardsPath
+            ( playerPlatID
+            , platforms
+            , platformTree
+            , tl
+            , dist
+            , prevPlat
+            , bestDist
+            , bestPath
+            , visited
+            )
+        else
+          let
+            val currentPlat = Platform.find (id, platforms)
+          in
+            if isReachableFromRight (prevPlat, currentPlat) then
+              (* is reachable, so reach *)
+              let
+                val {y = cy, ...} = currentPlat
+                val {y = py, ...} = prevPlat
+
+                val diff = py - cy
+                val platDist = dist + diff
+
+                val (newDist, newPath) = getRightwardsPath
+                  (playerPlatID, id, platforms, platformTree, platDist, visited)
+              in
+                if newDist = ~1 then
+                  (* newPath is invalid, so reuse old path *)
+                  helpGetRightwardsPath
+                    ( playerPlatID
+                    , platforms
+                    , platformTree
+                    , tl
+                    , dist
+                    , prevPlat
+                    , bestDist
+                    , bestPath
+                    , visited
+                    )
+                else if bestDist = ~1 then
+                  (* bestPath is invalid *)
+                  helpGetRightwardsPath
+                    ( playerPlatID
+                    , platforms
+                    , platformTree
+                    , tl
+                    , dist
+                    , prevPlat
+                    , newDist
+                    , newPath
+                    , visited
+                    )
+                else if newDist < bestDist then
+                  helpGetRightwardsPath
+                    ( playerPlatID
+                    , platforms
+                    , platformTree
+                    , tl
+                    , dist
+                    , prevPlat
+                    , newDist
+                    , newPath
+                    , visited
+                    )
+                else
+                  helpGetRightwardsPath
+                    ( playerPlatID
+                    , platforms
+                    , platformTree
+                    , tl
+                    , dist
+                    , prevPlat
+                    , bestDist
+                    , bestPath
+                    , visited
+                    )
+              end
+            else
+              (* ignore node and filter out if we cannot reach *)
+              helpGetRightwardsPath
+                ( playerPlatID
+                , platforms
+                , platformTree
+                , tl
+                , dist
+                , prevPlat
+                , bestDist
+                , bestPath
+                , visited
+                )
+          end
+    | [] => (bestDist, bestPath)
+
   fun getUpwardsPath
     (playerPlatID, currentPlatID, platforms, platformTree, dist, visited) =
     if playerPlatID = currentPlatID then
@@ -156,8 +340,9 @@ struct
         val currentPlat = Platform.find (currentPlatID, platforms)
         val {x, y, width, ...} = currentPlat
 
+        (* search for platforms directly above current one *)
         val searchY = y - Constants.jumpLimit
-        val searchH = Constants.jumpLimit + 1
+        val searchH = Constants.jumpLimit
 
         (* todo: x/width are placeholder values.
          * They should define values that let reachable platforms 
