@@ -14,6 +14,7 @@ sig
   val empty: elem vector
 
   val sub: elem vector * int -> elem
+  val contains: elem * elem vector -> bool
 
   val findInsPos: elem * elem vector -> int
   val insert: elem vector * elem * int -> elem vector
@@ -77,6 +78,26 @@ struct
     if Vector.length vec = 0 then ~1
     else helpFindInsPos (findNum, vec, 0, Vector.length vec - 1, 0)
 
+  fun helpContains (findNum, vec, low, high) =
+    if high >= low then
+      let
+        val mid = low + ((high - low) div 2)
+        val curNum = Vector.sub (vec, mid)
+      in
+        if Fn.eq (curNum, findNum) then
+          true
+        else if Fn.l (curNum, findNum) then
+          helpContains (findNum, vec, mid + 1, high)
+        else
+          helpContains (findNum, vec, low, mid - 1)
+      end
+    else
+      false
+
+  fun contains (findNum, vec) =
+    if Vector.length vec = 0 then false
+    else helpContains (findNum, vec, 0, Vector.length vec - 1)
+
   (* insPos parameter should be the unmodified result of calling findInsPos.
    * The reason the insert function does not call findInsPos directly is so,
    * if two BinVecs are used (one for keys and another for values like a map) 
@@ -117,7 +138,7 @@ struct
     end
 end
 
-structure IntBinVec =
+structure IntSet =
   MakeBinVec
     (struct
        type elem = int
