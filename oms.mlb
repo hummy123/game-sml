@@ -11,8 +11,6 @@ fcore/quad-tree-fold.sml
 fcore/bin-search.sml
 fcore/bin-vec.sml
 
-fcore/path-finding.sml
-
 ann
   "allowVectorExps true"
 in
@@ -28,6 +26,8 @@ fcore/game-type.sml
 fcore/player-patch.sml
 fcore/enemy-patch.sml
 fcore/physics.sml
+
+fcore/path-finding.sml
 
 fcore/enemy-behaviour.sml
 fcore/enemy.sml

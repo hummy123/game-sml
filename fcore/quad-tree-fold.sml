@@ -2,8 +2,6 @@ signature QUAD_FOLDER =
 sig
   type env
   type state
-
-  val isReachable: state * env * int -> bool
   val fState: state * env * int -> state
 end
 
@@ -17,11 +15,7 @@ struct
     else
       let
         val {itemID, ...} = Vector.sub (elements, pos)
-        val state =
-          if Fn.isReachable (state, env, itemID) then
-            Fn.fState (state, env, itemID)
-          else
-            state
+        val state = Fn.fState (state, env, itemID)
       in
         foldVec (iX, iY, iW, iH, pos + 1, elements, state, env)
       end

@@ -19,6 +19,7 @@ sig
   val findInsPos: elem * elem vector -> int
   val insert: elem vector * elem * int -> elem vector
   val delete: elem vector * elem -> elem vector
+  val updateAtIdx: elem vector * elem * int -> elem vector
 end
 
 functor MakeBinVec(Fn: MAKE_BIN_VEC): BIN_VEC =
@@ -136,6 +137,10 @@ struct
           VectorSlice.concat [slice1, slice2]
         end
     end
+
+  fun updateAtIdx (vec, elem, idx) =
+    Vector.mapi
+      (fn (curIdx, curElem) => if curIdx <> idx then curElem else elem) vec
 end
 
 structure IntSet =
@@ -151,20 +156,17 @@ structure IntSet =
 structure ValSet =
   MakeBinVec
     (struct
-      type elem = {distance: int, from: char}
+       type elem = {distance: int, from: char}
 
-      (* l, e and q functions are not actually used in the ValSet
-      * because the IntSet is meant to contain keys while the ValSet
-      * is meant to contain corresponding values, like in a Map structure.
-      * However, it's required by the functor, 
-      * and it is actually easy to implement so no issue. *)
+       (* l, e and q functions are not actually used in the ValSet
+       * because the IntSet is meant to contain keys while the ValSet
+       * is meant to contain corresponding values, like in a Map structure.
+       * However, it's required by the functor, 
+       * and it is actually easy to implement so no issue. *)
 
-      fun l ({distance = a, ...}: elem, {distance = b, ...}: elem) =
-        a < b
+       fun l ({distance = a, ...}: elem, {distance = b, ...}: elem) = a < b
 
-      fun eq ({distance = a, ...}: elem, {distance = b, ...}: elem) =
-        a = b
+       fun eq ({distance = a, ...}: elem, {distance = b, ...}: elem) = a = b
 
-      fun g ({distance = a, ...}: elem, {distance = b, ...}: elem) =
-        a > b
+       fun g ({distance = a, ...}: elem, {distance = b, ...}: elem) = a > b
      end)
