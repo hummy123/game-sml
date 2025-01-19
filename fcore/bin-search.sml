@@ -6,12 +6,9 @@ struct
         val mid = low + ((high - low) div 2)
         val curNum = Vector.sub (vec, mid)
       in
-        if curNum = findNum then
-          true
-        else if curNum < findNum then
-          helpExists (findNum, vec, mid + 1, high)
-        else
-          helpExists (findNum, vec, low, mid - 1)
+        if curNum = findNum then true
+        else if curNum < findNum then helpExists (findNum, vec, mid + 1, high)
+        else helpExists (findNum, vec, low, mid - 1)
       end
     else
       false
@@ -25,12 +22,9 @@ struct
         val mid = low + ((high - low) div 2)
         val curNum = Vector.sub (vec, mid)
       in
-        if curNum = findNum then
-          mid
-        else if curNum < findNum then
-          helpFind (findNum, vec, mid + 1, high)
-        else
-          helpFind (findNum, vec, low, mid - 1)
+        if curNum = findNum then mid
+        else if curNum < findNum then helpFind (findNum, vec, mid + 1, high)
+        else helpFind (findNum, vec, low, mid - 1)
       end
     else
       ~1

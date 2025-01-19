@@ -9,6 +9,7 @@ fcore/quad-tree.sml
 fcore/quad-tree-fold.sml
 
 fcore/bin-search.sml
+fcore/bin-vec.sml
 
 ann
   "allowVectorExps true"
