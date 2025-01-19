@@ -11,6 +11,8 @@ fcore/quad-tree-fold.sml
 fcore/bin-search.sml
 fcore/bin-vec.sml
 
+fcore/path-finding.sml
+
 ann
   "allowVectorExps true"
 in

@@ -147,3 +147,24 @@ structure IntSet =
        fun eq (a, b) = a = b
        val g = Int.>
      end)
+
+structure ValSet =
+  MakeBinVec
+    (struct
+      type elem = {distance: int, from: char}
+
+      (* l, e and q functions are not actually used in the ValSet
+      * because the IntSet is meant to contain keys while the ValSet
+      * is meant to contain corresponding values, like in a Map structure.
+      * However, it's required by the functor, 
+      * and it is actually easy to implement so no issue. *)
+
+      fun l ({distance = a, ...}: elem, {distance = b, ...}: elem) =
+        a < b
+
+      fun eq ({distance = a, ...}: elem, {distance = b, ...}: elem) =
+        a = b
+
+      fun g ({distance = a, ...}: elem, {distance = b, ...}: elem) =
+        a > b
+     end)
