@@ -20,6 +20,8 @@ sig
   val insert: elem vector * elem * int -> elem vector
   val delete: elem vector * elem -> elem vector
   val updateAtIdx: elem vector * elem * int -> elem vector
+
+  val fromList: elem list -> elem vector
 end
 
 functor MakeBinVec(Fn: MAKE_BIN_VEC): BIN_VEC =
@@ -37,7 +39,7 @@ struct
       let
         val curNum = Vector.sub (vec, pos)
       in
-        if Fn.g (findNum, curNum) then pos + 1
+        if Fn.l (findNum, curNum) then pos
         else reverseLinearSearch (pos - 1, findNum, vec)
       end
 
@@ -48,7 +50,7 @@ struct
       let
         val curNum = Vector.sub (vec, pos)
       in
-        if Fn.g (findNum, curNum) then pos
+        if Fn.g (findNum, curNum) then pos + 1
         else forwardLinearSearch (pos + 1, findNum, vec)
       end
 
@@ -69,7 +71,7 @@ struct
       let
         val curNum = Vector.sub (vec, prevMid)
       in
-        if Fn.l (findNum, curNum) then
+        if Fn.g (findNum, curNum) then
           forwardLinearSearch (prevMid, findNum, vec)
         else
           reverseLinearSearch (prevMid, findNum, vec)
@@ -141,6 +143,17 @@ struct
   fun updateAtIdx (vec, elem, idx) =
     Vector.mapi
       (fn (curIdx, curElem) => if curIdx <> idx then curElem else elem) vec
+
+  fun helpFromList ([], acc) = acc
+    | helpFromList (hd :: tl, acc) =
+        let
+          val pos = findInsPos (hd, acc)
+          val acc = insert (acc, hd, pos)
+        in
+          helpFromList (tl, acc)
+        end
+
+  fun fromList lst = helpFromList (lst, empty)
 end
 
 structure IntSet =
