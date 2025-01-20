@@ -133,11 +133,11 @@ end
 structure DistHeap =
   MakeSkewHeap
     (struct
-       type t = {distance: int, id: int}
+       type t = {distance: int, id: int, comesFrom: int}
        type id = int
 
        (* default = defaultID returned when queue is empty *)
-       val default = {distance = ~1, id = ~1}
+       val default = {distance = ~1, id = ~1, comesFrom = ~1}
 
        fun getID {id, distance = _} = id
 

@@ -156,7 +156,7 @@ structure IntSet =
 structure ValSet =
   MakeBinVec
     (struct
-       type elem = {distance: int, from: char}
+       type elem = {distance: int, from: int}
 
        (* l, e and q functions are not actually used in the ValSet
        * because the IntSet is meant to contain keys while the ValSet

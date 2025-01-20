@@ -112,11 +112,9 @@ struct
                      if dist < oldDist then
                        (* update values as we found a shorter path *)
                        let
-                         val eVals = ValSet.updateAtIdx
-                           ( eVals
-                           , {distance = dist, from = Char.chr fromPlatID}
-                           , pos
-                           )
+                         val eVals =
+                           ValSet.updateAtIdx
+                             (eVals, {distance = dist, from = fromPlatID}, pos)
                        in
                          (eVals, q)
                        end
@@ -128,7 +126,13 @@ struct
                    (* key not explored, so add to queue *)
                    let
                      val q =
-                       DistHeap.insert ({distance = dist, id = foldPlatID}, q)
+                       DistHeap.insert
+                         ( { distance = dist
+                           , id = foldPlatID
+                           , comesFrom = fromPlatID
+                           }
+                         , q
+                         )
                    in
                      (eVals, q)
                    end
@@ -136,7 +140,14 @@ struct
              else
                (* key not explored, so add to queue *)
                let
-                 val q = DistHeap.insert ({distance = dist, id = foldPlatID}, q)
+                 val q =
+                   DistHeap.insert
+                     ( { distance = dist
+                       , id = foldPlatID
+                       , comesFrom = fromPlatID
+                       }
+                     , q
+                     )
                in
                  (eVals, q)
                end
@@ -251,10 +262,8 @@ struct
         val pos = IntSet.findInsPos (curID, eKeys)
 
         val {from, ...} = ValSet.sub (eVals, pos)
-        val from = Char.ord from
       in
-        if from = curID then acc
-        else helpGetPathList (from, eID, eKeys, eVals, acc)
+        helpGetPathList (from, eID, eKeys, eVals, acc)
       end
 
   fun getPathList (pID, eID, eKeys, eVals) =
@@ -271,7 +280,7 @@ struct
       else
         (* continue dijkstra's algorithm *)
         let
-          val {distance = distSoFar, id = minID} = DistHeap.findMin q
+          val {distance = distSoFar, id = minID, comesFrom} = DistHeap.findMin q
         in
           if minID = ~1 then
             (* return empty list to signify that there is no path *)
@@ -285,8 +294,9 @@ struct
               (* add explored *)
               val insPos = IntSet.findInsPos (minID, eKeys)
               val eKeys = IntSet.insert (eKeys, minID, insPos)
-              val eVals = ValSet.insert
-                (eVals, {distance = distSoFar, from = Char.chr minID}, insPos)
+              val eVals =
+                ValSet.insert
+                  (eVals, {distance = distSoFar, from = comesFrom}, insPos)
 
               val env =
                 { platforms = platforms
@@ -308,7 +318,7 @@ struct
               (* fold over quad tree, updating any distances 
                * we find the shortest path for *)
               val (eVals, q) = FindReachable.foldRegion
-                (x, y, width, height, 0, 0, ww, wh, env, state, platformTree)
+                (0, 0, ww, wh, 0, 0, ww, wh, env, state, platformTree)
             in
               loop (pID, eID, platforms, platformTree, q, eKeys, eVals)
             end
@@ -319,7 +329,7 @@ struct
     let
       (* initialise data structures: the priority queue and the explored map *)
       val q = DistHeap.empty
-      val q = DistHeap.insert ({distance = 0, id = eID}, q)
+      val q = DistHeap.insert ({distance = 0, id = eID, comesFrom = eID}, q)
 
       (* explored keys and values *)
       val eKeys = IntSet.empty
