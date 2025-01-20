@@ -10,6 +10,7 @@ struct
            { platforms: GameType.platform vector
            , currentPlat: GameType.platform
            , eKeys: IntSet.elem vector
+           , distSoFar: int
            }
 
          type state = ValSet.elem vector * DistHeap.t
@@ -94,7 +95,8 @@ struct
                end
            end
 
-         fun insertIfNotExistsOrShorter (dist, eKeys, eVals, foldPlatID, q) =
+         fun insertIfNotExistsOrShorter
+           (dist, eKeys, eVals, foldPlatID, q, fromPlatID) =
            let
              val pos = IntSet.findInsPos (foldPlatID, eKeys)
            in
@@ -112,7 +114,7 @@ struct
                        let
                          val eVals = ValSet.updateAtIdx
                            ( eVals
-                           , {distance = dist, from = Char.chr foldPlatID}
+                           , {distance = dist, from = Char.chr fromPlatID}
                            , pos
                            )
                        in
@@ -142,7 +144,8 @@ struct
 
          fun fState ((eVals, q), env, foldPlatID) =
            let
-             val {platforms, currentPlat, eKeys} = env
+             val {platforms, currentPlat, eKeys, distSoFar} = env
+             val curPlatID = #id currentPlat
              val foldPlat = Platform.find (foldPlatID, platforms)
            in
              if
@@ -154,8 +157,10 @@ struct
                  val {y = py, ...} = currentPlat
                  val {y = cy, ...} = foldPlat
                  val dist = abs (py - cy)
+                 val dist = dist + distSoFar
                in
-                 insertIfNotExistsOrShorter (dist, eKeys, eVals, foldPlatID, q)
+                 insertIfNotExistsOrShorter
+                   (dist, eKeys, eVals, foldPlatID, q, curPlatID)
                end
              else if
                isReachableFromLeft (currentPlat, foldPlat)
@@ -213,8 +218,10 @@ struct
                      in
                        Real.toInt IEEEReal.TO_NEAREST dg
                      end
+                 val dist = dist + distSoFar
                in
-                 insertIfNotExistsOrShorter (dist, eKeys, eVals, foldPlatID, q)
+                 insertIfNotExistsOrShorter
+                   (dist, eKeys, eVals, foldPlatID, q, curPlatID)
                end
              else
                (eVals, q)
@@ -223,7 +230,7 @@ struct
 
   fun filterMinDuplicates (q, eKeys) =
     let
-      val min = DistHeap.findMin q
+      val {id = min, ...} = DistHeap.findMin q
     in
       if IntSet.contains (min, eKeys) then
         let val q = DistHeap.deleteMin q
@@ -242,7 +249,8 @@ struct
       let
         val acc = curID :: acc
         val pos = IntSet.findInsPos (curID, eKeys)
-        val {from, ...} = IntSet.sub (eVals, pos)
+        val {from, ...} = ValSet.sub (eVals, pos)
+        val from = Char.ord from
       in
         helpGetPathList (from, eID, eKeys, eVals, acc)
       end
@@ -254,18 +262,59 @@ struct
     let
       (* filtering duplicates because we have no decrease-key operation *)
       val q = filterMinDuplicates (q, eKeys)
-      val min = DistHeap.findMin q
+      val pidPos = IntSet.findInsPos (pID, eKeys)
     in
-      if min = ~1 then
-        (* return empty list to signify that there is no path *)
-        []
-      else if min = pID then
-        (* found path to destination so reconstruct path and return *)
+      if pidPos = ~1 orelse pidPos = Vector.length eKeys then
+        (* return path if we explored pid *)
         getPathList (pID, eID, eKeys, eVals)
       else
-        (* find reachable values from min in quad tree *)
+        (* continue dijkstra's algorithm *)
         let
-          val plat = Platform.find (min, platforms)
+          val {distance = distSoFar, id = minID} = DistHeap.findMin q
+        in
+          if minID = ~1 then
+            (* return empty list to signify that there is no path *)
+            []
+          else if minID = pID then
+            (* found path to destination so reconstruct path and return 
+             * todo: maybe delete branch? pID is not explored... *)
+            getPathList (pID, eID, eKeys, eVals)
+          else
+            (* find reachable values from min in quad tree *)
+            let
+              val plat = Platform.find (minID, platforms)
+              val q = DistHeap.deleteMin q
+
+              (* add explored *)
+              val insPos = IntSet.findInsPos (minID, eKeys)
+              val eKeys = IntSet.insert (eKeys, minID, insPos)
+              val eVals = ValSet.insert
+                (eVals, {distance = distSoFar, from = Char.chr minID}, insPos)
+
+              val env =
+                { platforms = platforms
+                , currentPlat = plat
+                , eKeys = eKeys
+                , distSoFar = distSoFar
+                }
+
+              val state = (eVals, q)
+
+              val {x, y, width, ...} = plat
+              val height = Platform.platHeight
+
+              val ww = Constants.worldWidth
+              val wh = Constants.worldHeight
+
+              (* fold over quad tree, updating any distances 
+               * we find the shortest path for *)
+              val (eVals, q) = FindReachable.foldRegion
+                (x, y, width, height, 0, 0, ww, wh, env, state, platformTree)
+            in
+              loop (pID, eID, platforms, platformTree, q, eKeys, eVals)
+            end
+        end
+    end
 
   fun start (pID, eID, platforms, platformTree) =
     let
@@ -273,11 +322,12 @@ struct
       val q = DistHeap.empty
       val q = DistHeap.insert ({distance = 0, id = eID}, q)
 
-      val exploredKeys = IntSet.empty
-      val exploredVals = ValSet.empty
+      (* initialise explored keys and values *)
+      val eKeys = IntSet.empty
+      val eVals = ValSet.empty
 
-      val insPos = IntSet.findInsPos (eID, exploredKeys)
-      val exploredKeys = IntSet.insert (exploredKeys, eID, insPos)
+      val insPos = IntSet.findInsPos (eID, eKeys)
+      val eKeys = IntSet.insert (eKeys, eID, insPos)
 
       (* important: starting node will have a key that points to itself.
        * For example, if starting node is #"e", then the record will say 
@@ -289,7 +339,7 @@ struct
        * then we're done reconstructing the path and can return the path list.
        * *)
       val eVal = {distance = 0, from = Char.chr eID}
-      val exploredVals = ValSet.insert (exploredVals, eVal, insPos)
+      val eVals = ValSet.insert (eVals, eVal, insPos)
     in
       loop (pID, eID, platforms, platformTree, q, eKeys, eVals)
     end

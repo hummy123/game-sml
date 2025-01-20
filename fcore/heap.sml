@@ -13,10 +13,8 @@
 signature ORDERED =
 sig
   type t
-  type id
 
-  val default: id
-  val getID: t -> id
+  val default: t
   val leq: t * t -> bool
 end
 
@@ -28,7 +26,7 @@ sig
   val empty: t
   val isEmpty: t -> bool
   val insert: Elem.t * t -> t
-  val findMin: t -> Elem.id
+  val findMin: t -> Elem.t
   val deleteMin: t -> t
 end
 
@@ -76,22 +74,12 @@ struct
     | insert (x, ts) =
         NODE (x, 0, []) :: ts
 
-  fun helpFindMin (t, ts) =
-    case ts of
-      [x] => root x
-    | x :: tl =>
-        let val x = helpFindMin (x, tl)
+  fun findMin [] = Elem.default
+    | findMin [t] = root t
+    | findMin (t :: ts) =
+        let val x = findMin ts
         in if Elem.leq (root t, x) then root t else x
         end
-    | [] => root t
-
-  fun findMin [t] =
-        Elem.getID (root t)
-    | findMin (t :: ts) =
-        let val x = helpFindMin (t, ts)
-        in if Elem.leq (root t, x) then Elem.getID (root t) else Elem.getID x
-        end
-    | findMin [] = Elem.default
 
   fun getMin (prevT, t) =
     case t of
@@ -145,7 +133,7 @@ structure DistHeap =
        type id = int
 
        (* default = defaultID returned when queue is empty *)
-       val default = ~1
+       val default = {distance = ~1, id = ~1}
 
        fun getID {id, distance = _} = id
 
