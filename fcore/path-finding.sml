@@ -249,10 +249,12 @@ struct
       let
         val acc = curID :: acc
         val pos = IntSet.findInsPos (curID, eKeys)
+
         val {from, ...} = ValSet.sub (eVals, pos)
         val from = Char.ord from
       in
-        helpGetPathList (from, eID, eKeys, eVals, acc)
+        if from = curID then acc
+        else helpGetPathList (from, eID, eKeys, eVals, acc)
       end
 
   fun getPathList (pID, eID, eKeys, eVals) =
@@ -262,9 +264,8 @@ struct
     let
       (* filtering duplicates because we have no decrease-key operation *)
       val q = filterMinDuplicates (q, eKeys)
-      val pidPos = IntSet.findInsPos (pID, eKeys)
     in
-      if pidPos = ~1 orelse pidPos = Vector.length eKeys then
+      if IntSet.contains (pID, eKeys) then
         (* return path if we explored pid *)
         getPathList (pID, eID, eKeys, eVals)
       else
@@ -275,10 +276,6 @@ struct
           if minID = ~1 then
             (* return empty list to signify that there is no path *)
             []
-          else if minID = pID then
-            (* found path to destination so reconstruct path and return 
-             * todo: maybe delete branch? pID is not explored... *)
-            getPathList (pID, eID, eKeys, eVals)
           else
             (* find reachable values from min in quad tree *)
             let
@@ -300,11 +297,13 @@ struct
 
               val state = (eVals, q)
 
-              val {x, y, width, ...} = plat
-              val height = Platform.platHeight
-
+              (* calculate area to fold over quad tree *)
               val ww = Constants.worldWidth
               val wh = Constants.worldHeight
+
+              val {x, y, width, ...} = plat
+              val y = y - Constants.jumpLimit
+              val height = wh - y
 
               (* fold over quad tree, updating any distances 
                * we find the shortest path for *)
@@ -322,24 +321,19 @@ struct
       val q = DistHeap.empty
       val q = DistHeap.insert ({distance = 0, id = eID}, q)
 
-      (* initialise explored keys and values *)
+      (* explored keys and values *)
       val eKeys = IntSet.empty
       val eVals = ValSet.empty
 
-      val insPos = IntSet.findInsPos (eID, eKeys)
-      val eKeys = IntSet.insert (eKeys, eID, insPos)
-
-      (* important: starting node will have a key that points to itself.
-       * For example, if starting node is #"e", then the record will say 
-       * the "from" field is #"e".
-       * This is different from the other nodes, where the "from" field
-       * will be the ID of the previous node which led to the current one.
-       * This is our terminating condition when reconstructing paths:
-       * If the key matching this value is the same as the "from" node,
-       * then we're done reconstructing the path and can return the path list.
-       * *)
-      val eVal = {distance = 0, from = Char.chr eID}
-      val eVals = ValSet.insert (eVals, eVal, insPos)
+    (* important: starting node will have a key that points to itself.
+     * For example, if starting node is #"e", then the record will say 
+     * the "from" field is #"e".
+     * This is different from the other nodes, where the "from" field
+     * will be the ID of the previous node which led to the current one.
+     * This is our terminating condition when reconstructing paths:
+     * If the key matching this value is the same as the "from" node,
+     * then we're done reconstructing the path and can return the path list.
+     * *)
     in
       loop (pID, eID, platforms, platformTree, q, eKeys, eVals)
     end

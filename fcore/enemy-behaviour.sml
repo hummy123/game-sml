@@ -31,7 +31,7 @@ struct
       val ey = ey + Constants.enemySize - 1
 
       val width = Constants.enemySize
-      val height = 2
+      val height = Platform.platHeight
 
       val ww = Constants.worldWidth
       val wh = Constants.worldHeight
@@ -746,26 +746,12 @@ struct
 
       val eID = getPlatformBelowEnemy (enemy, platformTree, platforms)
 
-      val (bestDist, bestPath) =
-        if eID > ~1 andalso pID > ~1 then
-          getUpwardsPath (pID, eID, platforms, platformTree, 0, "")
-        else
-          (~1, [])
+      val _ = print "start best path:\n"
 
-      val _ =
-        if bestDist = ~1 then
-          print "no path\n"
-        else
-          let
-            val _ = print "has path:\n"
-            val _ =
-              List.map
-                (fn platID =>
-                   print ("best path platID: " ^ Int.toString platID ^ "\n"))
-                bestPath
-          in
-            ()
-          end
+      val bestPath = PathFinding.start (pID, eID, platforms, platformTree)
+      val _ = List.map (fn c => print (Int.toString c ^ "\n")) bestPath
+
+      val _ = print "finished best path\n\n"
 
       val distance = Constants.moveEnemyBy * Constants.jumpLimit
 

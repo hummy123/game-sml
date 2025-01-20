@@ -74,12 +74,16 @@ struct
     | insert (x, ts) =
         NODE (x, 0, []) :: ts
 
-  fun findMin [] = Elem.default
-    | findMin [t] = root t
-    | findMin (t :: ts) =
-        let val x = findMin ts
+  fun helpFindMin (prev, []) = root prev
+    | helpFindMin (prev, [t]) = root t
+    | helpFindMin (prev, t :: ts) =
+        let val x = helpFindMin (t, ts)
         in if Elem.leq (root t, x) then root t else x
         end
+
+  fun findMin [] = Elem.default
+    | findMin [t] = root t
+    | findMin (t :: ts) = helpFindMin (t, ts)
 
   fun getMin (prevT, t) =
     case t of
