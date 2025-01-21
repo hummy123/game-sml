@@ -28,7 +28,7 @@ struct
              (isBetween (prevX, curX, prevFinishX)
               orelse
               isBetween (prevX, curFinishX, prevFinishX)
-              andalso prevY + Constants.jumpLimit >= curY)
+              andalso prevY + 155 >= curY)
            end
 
          fun canDropDownTo (prevPlat: platform, currentPlat: platform) =
@@ -242,6 +242,7 @@ struct
   fun filterMinDuplicates (q, eKeys) =
     let
       val {id = min, ...} = DistHeap.findMin q
+      val pos = IntSet.findInsPos (min, eKeys)
     in
       if IntSet.contains (min, eKeys) then
         let val q = DistHeap.deleteMin q
@@ -261,7 +262,8 @@ struct
         val acc = curID :: acc
         val pos = IntSet.findInsPos (curID, eKeys)
 
-        val {from, ...} = ValSet.sub (eVals, pos)
+        val {from, distance, ...} = ValSet.sub (eVals, pos)
+        val _ = print ("266 distance = " ^ Int.toString distance ^ "\n")
       in
         helpGetPathList (from, eID, eKeys, eVals, acc)
       end
@@ -289,7 +291,6 @@ struct
             (* find reachable values from min in quad tree *)
             let
               val plat = Platform.find (minID, platforms)
-              val q = DistHeap.deleteMin q
 
               (* add explored *)
               val insPos = IntSet.findInsPos (minID, eKeys)
@@ -318,7 +319,7 @@ struct
               (* fold over quad tree, updating any distances 
                * we find the shortest path for *)
               val (eVals, q) = FindReachable.foldRegion
-                (0, 0, ww, wh, 0, 0, ww, wh, env, state, platformTree)
+                (0, 0, ww, 100, 0, 0, ww, wh, env, state, platformTree)
             in
               loop (pID, eID, platforms, platformTree, q, eKeys, eVals)
             end

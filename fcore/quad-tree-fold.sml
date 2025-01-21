@@ -52,7 +52,6 @@ struct
     else
       let
         val {itemID, ...} = Vector.sub (elements, pos)
-        val _ = print ("foldVec itemID: " ^ Int.toString itemID ^ "\n")
         val state = Fn.fState (state, env, itemID)
       in
         foldVec (iX, iY, iW, iH, pos + 1, elements, state, env)
