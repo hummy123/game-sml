@@ -24,7 +24,7 @@ struct
    * Function is monomorphic in the sense that wallTree and platformTree 
    * are both same type (no generics/parametric polymorphism).
    * *)
-  fun standingOnArea (enemy, tree) =
+  fun standingOnArea (enemy: enemy, tree) =
     let
       val {x = ex, y = ey, ...} = enemy
 
@@ -131,563 +131,9 @@ struct
       | STAY_STILL => acc
     end
 
-  (* new pathfinding using quad tree *)
-  fun helpHasVisited (pos, find, visited) =
-    if pos = Vector.length visited then
-      false
-    else
-      let val cur = Vector.sub (visited, pos)
-      in cur = find orelse helpHasVisited (pos + 1, find, visited)
-      end
-
-  fun hasVisted (find, visited) =
-    helpHasVisited (0, Char.chr find, visited)
-
+  (* pathfinding *)
   fun isBetween (p1, check, p2) = check >= p1 andalso check <= p2
 
-  fun isReachableFromBelow (prevPlat: platform, currentPlat: platform) =
-    let
-      val {x = prevX, y = prevY, width = prevWidth, ...} = prevPlat
-      val {x = curX, y = curY, width = curWidth, ...} = currentPlat
-
-      val prevFinishX = prevX + prevWidth
-      val curFinishX = curX + curWidth
-    in
-      (isBetween (prevX, curX, prevFinishX)
-       orelse
-       isBetween (prevX, curFinishX, prevFinishX)
-       andalso prevY + Constants.jumpLimit >= curY)
-    end
-
-  fun isReachableFromAbove (prevPlat: platform, currentPlat: platform) =
-    let
-      val {x = prevX, y = prevY, width = prevWidth, ...} = prevPlat
-      val {x = curX, y = curY, width = curWidth, ...} = currentPlat
-
-      val prevFinishX = prevX + prevWidth
-      val curFinishX = curX + curWidth
-    in
-      (isBetween (prevX, curX, prevFinishX)
-       orelse isBetween (prevX, curFinishX, prevFinishX) andalso prevY <= curY)
-    end
-
-  fun isReachableFromLeft (prevPlat, currentPlat) =
-    (* prev = right/from, current = left/to *)
-    let
-      val {x = prevX, y = prevY, width = prevWidth, ...} = prevPlat
-      val {x = curX, y = curY, width = curWidth, ...} = currentPlat
-
-      val enemyX = prevX
-      val xDiff = prevX - curX
-    in
-      if xDiff <= Constants.jumpLimit then
-        true
-      else
-        let
-          val enemyApexX = enemyX - Constants.jumpLimit
-          val enemyApexY = prevY + Constants.jumpLimit
-
-          val curFinishX = curX + curWidth
-
-          val diffApexY = enemyApexY - curY
-          val diffApexX = enemyApexX - curFinishX
-        in
-          diffApexX <= diffApexY orelse diffApexY <= 0
-        end
-    end
-
-  fun isReachableFromRight (prevPlat, currentPlat) =
-    (* prev = left/from, current = right/to *)
-    let
-      val {x = prevX, y = prevY, width = prevWidth, ...} = prevPlat
-      val {x = curX, y = curY, width = curWidth, ...} = currentPlat
-
-      (* last x coordinate where enemy can fully fit on prevPlat *)
-      val enemyX = prevX + prevWidth - Constants.enemySize
-
-      val xDiff = curX - prevX
-    in
-      if xDiff <= Constants.jumpLimit then
-        (* platform is possible to jump to without falling *)
-        true
-      else
-        let
-          val enemyApexX = enemyX + Constants.jumpLimit
-          val enemyApexY = prevY + Constants.jumpLimit
-
-          val diffApexY = enemyApexY - curY
-          val diffApexX = enemyApexX - curX
-        in
-          diffApexY <= 0 orelse diffApexX <= diffApexY
-        end
-    end
-
-  fun getLeftwardsPath
-    (playerPlatID, currentPlatID, platforms, platformTree, dist, visited) =
-    if playerPlatID = currentPlatID then
-      (dist, [currentPlatID])
-    else
-      let
-        val chr = Char.chr currentPlatID
-        val visited = Vector.concat [Vector.fromList [chr], visited]
-
-        val currentPlat = Platform.find (currentPlatID, platforms)
-        val {x, y, width, ...} = currentPlat
-
-        (* include all platforms we can jump leftwards to,
-         * whether above or below. 
-         * *)
-
-        val searchY = y - Constants.jumpLimit
-        val searchH = Constants.worldHeight - searchY
-
-        val searchX = 0
-        val searchW = x
-
-        val ww = Constants.worldWidth
-        val wh = Constants.worldHeight
-
-        val leftList = QuadTree.getCollisions
-          (searchX, searchY, searchW, searchH, 0, 0, ww, wh, ~1, platformTree)
-
-        val (bestDist, bestPath) = helpGetLeftwardsPath
-          ( playerPlatID
-          , platforms
-          , platformTree
-          , leftList
-          , dist
-          , currentPlat
-          , ~1
-          , []
-          , visited
-          )
-      in
-        if bestDist = ~1 then (* invalid *) (~1, [])
-        else (bestDist, currentPlatID :: bestPath)
-      end
-
-  and helpGetLeftwardsPath
-    ( playerPlatID
-    , platforms
-    , platformTree
-    , lst
-    , dist
-    , prevPlat
-    , bestDist
-    , bestPath
-    , visited
-    ) =
-    case lst of
-      id :: tl =>
-        if hasVisted (id, visited) then
-          helpGetLeftwardsPath
-            ( playerPlatID
-            , platforms
-            , platformTree
-            , tl
-            , dist
-            , prevPlat
-            , bestDist
-            , bestPath
-            , visited
-            )
-        else
-          let
-            val currentPlat = Platform.find (id, platforms)
-          in
-            if isReachableFromLeft (prevPlat, currentPlat) then
-              (* is reachable, so reach *)
-              let
-                (* considering horizontal distance only.
-                 * todo: can consider diagonal/vertical distance too 
-                 * (by pythagoras) 
-                 * also todo: lFinishX might be to the right of rx
-                 * if currentPlat intersects with prevPlat in the y axis
-                 * in which case the distance calculated is wrong.
-                 * *)
-                val {x = lx, width = lWidth, ...} = currentPlat
-                val {x = rx, width = rWidth, ...} = prevPlat
-
-                val lFinishX = lx + lWidth
-                val diff = rx - lFinishX
-                val platDist = dist + diff
-
-                val (newDist, newPath) = getLeftwardsPath
-                  (playerPlatID, id, platforms, platformTree, platDist, visited)
-              in
-                if newDist = ~1 then
-                  (* newPath is invalid, so reuse old path *)
-                  helpGetLeftwardsPath
-                    ( playerPlatID
-                    , platforms
-                    , platformTree
-                    , tl
-                    , dist
-                    , prevPlat
-                    , bestDist
-                    , bestPath
-                    , visited
-                    )
-                else if bestDist = ~1 then
-                  (* bestPath is invalid *)
-                  helpGetLeftwardsPath
-                    ( playerPlatID
-                    , platforms
-                    , platformTree
-                    , tl
-                    , dist
-                    , prevPlat
-                    , newDist
-                    , newPath
-                    , visited
-                    )
-                else if newDist < bestDist then
-                  helpGetLeftwardsPath
-                    ( playerPlatID
-                    , platforms
-                    , platformTree
-                    , tl
-                    , dist
-                    , prevPlat
-                    , newDist
-                    , newPath
-                    , visited
-                    )
-                else
-                  helpGetLeftwardsPath
-                    ( playerPlatID
-                    , platforms
-                    , platformTree
-                    , tl
-                    , dist
-                    , prevPlat
-                    , bestDist
-                    , bestPath
-                    , visited
-                    )
-              end
-            else
-              (* ignore node and filter out if we cannot reach *)
-              helpGetLeftwardsPath
-                ( playerPlatID
-                , platforms
-                , platformTree
-                , tl
-                , dist
-                , prevPlat
-                , bestDist
-                , bestPath
-                , visited
-                )
-          end
-    | [] => (bestDist, bestPath)
-
-  fun getRightwardsPath
-    (playerPlatID, currentPlatID, platforms, platformTree, dist, visited) =
-    if playerPlatID = currentPlatID then
-      (dist, [currentPlatID])
-    else
-      let
-        val chr = Char.chr currentPlatID
-        val visited = Vector.concat [Vector.fromList [chr], visited]
-
-        val currentPlat = Platform.find (currentPlatID, platforms)
-        val {x, y, width, ...} = currentPlat
-
-        (* include all platforms we can jump rightwards to,
-         * whether above or below. 
-         * Note: Collision list may contain platforms which we can't jump to
-         * as player will eventually fall from jump, 
-         * and our query to the QuadTree is a simple rectangular box 
-         * which is not the correct shape to model diagonal descent.
-         * Thus, we perform additional filtering in the collision list
-         * to see if the platform is reachable.
-         * *)
-
-        val searchY = y - Constants.jumpLimit
-        val searchH = Constants.worldHeight - searchY
-
-        val searchX = x + width
-        val searchW = Constants.worldWidth - searchX
-
-        val ww = Constants.worldWidth
-        val wh = Constants.worldHeight
-
-        val rightList = QuadTree.getCollisions
-          (searchX, searchY, searchW, searchH, 0, 0, ww, wh, ~1, platformTree)
-
-        val (bestDist, bestPath) = helpGetRightwardsPath
-          ( playerPlatID
-          , platforms
-          , platformTree
-          , rightList
-          , dist
-          , currentPlat
-          , ~1
-          , []
-          , visited
-          )
-      in
-        if bestDist = ~1 then (* invalid *) (~1, [])
-        else (bestDist, currentPlatID :: bestPath)
-      end
-
-  and helpGetRightwardsPath
-    ( playerPlatID
-    , platforms
-    , platformTree
-    , lst
-    , dist
-    , prevPlat
-    , bestDist
-    , bestPath
-    , visited
-    ) =
-    case lst of
-      id :: tl =>
-        if hasVisted (id, visited) then
-          helpGetRightwardsPath
-            ( playerPlatID
-            , platforms
-            , platformTree
-            , tl
-            , dist
-            , prevPlat
-            , bestDist
-            , bestPath
-            , visited
-            )
-        else
-          let
-            val currentPlat = Platform.find (id, platforms)
-          in
-            if isReachableFromRight (prevPlat, currentPlat) then
-              (* is reachable, so reach *)
-              let
-                (* considering horizontal distance only.
-                 * todo: can consider diagonal/vertical distance too 
-                 * (by pythagoras) *)
-                val {x = cx, ...} = currentPlat
-                val {x = px, ...} = prevPlat
-
-                val diff = cx - px
-                val platDist = dist + diff
-
-                val (newDist, newPath) = getRightwardsPath
-                  (playerPlatID, id, platforms, platformTree, platDist, visited)
-              in
-                if newDist = ~1 then
-                  (* newPath is invalid, so reuse old path *)
-                  helpGetRightwardsPath
-                    ( playerPlatID
-                    , platforms
-                    , platformTree
-                    , tl
-                    , dist
-                    , prevPlat
-                    , bestDist
-                    , bestPath
-                    , visited
-                    )
-                else if bestDist = ~1 then
-                  (* bestPath is invalid *)
-                  helpGetRightwardsPath
-                    ( playerPlatID
-                    , platforms
-                    , platformTree
-                    , tl
-                    , dist
-                    , prevPlat
-                    , newDist
-                    , newPath
-                    , visited
-                    )
-                else if newDist < bestDist then
-                  helpGetRightwardsPath
-                    ( playerPlatID
-                    , platforms
-                    , platformTree
-                    , tl
-                    , dist
-                    , prevPlat
-                    , newDist
-                    , newPath
-                    , visited
-                    )
-                else
-                  helpGetRightwardsPath
-                    ( playerPlatID
-                    , platforms
-                    , platformTree
-                    , tl
-                    , dist
-                    , prevPlat
-                    , bestDist
-                    , bestPath
-                    , visited
-                    )
-              end
-            else
-              (* ignore node and filter out if we cannot reach *)
-              helpGetRightwardsPath
-                ( playerPlatID
-                , platforms
-                , platformTree
-                , tl
-                , dist
-                , prevPlat
-                , bestDist
-                , bestPath
-                , visited
-                )
-          end
-    | [] => (bestDist, bestPath)
-
-  fun getUpwardsPath
-    (playerPlatID, currentPlatID, platforms, platformTree, dist, visited) =
-    if playerPlatID = currentPlatID then
-      (dist, [currentPlatID])
-    else
-      let
-        (* add current node to list of visited nodes *)
-        val chr = Char.chr currentPlatID
-        val visited = Vector.concat [Vector.fromList [chr], visited]
-
-        val currentPlat = Platform.find (currentPlatID, platforms)
-        val {x, y, width, ...} = currentPlat
-
-        (* search for platforms directly above current one *)
-        val searchY = y - Constants.jumpLimit
-        val searchH = Constants.jumpLimit
-
-        (* todo: x/width are placeholder values.
-         * They should define values that let reachable platforms 
-         * on the top left/top right be included in the collision list
-         * but they currentl are not. *)
-        val searchX = x
-        val searchW = width
-
-        val ww = Constants.worldWidth
-        val wh = Constants.worldHeight
-
-        val upList = QuadTree.getCollisions
-          (searchX, searchY, searchW, searchH, 0, 0, ww, wh, ~1, platformTree)
-
-        val (bestDist, bestPath) = helpGetUpwardsPath
-          ( playerPlatID
-          , platforms
-          , platformTree
-          , upList
-          , dist
-          , currentPlat
-          , ~1
-          , []
-          , visited
-          )
-      in
-        if bestDist = ~1 then
-          (* invalid; return error value *)
-          (~1, [])
-        else
-          (* is valid, so cons currentPlatID to path *)
-          (bestDist, currentPlatID :: bestPath)
-      end
-
-  and helpGetUpwardsPath
-    ( playerPlatID
-    , platforms
-    , platformTree
-    , lst
-    , dist
-    , prevPlat
-    , bestDist
-    , bestPath
-    , visited
-    ) =
-    case lst of
-      id :: tl =>
-        if hasVisted (id, visited) then
-          helpGetUpwardsPath
-            ( playerPlatID
-            , platforms
-            , platformTree
-            , tl
-            , dist
-            , prevPlat
-            , bestDist
-            , bestPath
-            , visited
-            )
-        else
-          let
-            val currentPlat = Platform.find (id, platforms)
-            (* considering vertical distance only.
-             * This is okay because the scan box is a simple square
-             * directly above prev platform which does not care about 
-             * top right or top left). *)
-            val {y = cy, ...} = currentPlat
-            val {y = py, ...} = prevPlat
-
-            val diff = py - cy
-            val platDist = dist + diff
-
-            val (newDist, newPath) = getUpwardsPath
-              (playerPlatID, id, platforms, platformTree, platDist, visited)
-          in
-            if newDist = ~1 then
-              (* newPath is invalid, so reuse old path *)
-              helpGetUpwardsPath
-                ( playerPlatID
-                , platforms
-                , platformTree
-                , tl
-                , dist
-                , prevPlat
-                , bestDist
-                , bestPath
-                , visited
-                )
-            else if bestDist = ~1 then
-              (* bestPath is invalid *)
-              helpGetUpwardsPath
-                ( playerPlatID
-                , platforms
-                , platformTree
-                , tl
-                , dist
-                , prevPlat
-                , newDist
-                , newPath
-                , visited
-                )
-            else if newDist < bestDist then
-              helpGetUpwardsPath
-                ( playerPlatID
-                , platforms
-                , platformTree
-                , tl
-                , dist
-                , prevPlat
-                , newDist
-                , newPath
-                , visited
-                )
-            else
-              helpGetUpwardsPath
-                ( playerPlatID
-                , platforms
-                , platformTree
-                , tl
-                , dist
-                , prevPlat
-                , bestDist
-                , bestPath
-                , visited
-                )
-          end
-    | [] => (bestDist, bestPath)
-
-  (* pathfinding *)
   fun getHighestPlatform (collisions, platforms, highestY, highestID) =
     case collisions of
       id :: tl =>
@@ -724,6 +170,8 @@ struct
       val searchWidth = Constants.enemySize
       val searchHeight = Constants.worldHeight - y
 
+      val y = y + Constants.enemySize
+
       val ww = Constants.worldWidth
       val wh = Constants.worldHeight
 
@@ -733,42 +181,56 @@ struct
       getHighestPlatform (collisions, platforms, wh, ~1)
     end
 
-  fun canJumpOnPID (collisions, pID) =
-    case collisions of
-      id :: tl => (id = pID) orelse canJumpOnPID (tl, pID)
-    | [] => false
+  fun canJump (nextPlatform, platformTree, enemy) =
+    let
+      val {x = platX, y = platY, width = platW, ...} = nextPlatform
+      val platFinishX = platX + platW
 
-  fun canJumpOnPlatform (player, platforms, enemy: enemy, platformTree) =
+      val {x = eX, y = ey, yAxis = eyAxis, ...} = enemy
+
+      val standingOnPlat = standingOnArea (enemy, platformTree)
+    in
+      isBetween (platX, eX, platFinishX) andalso standingOnPlat
+      andalso (ey > platY andalso ey + Constants.jumpLimit >= platY)
+    end
+
+  (* get patches to help enemy move to nextPlatformID *)
+  fun getPathToNextPlatform
+    (nextPlatformID, platforms, platformTree, enemy, eID, pID, acc) =
+    let
+      val nextPlatform = Platform.find (nextPlatformID, platforms)
+
+      val {x = eX, y = ey, yAxis = eyAxis, ...} = enemy
+
+      val canJump = canJump (nextPlatform, platformTree, enemy)
+
+    in
+      if canJump then
+        case eyAxis of
+          ON_GROUND => EnemyPatch.W_Y_AXIS (JUMPING 0) :: acc
+        | FALLING => EnemyPatch.W_Y_AXIS (JUMPING 0) :: acc
+        | _ => acc
+      else
+        acc
+    end
+
+  fun canJumpOnPlatform (player, platforms, enemy: enemy, platformTree, acc) =
     let
       (* todo: possibly get pID and eID of player/enemy in a different way *)
       val pID = getPlatformBelowPlayer (player, platformTree, platforms)
-      val {x, y, ...} = enemy
       val eID = getPlatformBelowEnemy (enemy, platformTree, platforms)
 
       val bestPath = PathFinding.start (pID, eID, platforms, platformTree)
-
-      val distance = Constants.moveEnemyBy * Constants.jumpLimit
-
-      val distance = distance div 2
-      val yDistance = distance
-
-      val y = y - yDistance + Constants.enemySize
-
-      val ww = Constants.worldWidth
-      val wh = Constants.worldHeight
-
-      val mx = x - distance
-
-      val rightCollisions = QuadTree.getCollisions
-        (x, y, distance, yDistance, 0, 0, ww, wh, ~1, platformTree)
-
-      val leftCollisions = QuadTree.getCollisions
-        (mx, y, distance, yDistance, 0, 0, ww, wh, ~1, platformTree)
     in
-      canJumpOnPID (rightCollisions, pID)
-      orelse canJumpOnPID (leftCollisions, pID)
+      if eID = pID then
+        EnemyPatch.W_Y_AXIS FALLING :: acc
+      else
+        case bestPath of
+          nextPlatformID :: _ =>
+            getPathToNextPlatform
+              (nextPlatformID, platforms, platformTree, enemy, eID, pID, acc)
+        | [] => acc
     end
-
 
   fun getFollowPatches
     (player: player, enemy, wallTree, platformTree, platforms, acc) =
@@ -778,20 +240,8 @@ struct
 
       val xAxis = if px < ex then MOVE_LEFT else MOVE_RIGHT
 
-      val isOnWall = standingOnArea (enemy, wallTree)
-      val isOnPlatform = standingOnArea (enemy, platformTree)
-      val hasPlatformAbove =
-        canJumpOnPlatform (player, platforms, enemy, platformTree)
-      val shouldJump = (isOnWall orelse isOnPlatform) andalso hasPlatformAbove
+      val acc = canJumpOnPlatform (player, platforms, enemy, platformTree, acc)
 
-      val yAxis =
-        if ey > py andalso shouldJump then
-          case eyAxis of
-            ON_GROUND => JUMPING 0
-          | FALLING => JUMPING 0
-          | _ => eyAxis
-        else
-          eyAxis
     in
       EnemyPatch.W_X_AXIS STAY_STILL :: acc
     end
