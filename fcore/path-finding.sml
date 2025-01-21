@@ -2,8 +2,7 @@ structure PathFinding =
 struct
   (* functor for adding reachable platforms to queue *)
   structure FindReachable =
-    MakeQuadFolder
-      (struct
+      struct
          open GameType
 
          type env =
@@ -237,7 +236,7 @@ struct
              else
                (eVals, q)
            end
-       end)
+       end
 
   fun filterMinDuplicates (q, eKeys) =
     let
@@ -270,6 +269,21 @@ struct
 
   fun getPathList (pID, eID, eKeys, eVals) =
     helpGetPathList (pID, eID, eKeys, eVals, [])
+
+  fun addPlatforms (pos, (eVals, q), env) =
+  let
+    val {platforms, ...} = env
+  in
+    if pos = Vector.length platforms then (eVals, q)
+    else
+      let
+        val foldPlat = Vector.sub (platforms, pos)
+        val foldPlatID = #id foldPlat
+        val (eVals, q) = FindReachable.fState ((eVals, q), env, foldPlatID)
+      in
+        addPlatforms (pos + 1, (eVals, q), env)
+      end
+  end
 
   fun loop (pID, eID, platforms, platformTree, q, eKeys, eVals) =
     let
@@ -318,8 +332,7 @@ struct
 
               (* fold over quad tree, updating any distances 
                * we find the shortest path for *)
-              val (eVals, q) = FindReachable.foldRegion
-                (0, 0, ww, 100, 0, 0, ww, wh, env, state, platformTree)
+              val (eVals, q) = addPlatforms (0, (eVals, q), env)
             in
               loop (pID, eID, platforms, platformTree, q, eKeys, eVals)
             end
