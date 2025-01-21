@@ -740,18 +740,12 @@ struct
 
   fun canJumpOnPlatform (player, platforms, enemy: enemy, platformTree) =
     let
+      (* todo: possibly get pID and eID of player/enemy in a different way *)
       val pID = getPlatformBelowPlayer (player, platformTree, platforms)
-
       val {x, y, ...} = enemy
-
       val eID = getPlatformBelowEnemy (enemy, platformTree, platforms)
 
-      val _ = print "start best path:\n"
-
       val bestPath = PathFinding.start (pID, eID, platforms, platformTree)
-      val _ = List.map (fn c => print (Int.toString c ^ "\n")) bestPath
-
-      val _ = print "finished best path\n\n"
 
       val distance = Constants.moveEnemyBy * Constants.jumpLimit
 

@@ -166,7 +166,7 @@ struct
       val plat3 = {id = 3, x = 355, y = 659, width = 555}
       val plat4 = {id = 4, x = 155, y = 855, width = 199}
       val plat5 = {id = 5, x = 155, y = 759, width = 199}
-      val plat6 = {id = 6, x = 155, y = 610, width = 199}
+      val plat6 = {id = 6, x = 155, y = 710, width = 199}
       val platforms = Vector.fromList [plat1, plat2, plat3, plat4, plat5, plat6]
       val platformTree = Platform.generateTree platforms
 
