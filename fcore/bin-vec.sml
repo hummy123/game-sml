@@ -12,13 +12,16 @@ sig
   type elem
 
   val empty: elem vector
+  val isEmpty: elem vector -> bool
 
   val sub: elem vector * int -> elem
   val contains: elem * elem vector -> bool
+  val findMin: elem vector -> elem
 
   val findInsPos: elem * elem vector -> int
   val insert: elem vector * elem * int -> elem vector
   val delete: elem vector * elem -> elem vector
+  val deleteMin: elem vector -> elem vector
   val updateAtIdx: elem vector * elem * int -> elem vector
 
   val fromList: elem list -> elem vector
@@ -30,7 +33,22 @@ struct
 
   val empty = Vector.fromList []
 
+  fun isEmpty vec = Vector.length vec = 0
+
+  fun deleteMin vec =
+    if Vector.length vec <= 1 then
+      Vector.fromList []
+    else
+      let
+        val len = Vector.length vec - 2
+        val slice = VectorSlice.slice (vec, 1, SOME len)
+      in
+        VectorSlice.vector slice
+      end
+
   val sub = Vector.sub
+
+  fun findMin vec = Vector.sub (vec, 0)
 
   fun reverseLinearSearch (pos, findNum, vec) =
     if pos < 0 then
@@ -176,6 +194,18 @@ structure ValSet =
        * is meant to contain corresponding values, like in a Map structure.
        * However, it's required by the functor, 
        * and it is actually easy to implement so no issue. *)
+
+       fun l ({distance = a, ...}: elem, {distance = b, ...}: elem) = a < b
+
+       fun eq ({distance = a, ...}: elem, {distance = b, ...}: elem) = a = b
+
+       fun g ({distance = a, ...}: elem, {distance = b, ...}: elem) = a > b
+     end)
+
+structure DistVec =
+  MakeBinVec
+    (struct
+       type elem = {distance: int, id: int, comesFrom: int}
 
        fun l ({distance = a, ...}: elem, {distance = b, ...}: elem) = a < b
 

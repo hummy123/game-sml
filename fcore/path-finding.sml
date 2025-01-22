@@ -12,7 +12,7 @@ struct
       , distSoFar: int
       }
 
-    type state = ValSet.elem vector * DistHeap.t
+    type state = ValSet.elem vector * DistVec.elem vector
 
     fun isBetween (p1, check, p2) = check >= p1 andalso check <= p2
 
@@ -122,11 +122,10 @@ struct
             else
               (* key not explored, so add to queue *)
               let
-                val q =
-                  DistHeap.insert
-                    ( {distance = dist, id = foldPlatID, comesFrom = fromPlatID}
-                    , q
-                    )
+                val insRecord =
+                  {distance = dist, id = foldPlatID, comesFrom = fromPlatID}
+                val insPos = DistVec.findInsPos (insRecord, q)
+                val q = DistVec.insert (q, insRecord, insPos)
               in
                 (eVals, q)
               end
@@ -134,9 +133,10 @@ struct
         else
           (* key not explored, so add to queue *)
           let
-            val q =
-              DistHeap.insert
-                ({distance = dist, id = foldPlatID, comesFrom = fromPlatID}, q)
+            val insRecord =
+              {distance = dist, id = foldPlatID, comesFrom = fromPlatID}
+            val insPos = DistVec.findInsPos (insRecord, q)
+            val q = DistVec.insert (q, insRecord, insPos)
           in
             (eVals, q)
           end
@@ -229,17 +229,21 @@ struct
   end
 
   fun filterMinDuplicates (q, eKeys) =
-    let
-      val {id = min, ...} = DistHeap.findMin q
-      val pos = IntSet.findInsPos (min, eKeys)
-    in
-      if IntSet.contains (min, eKeys) then
-        let val q = DistHeap.deleteMin q
-        in filterMinDuplicates (q, eKeys)
-        end
-      else
-        q
-    end
+    if DistVec.isEmpty q then
+      q
+    else
+      let
+        val {id = min, ...} = DistVec.findMin q
+
+        val pos = IntSet.findInsPos (min, eKeys)
+      in
+        if IntSet.contains (min, eKeys) then
+          let val q = DistVec.deleteMin q
+          in filterMinDuplicates (q, eKeys)
+          end
+        else
+          q
+      end
 
   fun helpGetPathList (curID, eID, eKeys, eVals, acc) =
     if curID = eID then
@@ -283,57 +287,51 @@ struct
       if IntSet.contains (pID, eKeys) then
         (* return path if we explored pid *)
         getPathList (pID, eID, eKeys, eVals)
+      else (* continue dijkstra's algorithm *) if DistVec.isEmpty q then
+        (* return empty list to signify that there is no path *)
+        []
       else
-        (* continue dijkstra's algorithm *)
+        (* find reachable values from min in quad tree *)
         let
-          val {distance = distSoFar, id = minID, comesFrom} = DistHeap.findMin q
+          val {distance = distSoFar, id = minID, comesFrom} = DistVec.findMin q
+          val plat = Platform.find (minID, platforms)
+
+          (* add explored *)
+          val insPos = IntSet.findInsPos (minID, eKeys)
+          val eKeys = IntSet.insert (eKeys, minID, insPos)
+          val eVals =
+            ValSet.insert
+              (eVals, {distance = distSoFar, from = comesFrom}, insPos)
+
+          val env =
+            { platforms = platforms
+            , currentPlat = plat
+            , eKeys = eKeys
+            , distSoFar = distSoFar
+            }
+
+          val state = (eVals, q)
+
+          (* calculate area to fold over quad tree *)
+          val ww = Constants.worldWidth
+          val wh = Constants.worldHeight
+
+          val {x, y, width, ...} = plat
+          val y = y - Constants.jumpLimit
+          val height = wh - y
+
+          (* fold over quad tree, updating any distances 
+           * we find the shortest path for *)
+          val (eVals, q) = addPlatforms (0, (eVals, q), env)
         in
-          if minID = ~1 then
-            (* return empty list to signify that there is no path *)
-            []
-          else
-            (* find reachable values from min in quad tree *)
-            let
-              val plat = Platform.find (minID, platforms)
-
-              (* add explored *)
-              val insPos = IntSet.findInsPos (minID, eKeys)
-              val eKeys = IntSet.insert (eKeys, minID, insPos)
-              val eVals =
-                ValSet.insert
-                  (eVals, {distance = distSoFar, from = comesFrom}, insPos)
-
-              val env =
-                { platforms = platforms
-                , currentPlat = plat
-                , eKeys = eKeys
-                , distSoFar = distSoFar
-                }
-
-              val state = (eVals, q)
-
-              (* calculate area to fold over quad tree *)
-              val ww = Constants.worldWidth
-              val wh = Constants.worldHeight
-
-              val {x, y, width, ...} = plat
-              val y = y - Constants.jumpLimit
-              val height = wh - y
-
-              (* fold over quad tree, updating any distances 
-               * we find the shortest path for *)
-              val (eVals, q) = addPlatforms (0, (eVals, q), env)
-            in
-              loop (pID, eID, platforms, platformTree, q, eKeys, eVals)
-            end
+          loop (pID, eID, platforms, platformTree, q, eKeys, eVals)
         end
     end
 
   fun start (pID, eID, platforms, platformTree) =
     let
       (* initialise data structures: the priority queue and the explored map *)
-      val q = DistHeap.empty
-      val q = DistHeap.insert ({distance = 0, id = eID, comesFrom = eID}, q)
+      val q = DistVec.fromList [{distance = 0, id = eID, comesFrom = eID}]
 
       (* explored keys and values *)
       val eKeys = IntSet.empty
