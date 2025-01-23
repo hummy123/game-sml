@@ -194,6 +194,19 @@ struct
       andalso (ey > platY andalso ey + Constants.jumpLimit >= platY)
     end
 
+  fun canDrop (nextPlatform, platformTree, enemy) =
+    let
+      val {x = platX, y = platY, width = platW, ...} = nextPlatform
+      val platFinishX = platX + platW
+
+      val {x = eX, y = ey, yAxis = eyAxis, ...} = enemy
+
+      val standingOnPlat = standingOnArea (enemy, platformTree)
+    in
+      isBetween (platX, eX, platFinishX) andalso standingOnPlat
+      andalso ey < platY
+    end
+
   (* get patches to help enemy move to nextPlatformID *)
   fun getPathToNextPlatform
     (nextPlatformID, platforms, platformTree, enemy, eID, pID, acc) =
@@ -203,13 +216,15 @@ struct
       val {x = eX, y = ey, yAxis = eyAxis, ...} = enemy
 
       val canJump = canJump (nextPlatform, platformTree, enemy)
-
+      val canDrop = canDrop (nextPlatform, platformTree, enemy)
     in
       if canJump then
         case eyAxis of
           ON_GROUND => EnemyPatch.W_Y_AXIS (JUMPING 0) :: acc
         | FALLING => EnemyPatch.W_Y_AXIS (JUMPING 0) :: acc
         | _ => acc
+      else if canDrop then
+        EnemyPatch.W_Y_AXIS DROP_BELOW_PLATFORM :: acc
       else
         acc
     end
