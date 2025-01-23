@@ -2,8 +2,8 @@ structure Platform =
 struct
   (* collision height of a platform.
    * Visual height may (and probably will) be different. *)
-  val platHeight = 3
-  val rPlatHeight = 3.0
+  val platHeight = 5
+  val rPlatHeight = 5.0
 
   fun helpGenerateTree (pos, platVec, acc) =
     if pos = Vector.length platVec then

@@ -187,11 +187,12 @@ struct
       val platFinishX = platX + platW
 
       val {x = eX, y = ey, yAxis = eyAxis, ...} = enemy
+      val ey = ey + Constants.enemySize
 
       val standingOnPlat = standingOnArea (enemy, platformTree)
     in
       isBetween (platX, eX, platFinishX) andalso standingOnPlat
-      andalso (ey > platY andalso ey + Constants.jumpLimit >= platY)
+      andalso (ey > platY andalso ey >= platY)
     end
 
   fun canDrop (nextPlatform, platformTree, enemy) =

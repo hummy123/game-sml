@@ -1305,7 +1305,7 @@ struct
                      , quadY
                      , halfWidth
                      , halfHeight
-                     , tree
+                     , topLeft
                      )
                  end
              | TOP_RIGHT =>
@@ -1323,7 +1323,7 @@ struct
                      , quadY
                      , halfWidth
                      , halfHeight
-                     , tree
+                     , topRight
                      )
                  end
              | BOTTOM_LEFT =>
@@ -1341,7 +1341,7 @@ struct
                      , middleY
                      , halfWidth
                      , halfHeight
-                     , tree
+                     , bottomLeft
                      )
                  end
              | BOTTOM_RIGHT =>
@@ -1360,7 +1360,7 @@ struct
                      , middleY
                      , halfWidth
                      , halfHeight
-                     , tree
+                     , bottomRight
                      )
                  end
              | PARENT_QUADRANT => ~1)

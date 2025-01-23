@@ -73,31 +73,30 @@ struct
             end
     end
 
-  fun getPlatformPatches (yAxis, platforms: platform vector, lst, acc) =
+  fun standingOnArea (x, y, tree) =
     let
-      open QuadTree
-    in
-      case lst of
-        platID :: tl =>
-          (case yAxis of
-             DROP_BELOW_PLATFORM =>
-               (* pass through, allowing player to drop below the platform *)
-               getPlatformPatches (yAxis, platforms, tl, acc)
-           | JUMPING _ =>
-               (* pass through, allowing player to jump above the platform *)
-               getPlatformPatches (yAxis, platforms, tl, acc)
-           | _ =>
-               let
-                 (* default case: 
-                  * player will land on platform and stay on the ground there. *)
-                 val {y = platY, ...} = Vector.sub (platforms, platID - 1)
+      val y = y + Fn.entitySize - 1
 
-                 val newY = platY - Fn.entitySize
-                 val acc = Fn.W_Y_AXIS ON_GROUND :: Fn.W_Y newY :: acc
-               in
-                 getPlatformPatches (yAxis, platforms, tl, acc)
-               end)
-      | [] => acc
+      val width = Fn.entitySize
+      val height = Platform.platHeight
+
+      val ww = Constants.worldWidth
+      val wh = Constants.worldHeight
+    in
+      QuadTree.hasCollisionAt (x, y, width, height, 0, 0, ww, wh, ~1, tree)
+    end
+
+  fun standingOnAreaID (x, y, tree) =
+    let
+      val y = y + Fn.entitySize - 1
+
+      val width = Fn.entitySize
+      val height = Platform.platHeight
+
+      val ww = Constants.worldWidth
+      val wh = Constants.worldHeight
+    in
+      QuadTree.getItemID (x, y, width, height, 0, 0, ww, wh, tree)
     end
 
   fun getWallPatches (walls: wall vector, lst, acc) =
@@ -151,7 +150,37 @@ struct
 
       val platCollisions = QuadTree.getCollisionsBelow
         (x, y, size, size, 0, 0, ww, wh, 0, platformTree)
-      val acc = getPlatformPatches (yAxis, platforms, platCollisions, [])
+
+      val platID = standingOnAreaID (x, y, platformTree)
+
+      val acc = []
+
+      val acc =
+        if platID <> ~1 then
+          (case yAxis of
+             DROP_BELOW_PLATFORM =>
+               (* pass through, allowing player to drop below the platform *)
+               acc
+           | JUMPING _ =>
+               (* pass through, allowing player to jump above the platform *)
+               acc
+           | FLOATING _ =>
+               (* pass through, allowing player to jump above the platform *)
+               acc
+           | _ =>
+               let
+                 (* default case: 
+                  * player will land on platform and stay on the ground there. *)
+                 val {y = platY, ...}: GameType.platform =
+                   Vector.sub (platforms, platID - 1)
+
+                 val newY = platY - Fn.entitySize
+                 val acc = Fn.W_Y_AXIS ON_GROUND :: Fn.W_Y newY :: acc
+               in
+                 acc
+               end)
+        else
+          acc
 
       val acc =
         case yAxis of
