@@ -164,15 +164,17 @@ struct
       val plat1 = {id = 1, x = 155, y = 911, width = 199}
       val plat2 = {id = 2, x = 355, y = 759, width = 555}
       val plat3 = {id = 3, x = 355, y = 659, width = 555}
-      val plat4 = {id = 4, x = 155, y = 855, width = 199}
+      val plat4 = {id = 4, x = 155, y = 855, width = 99}
       val plat5 = {id = 5, x = 155, y = 811, width = 199}
       val plat6 = {id = 6, x = 155, y = 710, width = 199}
-      val platforms = Vector.fromList [plat1, plat2, plat3, plat4, plat5, plat6]
+      val plat7 = {id = 7, x = 301, y = 855, width = 99}
+      val platforms = Vector.fromList
+        [plat1, plat2, plat3, plat4, plat5, plat6, plat7]
       val platformTree = Platform.generateTree platforms
 
       val enemy1 =
         { id = 1
-        , x = 300
+        , x = 251
         , y = 855
         , health = 1
         , xAxis = MOVE_LEFT

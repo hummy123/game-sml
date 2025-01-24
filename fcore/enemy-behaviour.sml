@@ -181,18 +181,46 @@ struct
       getHighestPlatform (collisions, platforms, wh, ~1)
     end
 
-  fun canJump (nextPlatform, platformTree, enemy) =
+  fun canJump (prevPlatform, nextPlatform) =
     let
-      val {x = platX, y = platY, width = platW, ...} = nextPlatform
-      val platFinishX = platX + platW
+      val {x = pPlatX, y = pPlatY, width = pPlatW, ...} = prevPlatform
+      val pPlatFinishX = pPlatX + pPlatW
 
-      val {x = eX, y = ey, yAxis = eyAxis, ...} = enemy
+      val {x = nPlatX, y = nPlatY, width = nPlatW, ...} = nextPlatform
+      val nPlatFinishX = nPlatX + nPlatW
+    in
+      isBetween (nPlatX, pPlatX, nPlatFinishX)
+      orelse isBetween (nPlatX, pPlatFinishX, nPlatFinishX)
+    end
+
+  fun getJumpPatches (nextPlatform, platformTree, enemy, acc) =
+    let
+      val {x = platX, y = platY, width = platWidth, ...} = nextPlatform
+      val platFinishX = platX + platWidth
+
+      val {x = eX, y = ey, yAxis = eyAxis, xAxis = exAxis, ...} = enemy
+      val ecx = eX + (Constants.enemySize div 2)
       val ey = ey + Constants.enemySize
 
       val standingOnPlat = standingOnArea (enemy, platformTree)
     in
-      isBetween (platX, eX, platFinishX) andalso standingOnPlat
-      andalso (ey > platY andalso ey >= platY)
+      if ey > platY andalso ey >= platY andalso standingOnPlat then
+        if isBetween (platX, ecx, platFinishX) then
+          (* can jump from same position enemy is at *)
+          case eyAxis of
+            ON_GROUND => EnemyPatch.W_Y_AXIS (JUMPING 0) :: acc
+          | FALLING => EnemyPatch.W_Y_AXIS (JUMPING 0) :: acc
+          | _ => acc
+        else
+          (* have to travel left/right before jumping *) 
+          if eX < platX then
+            (* have to move right to jump to platform *)
+            EnemyPatch.W_X_AXIS MOVE_RIGHT :: acc
+          else
+            (* have to move left to jump to platform *)
+            EnemyPatch.W_X_AXIS MOVE_LEFT :: acc
+          else 
+            acc
     end
 
   fun canDrop (nextPlatform, platformTree, enemy) =
@@ -212,22 +240,17 @@ struct
   fun getPathToNextPlatform
     (nextPlatformID, platforms, platformTree, enemy, eID, pID, acc) =
     let
+      val currentPlatform = Platform.find (eID, platforms)
       val nextPlatform = Platform.find (nextPlatformID, platforms)
 
       val {x = eX, y = ey, yAxis = eyAxis, ...} = enemy
 
-      val canJump = canJump (nextPlatform, platformTree, enemy)
+      val canJump = canJump (currentPlatform, nextPlatform)
       val canDrop = canDrop (nextPlatform, platformTree, enemy)
     in
-      if canJump then
-        case eyAxis of
-          ON_GROUND => EnemyPatch.W_Y_AXIS (JUMPING 0) :: acc
-        | FALLING => EnemyPatch.W_Y_AXIS (JUMPING 0) :: acc
-        | _ => acc
-      else if canDrop then
-        EnemyPatch.W_Y_AXIS DROP_BELOW_PLATFORM :: acc
-      else
-        acc
+      if canJump then getJumpPatches (nextPlatform, platformTree, enemy, acc)
+      else if canDrop then EnemyPatch.W_Y_AXIS DROP_BELOW_PLATFORM :: acc
+      else acc
     end
 
   fun canJumpOnPlatform (player, platforms, enemy: enemy, platformTree, acc) =
