@@ -189,8 +189,9 @@ struct
       val {x = nPlatX, y = nPlatY, width = nPlatW, ...} = nextPlatform
       val nPlatFinishX = nPlatX + nPlatW
     in
-      isBetween (nPlatX, pPlatX, nPlatFinishX)
-      orelse isBetween (nPlatX, pPlatFinishX, nPlatFinishX)
+      (isBetween (nPlatX, pPlatX, nPlatFinishX)
+      orelse isBetween (nPlatX, pPlatFinishX, nPlatFinishX))
+      andalso pPlatY > nPlatY
     end
 
   fun getJumpPatches (nextPlatform, platformTree, enemy, acc) =
