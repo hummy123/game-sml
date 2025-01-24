@@ -205,7 +205,7 @@ struct
 
       val standingOnPlat = standingOnArea (enemy, platformTree)
     in
-      if ey > platY andalso ey >= platY andalso standingOnPlat then
+      if ey >= platY andalso standingOnPlat then
         if isBetween (platX, ecx, platFinishX) then
           (* can jump from same position enemy is at *)
           case eyAxis of
@@ -213,15 +213,13 @@ struct
           | FALLING => EnemyPatch.W_Y_AXIS (JUMPING 0) :: acc
           | _ => acc
         else
-          (* have to travel left/right before jumping *) 
-          if eX < platX then
-            (* have to move right to jump to platform *)
+          (* have to travel either left or right before jumping *) 
+          if ecx < platX then
             EnemyPatch.W_X_AXIS MOVE_RIGHT :: acc
           else
-            (* have to move left to jump to platform *)
             EnemyPatch.W_X_AXIS MOVE_LEFT :: acc
-          else 
-            acc
+        else 
+          acc
     end
 
   fun canDrop (nextPlatform, platformTree, enemy) =
