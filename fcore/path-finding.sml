@@ -158,9 +158,7 @@ struct
             val {y = cy, ...} = foldPlat
             val dist = abs (py - cy)
 
-            (* divide by 2 so that we generally "prefer" straight vertical paths
-             * over diagonal ones, even if actual distance is longer *)
-            val dist = (dist + distSoFar) div 2
+            val dist = dist + distSoFar
           in
             insertIfNotExistsOrShorter
               (dist, eKeys, eVals, foldPlatID, q, curPlatID)
@@ -191,7 +189,7 @@ struct
                 in
                   (* divide by 2 so we prefer straight horizontal paths over
                    * diagonal ones by giving horizontal ones a lower cost *)
-                  (Int.min (min, d4) + distSoFar) div 2
+                  Int.min (min, d4) + distSoFar
                 end
               else
                 let
@@ -307,11 +305,14 @@ struct
             ValSet.insert
               (eVals, {distance = distSoFar, from = comesFrom}, insPos)
 
+          (* on each loop, increment distSoFar by 15.
+           * Result: paths that require jumps to fewer platforms are
+           * incentivised a little bit. *)
           val env =
             { platforms = platforms
             , currentPlat = plat
             , eKeys = eKeys
-            , distSoFar = distSoFar
+            , distSoFar = distSoFar + 15
             }
 
           val state = (eVals, q)
