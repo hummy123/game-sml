@@ -355,17 +355,25 @@ struct
       (* todo: possibly get pID and eID of player/enemy in a different way *)
       val pID = getPlatformBelowPlayer (player, platformTree, platforms)
       val eID = getPlatformBelowEnemy (enemy, platformTree, platforms)
-
-      val bestPath = PathFinding.start (pID, eID, platforms, platformTree)
     in
       if eID = pID then
         EnemyPatch.W_Y_AXIS FALLING :: acc
+      else if eID = ~1 orelse pID = ~1 then
+        (* without checking that neither of these are ~1 
+        * (which means there is no platform below the enemy/player)
+        * there is a subscript error because the PathFinding.start
+        * function expects neither of these values to be ~1. *)
+        acc
       else
-        case bestPath of
-          nextPlatformID :: _ =>
-            getPathToNextPlatform
-              (nextPlatformID, platforms, platformTree, enemy, eID, pID, acc)
-        | [] => acc
+        let
+          val bestPath = PathFinding.start (pID, eID, platforms, platformTree)
+        in
+          case bestPath of
+            nextPlatformID :: _ =>
+              getPathToNextPlatform
+                (nextPlatformID, platforms, platformTree, enemy, eID, pID, acc)
+          | [] => acc
+        end
     end
 
   fun getFollowPatches
