@@ -313,9 +313,33 @@ struct
         (* platform is below or at same y coordinat as enemy 
          * so might possibly require dropping below rather than jumping. *)
         let
-
+          (* check if we can get to next platform without jumping.
+           * If we can, then simply move rightwards 
+           * and possibly drop below platform. 
+           * Else, jump and move rightwards *)
+          val yDiff = ey - platY
         in
-          EnemyPatch.W_X_AXIS MOVE_RIGHT :: acc
+          if yDiff >= xDiff then
+            (* can reach next platform by simply dropping and moving right *)
+            EnemyPatch.W_Y_AXIS DROP_BELOW_PLATFORM :: EnemyPatch.W_X_AXIS
+            MOVE_RIGHT :: acc
+          else
+            let
+              val jumpAmt =
+                case eyAxis of
+                  JUMPING amt => amt
+                | _ => 0
+              val apexY = ey - (Constants.jumpLimit - jumpAmt)
+              val yDiff = apexY - platY
+            in
+              if yDiff >= xDiff then
+                (* can reach if we jump and move right *)
+                EnemyPatch.W_Y_AXIS (JUMPING 0) :: EnemyPatch.W_X_AXIS
+                MOVE_RIGHT :: acc
+              else
+                (* cannot reach yet so move right until we can *)
+                EnemyPatch.W_X_AXIS MOVE_RIGHT :: acc
+            end
         end
     end
 
