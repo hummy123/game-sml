@@ -173,9 +173,10 @@ struct
       val plat5 = {id = 5, x = 155, y = 811, width = 199}
       val plat6 = {id = 6, x = 155, y = 710, width = 199}
       val plat7 = {id = 7, x = 301, y = 855, width = 99}
-      val plat8 = {id = 8, x = 950, y = 710, width = 300}
+      val plat8 = {id = 8, x = 970, y = 815, width = 303}
+      val plat9 = {id = 9, x = 970, y = 655, width = 303}
       val platforms = Vector.fromList
-        [plat1, plat2, plat3, plat4, plat5, plat6, plat7, plat8]
+        [plat1, plat2, plat3, plat4, plat5, plat6, plat7, plat8, plat9]
       val platformTree = Platform.generateTree platforms
 
       val enemy1 =
