@@ -44,6 +44,7 @@ sig
     , enemies: defeated_enemies vector
     , charge: int
     , projectiles: player_projectile vector
+    , platID: int
     }
 
   type enemy =
@@ -54,6 +55,7 @@ sig
     , xAxis: x_axis
     , yAxis: y_axis
     , variant: EnemyVariants.t
+    , platID: int
     }
 
   type game_type =
@@ -115,6 +117,7 @@ struct
     , enemies: defeated_enemies vector
     , charge: int
     , projectiles: player_projectile vector
+    , platID: int
     }
 
   type enemy =
@@ -125,6 +128,7 @@ struct
     , xAxis: x_axis
     , yAxis: y_axis
     , variant: EnemyVariants.t
+    , platID: int
     }
 
   type game_type =
@@ -153,6 +157,7 @@ struct
         , enemies = Vector.fromList []
         , charge = Constants.maxCharge
         , projectiles = Vector.fromList []
+        , platID = ~1
         }
 
       val wall1 = {id = 1, x = 0, y = 0, width = 100, height = 1080}
@@ -181,6 +186,7 @@ struct
         , xAxis = MOVE_LEFT
         , yAxis = FALLING
         , variant = EnemyVariants.FOLLOW_SLIME
+        , platID = ~1
         }
       val enemy2 =
         { id = 2
@@ -190,6 +196,7 @@ struct
         , xAxis = MOVE_LEFT
         , yAxis = FALLING
         , variant = EnemyVariants.PATROL_SLIME
+        , platID = ~1
         }
       val enemy3 =
         { id = 3
@@ -199,6 +206,7 @@ struct
         , xAxis = MOVE_RIGHT
         , yAxis = FALLING
         , variant = EnemyVariants.PATROL_SLIME
+        , platID = ~1
         }
       val enemies = Vector.fromList [enemy1]
     in

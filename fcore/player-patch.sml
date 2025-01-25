@@ -14,6 +14,7 @@ sig
   | W_ENEMIES of GameType.defeated_enemies vector
   | W_CHARGE of int
   | W_PROJECTILES of GameType.player_projectile vector
+  | W_PLAT_ID of int
 
   val withPatch: GameType.player * player_patch -> GameType.player
   val withPatches: GameType.player * player_patch list -> GameType.player
@@ -35,6 +36,7 @@ struct
   | W_ENEMIES of GameType.defeated_enemies vector
   | W_CHARGE of int
   | W_PROJECTILES of GameType.player_projectile vector
+  | W_PLAT_ID of int
 
   fun mkPlayer
     ( health
@@ -51,6 +53,7 @@ struct
     , enemies
     , charge
     , projectiles
+    , platID
     ) =
     { yAxis = yAxis
     , xAxis = xAxis
@@ -66,6 +69,7 @@ struct
     , enemies = enemies
     , charge = charge
     , projectiles = projectiles
+    , platID = platID
     }
 
   fun withPatch (player, patch) =
@@ -85,6 +89,7 @@ struct
         , enemies
         , charge
         , projectiles
+        , platID
         } = player
     in
       case patch of
@@ -104,6 +109,7 @@ struct
             , enemies
             , charge
             , projectiles
+            , platID
             )
       | W_Y_AXIS yAxis =>
           mkPlayer
@@ -121,6 +127,7 @@ struct
             , enemies
             , charge
             , projectiles
+            , platID
             )
       | W_RECOIL recoil =>
           mkPlayer
@@ -138,6 +145,7 @@ struct
             , enemies
             , charge
             , projectiles
+            , platID
             )
       | W_ATTACKED attacked =>
           mkPlayer
@@ -155,6 +163,7 @@ struct
             , enemies
             , charge
             , projectiles
+            , platID
             )
       | W_MAIN_ATTACK mainAttack =>
           mkPlayer
@@ -172,6 +181,7 @@ struct
             , enemies
             , charge
             , projectiles
+            , platID
             )
       | W_FACING facing =>
           mkPlayer
@@ -189,6 +199,7 @@ struct
             , enemies
             , charge
             , projectiles
+            , platID
             )
       | W_HEALTH health =>
           mkPlayer
@@ -206,6 +217,7 @@ struct
             , enemies
             , charge
             , projectiles
+            , platID
             )
       | W_X x =>
           mkPlayer
@@ -223,6 +235,7 @@ struct
             , enemies
             , charge
             , projectiles
+            , platID
             )
       | W_Y y =>
           mkPlayer
@@ -240,6 +253,7 @@ struct
             , enemies
             , charge
             , projectiles
+            , platID
             )
       | W_JUMP_PRESSED jumpPressed =>
           mkPlayer
@@ -257,6 +271,7 @@ struct
             , enemies
             , charge
             , projectiles
+            , platID
             )
       | W_ENEMIES enemies =>
           mkPlayer
@@ -274,6 +289,7 @@ struct
             , enemies
             , charge
             , projectiles
+            , platID
             )
       | W_CHARGE charge =>
           mkPlayer
@@ -291,6 +307,7 @@ struct
             , enemies
             , charge
             , projectiles
+            , platID
             )
       | W_PROJECTILES projectiles =>
           mkPlayer
@@ -308,6 +325,25 @@ struct
             , enemies
             , charge
             , projectiles
+            , platID
+            )
+      | W_PLAT_ID platID =>
+          mkPlayer
+            ( health
+            , xAxis
+            , yAxis
+            , x
+            , y
+            , jumpPressed
+            , recoil
+            , attacked
+            , mainAttack
+            , facing
+            , mainAttackPressed
+            , enemies
+            , charge
+            , projectiles
+            , platID
             )
     end
 
