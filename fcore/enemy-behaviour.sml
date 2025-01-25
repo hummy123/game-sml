@@ -295,13 +295,14 @@ struct
            * but if y is lower, that means we can reach if we jump at this point
            * so we should simply move rightwards.
            * *)
-          val xyDiff = apexY - xDiff
+          val yDiff = platY - apexY
         in
-          if xyDiff >= 0 then
+          if yDiff > xDiff then
             let
               val acc =
                 case eyAxis of
                   ON_GROUND => EnemyPatch.W_Y_AXIS (JUMPING 0) :: acc
+                | FALLING => EnemyPatch.W_Y_AXIS (JUMPING 0) :: acc
                 | _ => acc
             in
               EnemyPatch.W_X_AXIS MOVE_RIGHT :: acc
@@ -378,7 +379,16 @@ struct
     let
       (* todo: possibly get pID and eID of player/enemy in a different way *)
       val pID = getPlatformBelowPlayer (player, platformTree, platforms)
+      val pID = 
+        if pID = ~1 then
+          #platID player
+        else pID
+
       val eID = getPlatformBelowEnemy (enemy, platformTree, platforms)
+      val eID =
+        if eID = ~1 then
+          #platID enemy
+        else eID
     in
       if eID = pID then
         EnemyPatch.W_Y_AXIS FALLING :: acc

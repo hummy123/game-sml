@@ -19,6 +19,7 @@ sig
   val W_X: int -> patch
   val W_Y: int -> patch
   val W_Y_AXIS: GameType.y_axis -> patch
+  val W_PLAT_ID: int -> patch
 end
 
 functor MakePhysics(Fn: PHYSICS_INPUT) =
@@ -200,8 +201,14 @@ struct
 
       val wallCollisions = QuadTree.getCollisionSides
         (x, y, size, size, 0, 0, ww, wh, 0, wallTree)
+      val acc = getWallPatches (walls, wallCollisions, acc)
+
+      val standPlatID = standingOnAreaID (x, y, platformTree)
     in
-      getWallPatches (walls, wallCollisions, acc)
+      if standPlatID <> ~1 then
+        Fn.W_PLAT_ID standPlatID :: acc
+      else
+        acc
     end
 end
 
@@ -228,6 +235,7 @@ structure PlayerPhysics =
        val W_X = PlayerPatch.W_X
        val W_Y = PlayerPatch.W_Y
        val W_Y_AXIS = PlayerPatch.W_Y_AXIS
+       val W_PLAT_ID = PlayerPatch.W_PLAT_ID
      end)
 
 structure EnemyPhysics =
@@ -253,4 +261,5 @@ structure EnemyPhysics =
        val W_X = EnemyPatch.W_X
        val W_Y = EnemyPatch.W_Y
        val W_Y_AXIS = EnemyPatch.W_Y_AXIS
+      val W_PLAT_ID = EnemyPatch.W_PLAT_ID
      end)
