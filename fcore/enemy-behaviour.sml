@@ -351,6 +351,80 @@ struct
         end
     end
 
+  fun getMoveLeftPatches (nextPlatform, enemy, platformTree, acc) =
+    let
+      val {x = platX, y = platY, width = platWidth, ...} = nextPlatform
+      val platFinishX = platX + platWidth
+
+      val {x = ex, y = ey, yAxis = eyAxis, ...} = enemy
+
+      val xDiff = ex - platX
+    in
+      if ey > platY then
+        (* enemy is lower than next platform so needs to jump *)
+        let
+          val jumpAmt =
+            case eyAxis of
+              JUMPING amt => amt
+            | _ => 0
+          val apexY = ey - (Constants.jumpLimit - jumpAmt)
+
+          val yDiff = platY - apexY
+        in
+          if yDiff > xDiff then
+            let
+              val acc =
+                if standingOnArea (enemy, platformTree) then
+                  EnemyPatch.W_Y_AXIS (JUMPING 0) :: acc
+                else
+                  acc
+            in
+              EnemyPatch.W_X_AXIS MOVE_LEFT :: acc
+            end
+          else
+              EnemyPatch.W_X_AXIS MOVE_LEFT :: acc
+        end
+      else
+        (* platform is below or at same y coordinat as enemy 
+         * so might possibly require dropping below rather than jumping. *)
+        let
+          (* check if we can get to next platform without jumping.
+           * If we can, then simply move rightwards 
+           * and possibly drop below platform. 
+           * Else, jump and move rightwards *)
+          val yDiff = platY - ey
+        in
+          if yDiff >= xDiff then
+            (* can reach next platform by simply dropping and moving right *)
+            EnemyPatch.W_Y_AXIS DROP_BELOW_PLATFORM :: EnemyPatch.W_X_AXIS
+            MOVE_LEFT :: acc
+          else
+            let
+              val jumpAmt =
+                case eyAxis of
+                  JUMPING amt => amt
+                | _ => 0
+              val apexY = ey - (Constants.jumpLimit - jumpAmt)
+              val yDiff = platY - apexY
+            in
+              if yDiff >= xDiff then
+                (* can reach if we jump and move left *)
+                let
+                  val acc =
+                    if standingOnArea (enemy, platformTree) then
+                      EnemyPatch.W_Y_AXIS (JUMPING 0) :: acc
+                    else
+                      acc
+                in
+                  EnemyPatch.W_X_AXIS MOVE_LEFT :: acc
+                end
+              else
+                (* cannot reach yet so move left until we can *)
+                EnemyPatch.W_X_AXIS MOVE_LEFT :: acc
+            end
+        end
+    end
+
   (* get patches to help enemy move to nextPlatformID *)
   fun getPathToNextPlatform
     (nextPlatformID, platforms, platformTree, enemy, eID, pID, acc) =
@@ -377,8 +451,7 @@ struct
           if eX < nPlatX then
             getMoveRightPatches (nextPlatform, enemy, platformTree, acc)
           else
-            (* move to the left *)
-            EnemyPatch.W_X_AXIS MOVE_LEFT :: acc
+            getMoveLeftPatches (nextPlatform, enemy, platformTree, acc)
         end
     end
 
