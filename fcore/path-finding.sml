@@ -157,7 +157,10 @@ struct
             val {y = py, ...} = currentPlat
             val {y = cy, ...} = foldPlat
             val dist = abs (py - cy)
-            val dist = dist + distSoFar
+
+            (* divide by 2 so that we generally "prefer" straight vertical paths
+             * over diagonal ones, even if actual distance is longer *)
+            val dist = (dist + distSoFar) div 2
           in
             insertIfNotExistsOrShorter
               (dist, eKeys, eVals, foldPlatID, q, curPlatID)
@@ -186,7 +189,9 @@ struct
                   val min = Int.min (d1, d2)
                   val min = Int.min (min, d3)
                 in
-                  Int.min (min, d4)
+                  (* divide by 2 so we prefer straight horizontal paths over
+                   * diagonal ones by giving horizontal ones a lower cost *)
+                  (Int.min (min, d4) + distSoFar) div 2
                 end
               else
                 let
@@ -216,9 +221,8 @@ struct
                   val dg = Real.fromInt hypsq
                   val dg = Math.sqrt dg
                 in
-                  Real.toInt IEEEReal.TO_NEAREST dg
+                  Real.toInt IEEEReal.TO_NEAREST dg + distSoFar
                 end
-            val dist = dist + distSoFar
           in
             insertIfNotExistsOrShorter
               (dist, eKeys, eVals, foldPlatID, q, curPlatID)
