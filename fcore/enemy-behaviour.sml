@@ -300,10 +300,10 @@ struct
           if yDiff > xDiff then
             let
               val acc =
-                case eyAxis of
-                  ON_GROUND => EnemyPatch.W_Y_AXIS (JUMPING 0) :: acc
-                | FALLING => EnemyPatch.W_Y_AXIS (JUMPING 0) :: acc
-                | _ => acc
+                if standingOnArea (enemy, platformTree) then
+                  EnemyPatch.W_Y_AXIS (JUMPING 0) :: acc
+                else
+                  acc
             in
               EnemyPatch.W_X_AXIS MOVE_RIGHT :: acc
             end
@@ -331,12 +331,19 @@ struct
                   JUMPING amt => amt
                 | _ => 0
               val apexY = ey - (Constants.jumpLimit - jumpAmt)
-              val yDiff = apexY - platY
+              val yDiff = platY - apexY
             in
               if yDiff >= xDiff then
                 (* can reach if we jump and move right *)
-                EnemyPatch.W_Y_AXIS (JUMPING 0) :: EnemyPatch.W_X_AXIS
-                MOVE_RIGHT :: acc
+                let
+                  val acc =
+                    if standingOnArea (enemy, platformTree) then
+                      EnemyPatch.W_Y_AXIS (JUMPING 0) :: acc
+                    else
+                      acc
+                in
+                  EnemyPatch.W_X_AXIS MOVE_RIGHT :: acc
+                end
               else
                 (* cannot reach yet so move right until we can *)
                 EnemyPatch.W_X_AXIS MOVE_RIGHT :: acc
