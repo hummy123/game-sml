@@ -187,7 +187,7 @@ struct
         , x = 251
         , y = 855
         , health = 1
-        , xAxis = MOVE_LEFT
+        , xAxis = STAY_STILL
         , yAxis = FALLING
         , variant = EnemyVariants.FOLLOW_SLIME
         , platID = ~1

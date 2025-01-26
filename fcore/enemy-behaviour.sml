@@ -511,7 +511,8 @@ struct
     | _ =>
         getFallingPatches (enemy, newPlatformID, platforms, acc)
 
-  fun canJumpOnPlatform (player, platforms, enemy: enemy, platformTree, acc) =
+  fun getFollowPatches 
+    (player: player, enemy, wallTree, platformTree, platforms, acc) =
     let
       (* todo: possibly get pID and eID of player/enemy in a different way *)
       val pID = getPlatformBelowPlayer (player, platformTree, platforms)
@@ -533,7 +534,9 @@ struct
         * (which means there is no platform below the enemy/player)
         * there is a subscript error because the PathFinding.start
         * function expects neither of these values to be ~1. *)
-        acc
+        getPatrollPatches (enemy, wallTree, platformTree, acc)
+      else if eID = pID then
+        getPatrollPatches (enemy, wallTree, platformTree, acc)
       else
         let
           val bestPath = PathFinding.start (pID, eID, platforms, platformTree)
@@ -546,22 +549,8 @@ struct
                 getPathToNextPlatform
                   (nextPlatformID, platforms, platformTree, enemy, eID, pID, acc)
               end
-          | [] => acc
+          | [] => getPatrollPatches (enemy, wallTree, platformTree, acc)
         end
-    end
-
-  fun getFollowPatches
-    (player: player, enemy, wallTree, platformTree, platforms, acc) =
-    let
-      val {x = px, y = py, ...} = player
-      val {x = ex, y = ey, yAxis = eyAxis, ...} = enemy
-
-      val xAxis = if px < ex then MOVE_LEFT else MOVE_RIGHT
-
-      val acc = canJumpOnPlatform (player, platforms, enemy, platformTree, acc)
-
-    in
-      EnemyPatch.W_X_AXIS STAY_STILL :: acc
     end
 
   fun getVariantPatches
