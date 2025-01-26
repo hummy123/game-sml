@@ -7,10 +7,9 @@ struct
       val ww = Constants.worldWidth
       val wh = Constants.worldHeight
 
-      val searchWidth = Constants.enemySize
-
       val y = y + Constants.enemySize - 5
       val searchHeight = 10
+      val searchWidth = Constants.moveEnemyBy
     in
       QuadTree.hasCollisionAt
         (x, y, searchWidth, searchHeight, 0, 0, ww, wh, ~1, wallTree)
@@ -66,7 +65,7 @@ struct
           let
             (* search to see if there is wall on left side *)
             val searchStartX = x - Constants.moveEnemyBy
-            val searchWidth = Constants.enemySize
+            val searchWidth = Constants.moveEnemyBy
             val searchHeight = Constants.enemySize - 5
 
             val ww = Constants.worldWidth
@@ -100,7 +99,7 @@ struct
              * but we want to check top * right coordinate, 
              * so add enemySize *)
             val searchStartX = x + Constants.enemySize + Constants.moveEnemyBy
-            val searchWidth = Constants.enemySize
+            val searchWidth = Constants.moveEnemyBy
             val searchHeight = Constants.enemySize - 5
 
             val ww = Constants.worldWidth
