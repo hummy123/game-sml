@@ -432,8 +432,6 @@ struct
       val currentPlatform = Platform.find (eID, platforms)
       val nextPlatform = Platform.find (nextPlatformID, platforms)
 
-      val {x = eX, y = ey, yAxis = eyAxis, ...} = enemy
-
       val canJump = canJump (currentPlatform, nextPlatform)
       val canDrop = canDrop (currentPlatform, nextPlatform)
     in
@@ -446,6 +444,7 @@ struct
           (* if can neither jump or drop to next platform vertically
            * then remaining options are either jumping to the right or left.
            * Figure out which the enemy needs to do and progress to it. *)
+          val {x = eX, ...} = enemy
           val {x = nPlatX, width = nPlatW, ...} = nextPlatform
         in
           if eX < nPlatX then
@@ -454,6 +453,63 @@ struct
             getMoveLeftPatches (nextPlatform, enemy, platformTree, acc)
         end
     end
+
+  (* if only one side in x direction overlaps with platform,
+   * then move enemy left/right to make them fully overlap with platform *)
+  fun getHorizontalLandingPatches (enemy, nextPlatform, acc) =
+    let
+      val {x = px, width = pw, ...} = nextPlatform
+      val pfx = px + pw
+
+      val {x = ex, ...} = enemy
+      val efx = ex + Constants.enemySize
+    in
+      if isBetween (px, ex, pfx) andalso isBetween (px, efx, pfx) then
+       acc
+      else 
+        let
+          val startDiff = abs (px - ex)
+          val endDiff = abs (pfx - efx)
+        in
+          if startDiff > endDiff then
+            EnemyPatch.W_X_AXIS MOVE_LEFT :: acc
+          else
+            EnemyPatch.W_X_AXIS MOVE_RIGHT :: acc
+        end
+    end
+
+  fun getFallingPatches (enemy, newPlatformID, platforms, acc) =
+    let
+      val nextPlatform = Platform.find (newPlatformID, platforms)
+      val acc = getHorizontalLandingPatches (enemy, nextPlatform, acc)
+    in
+      EnemyPatch.W_NEXT_PLAT_ID ~1 :: acc
+    end
+
+  fun getJumpLandingPatches (enemy, nextPlatformID, platforms, acc) =
+    let
+      val nextPlatform = Platform.find (nextPlatformID, platforms)
+      val {y = py, ...} = nextPlatform
+
+      val {y = ey, ...} = enemy
+
+      val acc = getHorizontalLandingPatches (enemy, nextPlatform, acc)
+    in
+      if ey < py - 65 then
+        (* set to falling *)
+        EnemyPatch.W_NEXT_PLAT_ID ~1 ::
+        EnemyPatch.W_Y_AXIS FALLING ::
+        acc
+      else
+        acc
+    end
+
+  fun getLandingPatches (newPlatformID, platforms, enemy, acc) =
+    case #yAxis enemy of
+      JUMPING _ =>
+        getJumpLandingPatches (enemy, newPlatformID, platforms, acc)
+    | _ =>
+        getFallingPatches (enemy, newPlatformID, platforms, acc)
 
   fun canJumpOnPlatform (player, platforms, enemy: enemy, platformTree, acc) =
     let
@@ -470,8 +526,8 @@ struct
           #platID enemy
         else eID
     in
-      if eID = pID then
-        EnemyPatch.W_Y_AXIS FALLING :: acc
+      if eID = #nextPlatID enemy then
+        getLandingPatches (eID, platforms, enemy, acc)
       else if eID = ~1 orelse pID = ~1 then
         (* without checking that neither of these are ~1 
         * (which means there is no platform below the enemy/player)
@@ -484,8 +540,12 @@ struct
         in
           case bestPath of
             nextPlatformID :: _ =>
-              getPathToNextPlatform
-                (nextPlatformID, platforms, platformTree, enemy, eID, pID, acc)
+              let
+                val acc = EnemyPatch.W_NEXT_PLAT_ID nextPlatformID :: acc
+              in
+                getPathToNextPlatform
+                  (nextPlatformID, platforms, platformTree, enemy, eID, pID, acc)
+              end
           | [] => acc
         end
     end

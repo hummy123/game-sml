@@ -56,6 +56,7 @@ sig
     , yAxis: y_axis
     , variant: EnemyVariants.t
     , platID: int
+    , nextPlatID: int
     }
 
   type game_type =
@@ -129,6 +130,7 @@ struct
     , yAxis: y_axis
     , variant: EnemyVariants.t
     , platID: int
+    , nextPlatID: int
     }
 
   type game_type =
@@ -189,6 +191,7 @@ struct
         , yAxis = FALLING
         , variant = EnemyVariants.FOLLOW_SLIME
         , platID = ~1
+        , nextPlatID = ~1
         }
       val enemy2 =
         { id = 2
@@ -199,6 +202,7 @@ struct
         , yAxis = FALLING
         , variant = EnemyVariants.PATROL_SLIME
         , platID = ~1
+        , nextPlatID = ~1
         }
       val enemy3 =
         { id = 3
@@ -209,6 +213,7 @@ struct
         , yAxis = FALLING
         , variant = EnemyVariants.PATROL_SLIME
         , platID = ~1
+        , nextPlatID = ~1
         }
       val enemies = Vector.fromList [enemy1]
     in
