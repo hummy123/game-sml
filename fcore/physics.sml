@@ -100,45 +100,68 @@ struct
       QuadTree.getItemID (x, y, width, height, 0, 0, ww, wh, tree)
     end
 
-  fun getWallPatches (walls: wall vector, lst, acc) =
+  fun getWallPatches (x, y, walls, wallTree, acc) =
     let
-      open QuadTree
+      val size = Fn.entitySize
+      val moveBy = Fn.moveBy
+      val ww = Constants.worldWidth
+      val wh = Constants.worldHeight
+
+      (* check collision with wall to the left *)
+      val acc =
+        let
+          val leftWallID = QuadTree.getItemID
+            (x - 1, y, 1, 1, 0, 0, ww, wh, wallTree)
+        in
+          if leftWallID <> ~1 then
+            let
+              val {x = wallX, width = wallWidth, ...} =
+                Vector.sub (walls, leftWallID - 1)
+
+              val newX = wallX + wallWidth
+            in
+              Fn.W_X newX :: acc
+            end
+          else
+            acc
+        end
+
+      (* check collision with wall to the right *)
+      val acc =
+        let
+          val rightWallID = QuadTree.getItemID
+            (x + size - 1, y, 1, 1, 0, 0, ww, wh, wallTree)
+        in
+          if rightWallID <> ~1 then
+            let
+              val {x = wallX, ...} = Vector.sub (walls, rightWallID - 1)
+
+              val newX = wallX - size
+            in
+              Fn.W_X newX :: acc
+            end
+          else
+            acc
+        end
+
+      (* check collision with wall below *)
+      val downWallID = QuadTree.getItemID
+        (x + moveBy + 1, y + size, 1, 1, 0, 0, ww, wh, wallTree)
     in
-      case lst of
-        (QUERY_ON_LEFT_SIDE, wallID) :: tl =>
-          let
-            val {x = wallX, width = wallWidth, ...} =
-              Vector.sub (walls, wallID - 1)
+      if downWallID <> ~1 then
+        let
+          val {y = wallY, ...} = Vector.sub (walls, downWallID - 1)
 
-            val newX = wallX + wallWidth
-            val acc = Fn.W_X newX :: acc
-          in
-            getWallPatches (walls, tl, acc)
-          end
-      | (QUERY_ON_RIGHT_SIDE, wallID) :: tl =>
-          let
-            val {x = wallX, width = wallWidth, ...} =
-              Vector.sub (walls, wallID - 1)
-
-            val newX = wallX - Fn.entitySize
-            val acc = Fn.W_X newX :: acc
-          in
-            getWallPatches (walls, tl, acc)
-          end
-      | (QUERY_ON_BOTTOM_SIDE, wallID) :: tl =>
-          let
-            val {y = wallY, ...} = Vector.sub (walls, wallID - 1)
-
-            val newY = wallY - Fn.entitySize
-            val acc = Fn.W_Y_AXIS ON_GROUND :: Fn.W_Y newY :: acc
-          in
-            getWallPatches (walls, tl, acc)
-          end
-      | (QUERY_ON_TOP_SIDE, wallID) :: tl => getWallPatches (walls, tl, acc)
-      | [] => acc
+          val newY = wallY - size
+        in
+          Fn.W_Y_AXIS ON_GROUND :: Fn.W_Y newY :: acc
+        end
+      else
+        acc
     end
 
-  fun getEnvironmentPatches (input, walls, wallTree, platforms, platformTree) =
+  fun getEnvironmentPatches
+    (input, walls: wall vector, wallTree, platforms, platformTree) =
     let
       (* react to platform and wall collisions  *)
       val x = Fn.getX input
@@ -199,16 +222,11 @@ struct
             else Fn.W_Y_AXIS FALLING :: acc
         | _ => acc
 
-      val wallCollisions = QuadTree.getCollisionSides
-        (x, y, size, size, 0, 0, ww, wh, 0, wallTree)
-      val acc = getWallPatches (walls, wallCollisions, acc)
+      val acc = getWallPatches (x, y, walls, wallTree, acc)
 
       val standPlatID = standingOnAreaID (x, y, platformTree)
     in
-      if standPlatID <> ~1 then
-        Fn.W_PLAT_ID standPlatID :: acc
-      else
-        acc
+      if standPlatID <> ~1 then Fn.W_PLAT_ID standPlatID :: acc else acc
     end
 end
 
@@ -261,5 +279,5 @@ structure EnemyPhysics =
        val W_X = EnemyPatch.W_X
        val W_Y = EnemyPatch.W_Y
        val W_Y_AXIS = EnemyPatch.W_Y_AXIS
-      val W_PLAT_ID = EnemyPatch.W_PLAT_ID
+       val W_PLAT_ID = EnemyPatch.W_PLAT_ID
      end)

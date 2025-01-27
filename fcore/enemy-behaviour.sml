@@ -526,14 +526,14 @@ struct
           #platID enemy
         else eID
     in
-      if eID = #nextPlatID enemy then
-        getLandingPatches (eID, platforms, enemy, acc)
-      else if eID = ~1 orelse pID = ~1 then
+      if eID = ~1 orelse pID = ~1 then
         (* without checking that neither of these are ~1 
         * (which means there is no platform below the enemy/player)
         * there is a subscript error because the PathFinding.start
         * function expects neither of these values to be ~1. *)
         getPatrollPatches (enemy, wallTree, platformTree, acc)
+      else if eID = #nextPlatID enemy then
+        getLandingPatches (eID, platforms, enemy, acc)
       else if eID = pID then
         getPatrollPatches (enemy, wallTree, platformTree, acc)
       else
