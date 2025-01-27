@@ -71,12 +71,9 @@ struct
     , tree: QuadTreeType.t
     ) =
     case tree of
-      NODE {topLeft, topRight, bottomLeft, bottomRight, elements} =>
+      NODE {topLeft, topRight, bottomLeft, bottomRight} =>
         let
           (* fold over intersecting elements in this vector first *)
-          val state = foldVec
-            (itemX, itemY, itemW, itemH, 0, elements, state, env)
-
           val halfW = quadW div 2
           val halfH = quadH div 2
 

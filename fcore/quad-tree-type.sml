@@ -3,13 +3,7 @@ sig
   type item = {itemID: int, startX: int, startY: int, width: int, height: int}
 
   datatype t =
-    NODE of
-      { topLeft: t
-      , topRight: t
-      , bottomLeft: t
-      , bottomRight: t
-      , elements: item vector
-      }
+    NODE of {topLeft: t, topRight: t, bottomLeft: t, bottomRight: t}
   | LEAF of item vector
 
   datatype quadrant =
@@ -25,13 +19,7 @@ struct
   type item = {itemID: int, startX: int, startY: int, width: int, height: int}
 
   datatype t =
-    NODE of
-      { topLeft: t
-      , topRight: t
-      , bottomLeft: t
-      , bottomRight: t
-      , elements: item vector
-      }
+    NODE of {topLeft: t, topRight: t, bottomLeft: t, bottomRight: t}
   | LEAF of item vector
 
   datatype quadrant =
