@@ -44,10 +44,12 @@ struct
       case patch of
         W_HEALTH health =>
           mkEnemy (id, health, x, y, xAxis, yAxis, variant, platID, nextPlatID)
-      | W_X x => mkEnemy (id, health, x, y, xAxis, yAxis, variant, platID, nextPlatID)
+      | W_X x =>
+          mkEnemy (id, health, x, y, xAxis, yAxis, variant, platID, nextPlatID)
       | W_X_AXIS xAxis =>
           mkEnemy (id, health, x, y, xAxis, yAxis, variant, platID, nextPlatID)
-      | W_Y y => mkEnemy (id, health, x, y, xAxis, yAxis, variant, platID, nextPlatID)
+      | W_Y y =>
+          mkEnemy (id, health, x, y, xAxis, yAxis, variant, platID, nextPlatID)
       | W_Y_AXIS yAxis =>
           mkEnemy (id, health, x, y, xAxis, yAxis, variant, platID, nextPlatID)
       | W_PLAT_ID platID =>

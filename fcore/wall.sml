@@ -6,13 +6,17 @@ struct
     else
       let
         val {id, x, y, width, height} = Vector.sub (wallVec, pos)
-        val acc = QuadHelp.insert
-          (x, y, width, height, id, acc)
+        val acc = QuadTree.insert (x, y, width, height, id, acc)
       in
         helpGenerateTree (pos + 1, wallVec, acc)
       end
 
-  fun generateTree wallVec = helpGenerateTree (0, wallVec, QuadTree.empty)
+  fun generateTree wallVec =
+    helpGenerateTree
+      ( 0
+      , wallVec
+      , QuadTree.create (Constants.worldWidth, Constants.worldHeight)
+      )
 
   fun helpGetDrawVecWider
     (pos, wallVec, acc, winWidth, winHeight, ratio, yOffset) =

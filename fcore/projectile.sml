@@ -11,13 +11,17 @@ struct
         val size = projectileSizeInt
 
         val {x, y, facing = _} = Vector.sub (projectiles, pos)
-        val acc = QuadHelp.insert (x, y, size, size, pos, acc)
+        val acc = QuadTree.insert (x, y, size, size, pos, acc)
       in
         helpGenerateTree (pos + 1, projectiles, acc)
       end
 
   fun generateTree projectiles =
-    helpGenerateTree (0, projectiles, QuadTree.empty)
+    helpGenerateTree
+      ( 0
+      , projectiles
+      , QuadTree.create (Constants.worldWidth, Constants.worldHeight)
+      )
 
   fun helpGetProjectileVec
     (pos, projectiles, width, height, ratio, xOffset, yOffset, acc) =

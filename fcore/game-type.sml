@@ -188,10 +188,26 @@ struct
       val plat18 = {id = 18, x = 155, y = 499, width = 199}
       val plat19 = {id = 19, x = 155, y = 399, width = 199}
       val platforms = Vector.fromList
-        [plat1, plat2, plat3, plat4, plat5, plat6, plat7, plat8, plat9, plat10,
-                                  plat11, plat12, plat13
-                                  , plat14, plat15, plat16, plat17, plat18,
-                                  plat19]
+        [ plat1
+        , plat2
+        , plat3
+        , plat4
+        , plat5
+        , plat6
+        , plat7
+        , plat8
+        , plat9
+        , plat10
+        , plat11
+        , plat12
+        , plat13
+        , plat14
+        , plat15
+        , plat16
+        , plat17
+        , plat18
+        , plat19
+        ]
       val platformTree = Platform.generateTree platforms
 
       val enemy1 =

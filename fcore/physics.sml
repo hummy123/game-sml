@@ -84,7 +84,7 @@ struct
       val ww = Constants.worldWidth
       val wh = Constants.worldHeight
     in
-      QuadHelp.hasCollisionAt (x, y, width, height, tree)
+      QuadTree.hasCollisionAt (x, y, width, height, ~1, tree)
     end
 
   fun standingOnAreaID (x, y, tree) =
@@ -109,10 +109,10 @@ struct
       val wh = Constants.worldHeight
 
       val _ = print "START getItemID\n"
-      val r = 
-      QuadHelp.getItemID (x, y, width, height, tree)
+      val r = QuadTree.getItemID (x, y, width, height, tree)
       val _ = print "FINISH getItemID\n"
-    in r
+    in
+      r
     end
 
   fun getWallPatches (x, y, walls, wallTree, acc) =
@@ -125,8 +125,7 @@ struct
       (* check collision with wall to the left *)
       val acc =
         let
-          val leftWallID = QuadHelp.getItemID
-            (x - 1, y, 1, 1, wallTree)
+          val leftWallID = QuadTree.getItemID (x - 1, y, 1, 1, wallTree)
         in
           if leftWallID <> ~1 then
             let
@@ -144,8 +143,7 @@ struct
       (* check collision with wall to the right *)
       val acc =
         let
-          val rightWallID = QuadHelp.getItemID
-            (x + size - 1, y, 1, 1, wallTree)
+          val rightWallID = QuadTree.getItemID (x + size - 1, y, 1, 1, wallTree)
         in
           if rightWallID <> ~1 then
             let
@@ -160,7 +158,7 @@ struct
         end
 
       (* check collision with wall below *)
-      val downWallID = QuadHelp.getItemID
+      val downWallID = QuadTree.getItemID
         (x + moveBy + 1, y + size, 1, 1, wallTree)
     in
       if downWallID <> ~1 then
@@ -193,22 +191,24 @@ struct
 
       val acc =
         if platID <> ~1 then
-          (print ("platID: " ^ Int.toString platID ^ "\n"); case yAxis of
-             JUMPING _ =>
-               (* pass through, allowing player to jump above the platform *)
-               acc
-           | _ =>
-               let
-                 (* default case: 
-                  * player will land on platform and stay on the ground there. *)
-                 val {y = platY, ...}: GameType.platform =
-                   Vector.sub (platforms, platID - 1)
+          ( print ("platID: " ^ Int.toString platID ^ "\n")
+          ; case yAxis of
+              JUMPING _ =>
+                (* pass through, allowing player to jump above the platform *)
+                acc
+            | _ =>
+                let
+                  (* default case: 
+                   * player will land on platform and stay on the ground there. *)
+                  val {y = platY, ...}: GameType.platform =
+                    Vector.sub (platforms, platID - 1)
 
-                 val newY = platY - Fn.entitySize
-                 val acc = Fn.W_Y_AXIS ON_GROUND :: Fn.W_Y newY :: acc
-               in
-                 acc
-               end)
+                  val newY = platY - Fn.entitySize
+                  val acc = Fn.W_Y_AXIS ON_GROUND :: Fn.W_Y newY :: acc
+                in
+                  acc
+                end
+          )
         else
           acc
 
@@ -221,11 +221,10 @@ struct
             * then set new yAxis to FALLING
             * so we do not drop below any platforms again
             * *)
-            if
-              QuadHelp.hasCollisionAt
-                (x, y, size, size, platformTree)
-            then acc
-            else Fn.W_Y_AXIS FALLING :: acc
+            if QuadTree.hasCollisionAt (x, y, size, size, ~1, platformTree) then
+              acc
+            else
+              Fn.W_Y_AXIS FALLING :: acc
         | _ => acc
 
       val acc = getWallPatches (x, y, walls, wallTree, acc)

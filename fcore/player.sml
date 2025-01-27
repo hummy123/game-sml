@@ -320,8 +320,9 @@ struct
     let
       val player = #player game
 
-      val _ = print ("(playerX, playerY) = (" ^Int.toString (#x player) ^ ", " ^
-      Int.toString (#y player) ^ ")\n")
+      val _ = print
+        ("(playerX, playerY) = (" ^ Int.toString (#x player) ^ ", "
+         ^ Int.toString (#y player) ^ ")\n")
 
       val patches = getProjectilePatches player
       val player = PlayerPatch.withPatches (player, patches)
@@ -430,8 +431,8 @@ struct
 
       val ww = Constants.worldWidth
       val wh = Constants.worldHeight
-      val enemyCollisions = QuadHelp.getCollisions
-        (x, y, size, size, enemyTree)
+      val enemyCollisions = QuadTree.getCollisions
+        (x, y, size, size, ~1, enemyTree)
     in
       Vector.fromList enemyCollisions
     end

@@ -8,11 +8,10 @@ struct
       val searchHeight = 10
       val searchWidth = Constants.moveEnemyBy
     in
-      QuadHelp.hasCollisionAt
-        (x, y, searchWidth, searchHeight, wallTree)
+      QuadTree.hasCollisionAt (x, y, searchWidth, searchHeight, ~1, wallTree)
       orelse
-      QuadHelp.hasCollisionAt
-        (x, y, searchWidth, searchHeight, platformTree)
+      QuadTree.hasCollisionAt
+        (x, y, searchWidth, searchHeight, ~1, platformTree)
     end
 
   (* same function takes either wallTree or platformTree and returns true
@@ -29,7 +28,7 @@ struct
       val width = Constants.enemySize
       val height = Platform.platHeight
     in
-      QuadHelp.hasCollisionAt (ex, ey, width, height, tree)
+      QuadTree.hasCollisionAt (ex, ey, width, height, ~1, tree)
     end
 
   fun getPatrollPatches (enemy: enemy, wallTree, platformTree, acc) =
@@ -62,22 +61,17 @@ struct
             val searchWidth = Constants.moveEnemyBy
             val searchHeight = Constants.enemySize - 5
 
-            val hasWallAhead = QuadHelp.hasCollisionAt
-              ( searchStartX
-              , y
-              , searchWidth
-              , searchHeight
-              , wallTree
-              )
+            val hasWallAhead = QuadTree.hasCollisionAt
+              (searchStartX, y, searchWidth, searchHeight, ~1, wallTree)
           in
-            if
-              hasWallAhead
-            then EnemyPatch.W_X_AXIS MOVE_RIGHT :: acc
-            else if canWalkAhead (searchStartX, y, wallTree, platformTree) then 
+            if hasWallAhead then
+              EnemyPatch.W_X_AXIS MOVE_RIGHT :: acc
+            else if canWalkAhead (searchStartX, y, wallTree, platformTree) then
               (* invert direction if moving further left 
-               * will result in falling down  *) 
+               * will result in falling down  *)
               acc
-            else EnemyPatch.W_X_AXIS MOVE_RIGHT :: acc
+            else
+              EnemyPatch.W_X_AXIS MOVE_RIGHT :: acc
           end
       | MOVE_RIGHT =>
           let
@@ -88,22 +82,17 @@ struct
             val searchWidth = Constants.moveEnemyBy
             val searchHeight = Constants.enemySize - 5
 
-            val hasWallAhead = QuadHelp.hasCollisionAt
-              ( searchStartX
-              , y
-              , searchWidth
-              , searchHeight
-              , wallTree
-              )
+            val hasWallAhead = QuadTree.hasCollisionAt
+              (searchStartX, y, searchWidth, searchHeight, ~1, wallTree)
           in
-            if
-              hasWallAhead
-            then EnemyPatch.W_X_AXIS MOVE_LEFT :: acc
-            else if canWalkAhead (searchStartX, y, wallTree, platformTree) then 
+            if hasWallAhead then
+              EnemyPatch.W_X_AXIS MOVE_LEFT :: acc
+            else if canWalkAhead (searchStartX, y, wallTree, platformTree) then
               (* invert direction if moving further right
-               * will result in falling down  *) 
+               * will result in falling down  *)
               acc
-            else EnemyPatch.W_X_AXIS MOVE_LEFT :: acc
+            else
+              EnemyPatch.W_X_AXIS MOVE_LEFT :: acc
           end
       | STAY_STILL => acc
     end
@@ -119,9 +108,9 @@ struct
         in
           (* platY < highestY is correct because lowest number = highest 
            * in * this case *)
-          if platY < highestY andalso checkY <= platY then 
+          if platY < highestY andalso checkY <= platY then
             getHighestPlatform (tl, platforms, platY, id, checkY)
-          else 
+          else
             getHighestPlatform (tl, platforms, highestY, highestID, checkY)
         end
     | [] => highestID
@@ -133,8 +122,8 @@ struct
       val searchWidth = Constants.playerSize
       val searchHeight = Constants.worldHeight - y
 
-      val collisions = QuadHelp.getCollisions
-        (x, y, searchWidth, searchHeight, platformTree)
+      val collisions = QuadTree.getCollisions
+        (x, y, searchWidth, searchHeight, ~1, platformTree)
       val checkY = y + Constants.playerSize
 
       val wh = Constants.worldHeight
@@ -151,8 +140,8 @@ struct
 
       val y = y + Constants.enemySize
 
-      val collisions = QuadHelp.getCollisions
-        (x, y, searchWidth, searchHeight, platformTree)
+      val collisions = QuadTree.getCollisions
+        (x, y, searchWidth, searchHeight, ~1, platformTree)
       val wh = Constants.worldHeight
     in
       getHighestPlatform (collisions, platforms, wh, ~1, y)
@@ -191,12 +180,12 @@ struct
             ON_GROUND => EnemyPatch.W_Y_AXIS (JUMPING 0) :: acc
           | FALLING => EnemyPatch.W_Y_AXIS (JUMPING 0) :: acc
           | _ => acc
-        else 
-          (* have to travel either left or right before jumping *) 
-          if ecx < platX then
-            EnemyPatch.W_X_AXIS MOVE_RIGHT :: acc
-          else
-            EnemyPatch.W_X_AXIS MOVE_LEFT :: acc
+        else (* have to travel either left or right before jumping *) if
+          ecx < platX
+        then
+          EnemyPatch.W_X_AXIS MOVE_RIGHT :: acc
+        else
+          EnemyPatch.W_X_AXIS MOVE_LEFT :: acc
       else
         acc
     end
@@ -234,12 +223,12 @@ struct
             ON_GROUND => EnemyPatch.W_Y_AXIS DROP_BELOW_PLATFORM :: acc
           | FALLING => EnemyPatch.W_Y_AXIS DROP_BELOW_PLATFORM :: acc
           | _ => acc
-        else 
-          (* have to travel either left or right before jumping *) 
-          if ecx < platX then
-            EnemyPatch.W_X_AXIS MOVE_RIGHT :: acc
-          else
-            EnemyPatch.W_X_AXIS MOVE_LEFT :: acc
+        else (* have to travel either left or right before jumping *) if
+          ecx < platX
+        then
+          EnemyPatch.W_X_AXIS MOVE_RIGHT :: acc
+        else
+          EnemyPatch.W_X_AXIS MOVE_LEFT :: acc
       else
         acc
     end
@@ -282,7 +271,7 @@ struct
               EnemyPatch.W_X_AXIS MOVE_RIGHT :: acc
             end
           else
-              EnemyPatch.W_X_AXIS MOVE_RIGHT :: acc
+            EnemyPatch.W_X_AXIS MOVE_RIGHT :: acc
         end
       else
         (* platform is below or at same y coordinat as enemy 
@@ -296,8 +285,8 @@ struct
         in
           if yDiff >= xDiff then
             (* can reach next platform by simply dropping and moving right *)
-            EnemyPatch.W_Y_AXIS DROP_BELOW_PLATFORM :: EnemyPatch.W_X_AXIS
-            MOVE_RIGHT :: acc
+            EnemyPatch.W_Y_AXIS DROP_BELOW_PLATFORM
+            :: EnemyPatch.W_X_AXIS MOVE_RIGHT :: acc
           else
             let
               val jumpAmt =
@@ -356,7 +345,7 @@ struct
               EnemyPatch.W_X_AXIS MOVE_LEFT :: acc
             end
           else
-              EnemyPatch.W_X_AXIS MOVE_LEFT :: acc
+            EnemyPatch.W_X_AXIS MOVE_LEFT :: acc
         end
       else
         (* platform is below or at same y coordinat as enemy 
@@ -370,8 +359,8 @@ struct
         in
           if yDiff >= xDiff then
             (* can reach next platform by simply dropping and moving right *)
-            EnemyPatch.W_Y_AXIS DROP_BELOW_PLATFORM :: EnemyPatch.W_X_AXIS
-            MOVE_LEFT :: acc
+            EnemyPatch.W_Y_AXIS DROP_BELOW_PLATFORM
+            :: EnemyPatch.W_X_AXIS MOVE_LEFT :: acc
           else
             let
               val jumpAmt =
@@ -413,7 +402,7 @@ struct
         getJumpPatches (nextPlatform, platformTree, enemy, acc)
       else if canDrop then
         getDropPatches (nextPlatform, platformTree, enemy, acc)
-      else 
+      else
         let
           (* if can neither jump or drop to next platform vertically
            * then remaining options are either jumping to the right or left.
@@ -439,16 +428,14 @@ struct
       val efx = ex + Constants.enemySize
     in
       if isBetween (px, ex, pfx) andalso isBetween (px, efx, pfx) then
-       acc
-      else 
+        acc
+      else
         let
           val startDiff = abs (px - ex)
           val endDiff = abs (pfx - efx)
         in
-          if startDiff > endDiff then
-            EnemyPatch.W_X_AXIS MOVE_LEFT :: acc
-          else
-            EnemyPatch.W_X_AXIS MOVE_RIGHT :: acc
+          if startDiff > endDiff then EnemyPatch.W_X_AXIS MOVE_LEFT :: acc
+          else EnemyPatch.W_X_AXIS MOVE_RIGHT :: acc
         end
     end
 
@@ -471,35 +458,25 @@ struct
     in
       if ey < py - 65 then
         (* set to falling *)
-        EnemyPatch.W_NEXT_PLAT_ID ~1 ::
-        EnemyPatch.W_Y_AXIS FALLING ::
-        acc
+        EnemyPatch.W_NEXT_PLAT_ID ~1 :: EnemyPatch.W_Y_AXIS FALLING :: acc
       else
         acc
     end
 
   fun getLandingPatches (newPlatformID, platforms, enemy, acc) =
     case #yAxis enemy of
-      JUMPING _ =>
-        getJumpLandingPatches (enemy, newPlatformID, platforms, acc)
-    | _ =>
-        getFallingPatches (enemy, newPlatformID, platforms, acc)
+      JUMPING _ => getJumpLandingPatches (enemy, newPlatformID, platforms, acc)
+    | _ => getFallingPatches (enemy, newPlatformID, platforms, acc)
 
-  fun getFollowPatches 
+  fun getFollowPatches
     (player: player, enemy, wallTree, platformTree, platforms, acc) =
     let
       (* todo: possibly get pID and eID of player/enemy in a different way *)
       val pID = getPlatformBelowPlayer (player, platformTree, platforms)
-      val pID = 
-        if pID = ~1 then
-          #platID player
-        else pID
+      val pID = if pID = ~1 then #platID player else pID
 
       val eID = getPlatformBelowEnemy (enemy, platformTree, platforms)
-      val eID =
-        if eID = ~1 then
-          #platID enemy
-        else eID
+      val eID = if eID = ~1 then #platID enemy else eID
     in
       if eID = ~1 orelse pID = ~1 then
         (* without checking that neither of these are ~1 
@@ -521,7 +498,14 @@ struct
                 val acc = EnemyPatch.W_NEXT_PLAT_ID nextPlatformID :: acc
               in
                 getPathToNextPlatform
-                  (nextPlatformID, platforms, platformTree, enemy, eID, pID, acc)
+                  ( nextPlatformID
+                  , platforms
+                  , platformTree
+                  , enemy
+                  , eID
+                  , pID
+                  , acc
+                  )
               end
           | [] => getPatrollPatches (enemy, wallTree, platformTree, acc)
         end

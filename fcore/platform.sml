@@ -11,13 +11,17 @@ struct
     else
       let
         val {id, x, y, width} = Vector.sub (platVec, pos)
-        val acc = QuadHelp.insert
-          (x, y, width, platHeight, id, acc)
+        val acc = QuadTree.insert (x, y, width, platHeight, id, acc)
       in
         helpGenerateTree (pos + 1, platVec, acc)
       end
 
-  fun generateTree platVec = helpGenerateTree (0, platVec, QuadTree.empty)
+  fun generateTree platVec =
+    helpGenerateTree
+      ( 0
+      , platVec
+      , QuadTree.create (Constants.worldWidth, Constants.worldHeight)
+      )
 
   fun helpFind (findNum, vec, low, high) =
     let

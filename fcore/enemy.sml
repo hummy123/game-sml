@@ -4,8 +4,7 @@ struct
 
   fun withDefaultYAxis (enemy: enemy) =
     case #yAxis enemy of
-      ON_GROUND =>
-        EnemyPatch.withPatch (enemy, EnemyPatch.W_Y_AXIS FALLING)
+      ON_GROUND => EnemyPatch.withPatch (enemy, EnemyPatch.W_Y_AXIS FALLING)
     | _ => enemy
 
   fun helpExists (pos, id, collisions) =
@@ -35,8 +34,8 @@ struct
 
       val size = Constants.enemySize
 
-      val hasCollision = QuadHelp.hasCollisionAt
-        (x, y, size, size, projectileTree)
+      val hasCollision = QuadTree.hasCollisionAt
+        (x, y, size, size, ~1, projectileTree)
     in
       if hasCollision then
         if health = 1 then
@@ -181,12 +180,17 @@ struct
 
         val size = Constants.enemySize
 
-        val acc = QuadHelp.insert (x, y, size, size, id, acc)
+        val acc = QuadTree.insert (x, y, size, size, id, acc)
       in
         helpGenerateTree (pos + 1, enemyVec, acc)
       end
 
-  fun generateTree enemyVec = helpGenerateTree (0, enemyVec, QuadTree.empty)
+  fun generateTree enemyVec =
+    helpGenerateTree
+      ( 0
+      , enemyVec
+      , QuadTree.create (Constants.worldWidth, Constants.worldHeight)
+      )
 
   fun helpFind (findNum, vec: enemy vector, low, high) =
     (* should only be called when we know enemy already exists in vec *)
