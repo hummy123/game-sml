@@ -217,7 +217,7 @@ struct
         , health = 1
         , xAxis = STAY_STILL
         , yAxis = FALLING
-        , variant = EnemyVariants.PATROL_SLIME
+        , variant = EnemyVariants.FOLLOW_SLIME
         , platID = ~1
         , nextPlatID = ~1
         }

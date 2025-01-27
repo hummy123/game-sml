@@ -94,25 +94,8 @@ struct
       val width = Fn.entitySize
       val height = Platform.platHeight + 2
 
-      val plat1 = {id = 1, x = 155, y = 911, width = 199}
-      val plat2 = {id = 2, x = 355, y = 759, width = 555}
-      val plat3 = {id = 3, x = 355, y = 659, width = 111}
-      val plat4 = {id = 4, x = 155, y = 855, width = 99}
-      val plat5 = {id = 5, x = 155, y = 811, width = 199}
-      val plat6 = {id = 6, x = 155, y = 710, width = 199}
-      val plat7 = {id = 7, x = 301, y = 855, width = 99}
-      val plat8 = {id = 8, x = 970, y = 815, width = 303}
-      val plat9 = {id = 9, x = 959, y = 705, width = 303}
-      val plat10 = {id = 10, x = 970, y = 759, width = 303}
-
-      val ww = Constants.worldWidth
-      val wh = Constants.worldHeight
-
-      val _ = print "START getItemID\n"
-      val r = QuadTree.getItemID (x, y, width, height, tree)
-      val _ = print "FINISH getItemID\n"
     in
-      r
+      QuadTree.getItemID (x, y, width, height, tree)
     end
 
   fun getWallPatches (x, y, walls, wallTree, acc) =
@@ -185,30 +168,30 @@ struct
       val ww = Constants.worldWidth
       val wh = Constants.worldHeight
 
-      val platID = standingOnAreaID (x, y, platformTree)
+      val standPlatID = standingOnAreaID (x, y, platformTree)
 
       val acc = []
 
       val acc =
-        if platID <> ~1 then
-          ( print ("platID: " ^ Int.toString platID ^ "\n")
-          ; case yAxis of
-              JUMPING _ =>
-                (* pass through, allowing player to jump above the platform *)
-                acc
-            | _ =>
-                let
-                  (* default case: 
-                   * player will land on platform and stay on the ground there. *)
-                  val {y = platY, ...}: GameType.platform =
-                    Vector.sub (platforms, platID - 1)
+        if standPlatID <> ~1 then
+          case yAxis of
+          (* pass through cases, allowing player to jump above 
+           * or drop below the platform *)
+            JUMPING _ => acc
+          | DROP_BELOW_PLATFORM => acc
+          | FLOATING _ => acc
+          | _ =>
+              let
+                (* default case: 
+                 * player will land on platform and stay on the ground there. *)
+                val {y = platY, ...}: GameType.platform =
+                  Vector.sub (platforms, standPlatID - 1)
 
-                  val newY = platY - Fn.entitySize
-                  val acc = Fn.W_Y_AXIS ON_GROUND :: Fn.W_Y newY :: acc
-                in
-                  acc
-                end
-          )
+                val newY = platY - Fn.entitySize
+                val acc = Fn.W_Y_AXIS ON_GROUND :: Fn.W_Y newY :: acc
+              in
+                acc
+              end
         else
           acc
 
@@ -228,8 +211,6 @@ struct
         | _ => acc
 
       val acc = getWallPatches (x, y, walls, wallTree, acc)
-
-      val standPlatID = standingOnAreaID (x, y, platformTree)
     in
       if standPlatID <> ~1 then Fn.W_PLAT_ID standPlatID :: acc else acc
     end
