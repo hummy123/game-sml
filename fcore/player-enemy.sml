@@ -47,8 +47,8 @@ struct
           (case attacked of
              NOT_ATTACKED =>
                let
-                 val enemyCollisions = QuadTree.getCollisions
-                   (x, y, size, size, 0, 0, 1920, 1080, 0, enemyTree)
+                 val enemyCollisions = QuadHelp.getCollisions
+                   (x, y, size, size, enemyTree)
 
                  val player =
                    Player.enemyCollisionReaction
@@ -72,8 +72,8 @@ struct
                if amt = Constants.attackedLimit then
                  (* if reached limit, detect enemies again *)
                  let
-                   val enemyCollisions = QuadTree.getCollisions
-                     (x, y, size, size, 0, 0, 1920, 1080, 0, enemyTree)
+                   val enemyCollisions = QuadHelp.getCollisions
+                     (x, y, size, size, enemyTree)
 
                    val player =
                      Player.exitAttackedAndCheckEnemies

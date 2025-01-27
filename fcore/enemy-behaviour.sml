@@ -4,18 +4,15 @@ struct
 
   fun canWalkAhead (x, y, wallTree, platformTree) =
     let
-      val ww = Constants.worldWidth
-      val wh = Constants.worldHeight
-
       val y = y + Constants.enemySize - 5
       val searchHeight = 10
       val searchWidth = Constants.moveEnemyBy
     in
-      QuadTree.hasCollisionAt
-        (x, y, searchWidth, searchHeight, 0, 0, ww, wh, ~1, wallTree)
+      QuadHelp.hasCollisionAt
+        (x, y, searchWidth, searchHeight, wallTree)
       orelse
-      QuadTree.hasCollisionAt
-        (x, y, searchWidth, searchHeight, 0, 0, ww, wh, ~1, platformTree)
+      QuadHelp.hasCollisionAt
+        (x, y, searchWidth, searchHeight, platformTree)
     end
 
   (* same function takes either wallTree or platformTree and returns true
@@ -31,11 +28,8 @@ struct
 
       val width = Constants.enemySize
       val height = Platform.platHeight
-
-      val ww = Constants.worldWidth
-      val wh = Constants.worldHeight
     in
-      QuadTree.hasCollisionAt (ex, ey, width, height, 0, 0, ww, wh, ~1, tree)
+      QuadHelp.hasCollisionAt (ex, ey, width, height, tree)
     end
 
   fun getPatrollPatches (enemy: enemy, wallTree, platformTree, acc) =
@@ -68,19 +62,11 @@ struct
             val searchWidth = Constants.moveEnemyBy
             val searchHeight = Constants.enemySize - 5
 
-            val ww = Constants.worldWidth
-            val wh = Constants.worldHeight
-
-            val hasWallAhead = QuadTree.hasCollisionAt
+            val hasWallAhead = QuadHelp.hasCollisionAt
               ( searchStartX
               , y
               , searchWidth
               , searchHeight
-              , 0
-              , 0
-              , ww
-              , wh
-              , ~1
               , wallTree
               )
           in
@@ -102,19 +88,11 @@ struct
             val searchWidth = Constants.moveEnemyBy
             val searchHeight = Constants.enemySize - 5
 
-            val ww = Constants.worldWidth
-            val wh = Constants.worldHeight
-
-            val hasWallAhead = QuadTree.hasCollisionAt
+            val hasWallAhead = QuadHelp.hasCollisionAt
               ( searchStartX
               , y
               , searchWidth
               , searchHeight
-              , 0
-              , 0
-              , ww
-              , wh
-              , ~1
               , wallTree
               )
           in
@@ -155,12 +133,11 @@ struct
       val searchWidth = Constants.playerSize
       val searchHeight = Constants.worldHeight - y
 
-      val ww = Constants.worldWidth
-      val wh = Constants.worldHeight
-
-      val collisions = QuadTree.getCollisions
-        (x, y, searchWidth, searchHeight, 0, 0, ww, wh, ~1, platformTree)
+      val collisions = QuadHelp.getCollisions
+        (x, y, searchWidth, searchHeight, platformTree)
       val checkY = y + Constants.playerSize
+
+      val wh = Constants.worldHeight
     in
       getHighestPlatform (collisions, platforms, wh, ~1, checkY)
     end
@@ -174,11 +151,9 @@ struct
 
       val y = y + Constants.enemySize
 
-      val ww = Constants.worldWidth
+      val collisions = QuadHelp.getCollisions
+        (x, y, searchWidth, searchHeight, platformTree)
       val wh = Constants.worldHeight
-
-      val collisions = QuadTree.getCollisions
-        (x, y, searchWidth, searchHeight, 0, 0, ww, wh, ~1, platformTree)
     in
       getHighestPlatform (collisions, platforms, wh, ~1, y)
     end

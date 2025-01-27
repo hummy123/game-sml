@@ -178,8 +178,20 @@ struct
       val plat8 = {id = 8, x = 970, y = 815, width = 303}
       val plat9 = {id = 9, x = 959, y = 705, width = 303}
       val plat10 = {id = 10, x = 970, y = 759, width = 303}
+      val plat11 = {id = 11, x = 970, y = 595, width = 303}
+      val plat12 = {id = 12, x = 959, y = 535, width = 303}
+      val plat13 = {id = 13, x = 970, y = 495, width = 303}
+      val plat14 = {id = 14, x = 1000, y = 415, width = 303}
+      val plat15 = {id = 15, x = 1000, y = 335, width = 303}
+      val plat16 = {id = 16, x = 1000, y = 295, width = 303}
+      val plat17 = {id = 17, x = 155, y = 599, width = 199}
+      val plat18 = {id = 18, x = 155, y = 499, width = 199}
+      val plat19 = {id = 19, x = 155, y = 399, width = 199}
       val platforms = Vector.fromList
-        [plat1, plat2, plat3, plat4, plat5, plat6, plat7, plat8, plat9, plat10]
+        [plat1, plat2, plat3, plat4, plat5, plat6, plat7, plat8, plat9, plat10,
+                                  plat11, plat12, plat13
+                                  , plat14, plat15, plat16, plat17, plat18,
+                                  plat19]
       val platformTree = Platform.generateTree platforms
 
       val enemy1 =
@@ -189,7 +201,7 @@ struct
         , health = 1
         , xAxis = STAY_STILL
         , yAxis = FALLING
-        , variant = EnemyVariants.FOLLOW_SLIME
+        , variant = EnemyVariants.PATROL_SLIME
         , platID = ~1
         , nextPlatID = ~1
         }

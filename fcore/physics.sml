@@ -84,7 +84,7 @@ struct
       val ww = Constants.worldWidth
       val wh = Constants.worldHeight
     in
-      QuadTree.hasCollisionAt (x, y, width, height, 0, 0, ww, wh, ~1, tree)
+      QuadHelp.hasCollisionAt (x, y, width, height, tree)
     end
 
   fun standingOnAreaID (x, y, tree) =
@@ -92,12 +92,27 @@ struct
       val y = y + Fn.entitySize - 1
 
       val width = Fn.entitySize
-      val height = Platform.platHeight
+      val height = Platform.platHeight + 2
+
+      val plat1 = {id = 1, x = 155, y = 911, width = 199}
+      val plat2 = {id = 2, x = 355, y = 759, width = 555}
+      val plat3 = {id = 3, x = 355, y = 659, width = 111}
+      val plat4 = {id = 4, x = 155, y = 855, width = 99}
+      val plat5 = {id = 5, x = 155, y = 811, width = 199}
+      val plat6 = {id = 6, x = 155, y = 710, width = 199}
+      val plat7 = {id = 7, x = 301, y = 855, width = 99}
+      val plat8 = {id = 8, x = 970, y = 815, width = 303}
+      val plat9 = {id = 9, x = 959, y = 705, width = 303}
+      val plat10 = {id = 10, x = 970, y = 759, width = 303}
 
       val ww = Constants.worldWidth
       val wh = Constants.worldHeight
-    in
-      QuadTree.getItemID (x, y, width, height, 0, 0, ww, wh, tree)
+
+      val _ = print "START getItemID\n"
+      val r = 
+      QuadHelp.getItemID (x, y, width, height, tree)
+      val _ = print "FINISH getItemID\n"
+    in r
     end
 
   fun getWallPatches (x, y, walls, wallTree, acc) =
@@ -110,8 +125,8 @@ struct
       (* check collision with wall to the left *)
       val acc =
         let
-          val leftWallID = QuadTree.getItemID
-            (x - 1, y, 1, 1, 0, 0, ww, wh, wallTree)
+          val leftWallID = QuadHelp.getItemID
+            (x - 1, y, 1, 1, wallTree)
         in
           if leftWallID <> ~1 then
             let
@@ -129,8 +144,8 @@ struct
       (* check collision with wall to the right *)
       val acc =
         let
-          val rightWallID = QuadTree.getItemID
-            (x + size - 1, y, 1, 1, 0, 0, ww, wh, wallTree)
+          val rightWallID = QuadHelp.getItemID
+            (x + size - 1, y, 1, 1, wallTree)
         in
           if rightWallID <> ~1 then
             let
@@ -145,8 +160,8 @@ struct
         end
 
       (* check collision with wall below *)
-      val downWallID = QuadTree.getItemID
-        (x + moveBy + 1, y + size, 1, 1, 0, 0, ww, wh, wallTree)
+      val downWallID = QuadHelp.getItemID
+        (x + moveBy + 1, y + size, 1, 1, wallTree)
     in
       if downWallID <> ~1 then
         let
@@ -172,23 +187,14 @@ struct
       val ww = Constants.worldWidth
       val wh = Constants.worldHeight
 
-      val platCollisions = QuadTree.getCollisionsBelow
-        (x, y, size, size, 0, 0, ww, wh, 0, platformTree)
-
       val platID = standingOnAreaID (x, y, platformTree)
 
       val acc = []
 
       val acc =
         if platID <> ~1 then
-          (case yAxis of
-             DROP_BELOW_PLATFORM =>
-               (* pass through, allowing player to drop below the platform *)
-               acc
-           | JUMPING _ =>
-               (* pass through, allowing player to jump above the platform *)
-               acc
-           | FLOATING _ =>
+          (print ("platID: " ^ Int.toString platID ^ "\n"); case yAxis of
+             JUMPING _ =>
                (* pass through, allowing player to jump above the platform *)
                acc
            | _ =>
@@ -216,8 +222,8 @@ struct
             * so we do not drop below any platforms again
             * *)
             if
-              QuadTree.hasCollisionAt
-                (x, y, size, size, 0, 0, ww, wh, ~1, platformTree)
+              QuadHelp.hasCollisionAt
+                (x, y, size, size, platformTree)
             then acc
             else Fn.W_Y_AXIS FALLING :: acc
         | _ => acc

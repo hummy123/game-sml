@@ -2,8 +2,6 @@ signature QUAD_TREE =
 sig
   type t
 
-  val empty: t
-
   datatype collision_side =
     QUERY_ON_LEFT_SIDE
   | QUERY_ON_TOP_SIDE
@@ -11,33 +9,22 @@ sig
   | QUERY_ON_BOTTOM_SIDE
 
   val insert: int * int * int * int * 
-              int * int * int * int * 
               int * t -> t
 
-  val fromItem: int * int * int * int * int -> t
-
   val getCollisions: int * int * int * int * 
-                     int * int * int * int * 
                      int * t -> int list
 
   val helpGetCollisions: int * int * int * int * 
-                         int * int * int * int * 
                          int * int list * t 
                          -> int list
 
-  val getCollisionSides: int * int * int * int * int * int * int * int * int * t
-                         -> (collision_side * int) list
-
-  val getCollisionsBelow: int * int * int * int * int * int * int * int * int * t
-                         -> int list
-
   val hasCollisionAt: int * int * int * int *
-                      int * int * int * int *
                       int * t -> bool
 
   val getItemID: int * int * int * int *
-                 int * int * int * int *
                  t -> int
+
+  val create: int * int -> t
 end
 
 structure QuadTree: QUAD_TREE =
@@ -46,41 +33,97 @@ struct
 
   type item = QuadTreeType.item
 
+  fun create (width, height) =
+    LEAF {
+      items = Vector.fromList [],
+      x = 0,
+      y = 0,
+      w = width,
+      h = height
+    }
+
+  fun isColliding (ix, iy, ifx, ify, cx, cy, cfx, cfy) =
+    ix < cfx andalso
+    ifx > cx andalso
+    iy < cfy andalso
+    ify > cy
+
+  fun isCollidingPlus (ix, iy, iw, ih, cx, cy, cw, ch) =
+  let
+    val ifx = ix + iw
+    val ify = iy + ih
+    val cfx = cx + cw
+    val cfy = cy + ch
+  in
+    isColliding (ix, iy, ifx, ify, cx, cy, cfx, cfy)
+  end
+
   fun visitTopLeft (iX, iY, iW, iH, qX, qY, qW, qH) =
     let
-      val midX = qW div 2 + qX
-      val midY = qH div 2 + qY
+      val hw = qW div 2
+      val hh = qH div 2
+
+      val ifx = iX + iW
+      val ify = iY + iH
+
+      val qmx = qX + hw
+      val qmy = qY + hh
+
+      val qfx = qX + qW
+      val qfy = qY + qH
     in
-      iX <= midX andalso iY <= midY
+      isColliding (iX, iY, ifx, ify, qX, qY, qmx, qmy)
     end
 
   fun visitTopRight (iX, iY, iW, iH, qX, qY, qW, qH) =
     let
-      val midX = qW div 2 + qX
-      val midY = qH div 2 + qY
+      val hw = qW div 2
+      val hh = qH div 2
+
+      val ifx = iX + iW
+      val ify = iY + iH
+      
+      val qmx = qX + hw
+      val qmy = qY + hh
+
+      val qfx = qX + qW
+      val qfy = qY + qH
     in
-      iX >= midX andalso iY <= midY
+      isColliding (iX, iY, ifx, ify, qmx, qY, qfx, qmy)
     end
 
   fun visitBottomLeft (iX, iY, iW, iH, qX, qY, qW, qH) =
     let
-      val midX = qW div 2 + qX
-      val midY = qH div 2 + qY
+      val hw = qW div 2
+      val hh = qH div 2
 
-      val iFinishY = iY + iH
+      val ifx = iX + iW
+      val ify = iY + iH
+      
+      val qmx = qX + hw
+      val qmy = qY + hh
+
+      val qfx = qX + qW
+      val qfy = qY + qH
     in
-      iX <= midX andalso iFinishY >= midY
+      isColliding (iX, iY, ifx, ify, qX, qmy, qmx, qfy)
     end
 
   fun visitBottomRight (iX, iY, iW, iH, qX, qY, qW, qH) =
     let
-      val midX = qW div 2 + qX
-      val midY = qH div 2 + qY
+      val hw = qW div 2
+      val hh = qH div 2
 
-      val iFinishX = iX + iH
-      val iFinishY = iY + iH
+      val ifx = iX + iW
+      val ify = iY + iH
+      
+      val qmx = qX + hw
+      val qmy = qY + hh
+
+      val qfx = qX + qW
+      val qfy = qY + qH
     in
-      iFinishX >= midX andalso iFinishY >= midY
+      isColliding (iX, iY, ifx, ify, qmx, qmy, qfx, qfy)
     end
 
   fun mkItem (id, startX, startY, width, height) : item =
@@ -91,114 +134,93 @@ struct
     , height = height
     }
 
-  fun itemToString {itemID, startX, startY, width, height} =
-    String.concat
-      [ "{itemID = "
-      , Int.toString itemID
-      , ", startX = "
-      , Int.toString startX
-      , ", startY = "
-      , Int.toString startY
-      , ", width = "
-      , Int.toString width
-      , ", height = "
-      , Int.toString height
-      , "}"
-      ]
-
   type t = QuadTreeType.t
-
-  val empty = LEAF (Vector.fromList [])
-
-  fun fromItem (itemID, startX, startY, width, height) =
-    let
-      val item = mkItem (itemID, startX, startY, width, height)
-      val elements = Vector.fromList [item]
-    in
-      LEAF elements
-    end
 
   (* max size of vector before we split it further *)
   val maxSize = 3
 
-  fun isItemInQuad (iX, iY, iWidth, iHeight, qX, qY, qWidth, qHeight) =
-    iX >= qX andalso iY >= qY andalso iWidth <= qWidth
-    andalso iHeight <= qHeight
-
-  fun whichQuadrant
-    (itemX, itemY, itemWidth, itemHeight, quadX, quadY, quadWidth, quadHeight) =
+  fun mkTopLeft (x, y, w, h, items) =
     let
-      (* calculate quadrants *)
-      val halfWidth = quadWidth div 2
-      val halfHeight = quadHeight div 2
-
-      val middleX = quadX + halfWidth
-      val middleY = quadY + halfHeight
-
-      val isInTopLeft = isItemInQuad
-        ( itemX
-        , itemY
-        , itemWidth
-        , itemHeight
-        , quadX
-        , quadY
-        , halfWidth
-        , halfHeight
-        )
-
-      val isInTopRight = isItemInQuad
-        ( itemX
-        , itemY
-        , itemWidth
-        , itemHeight
-        , middleX
-        , quadY
-        , halfWidth
-        , halfHeight
-        )
-
-      val isInBottomLeft = isItemInQuad
-        ( itemX
-        , itemY
-        , itemWidth
-        , itemHeight
-        , quadX
-        , middleY
-        , halfWidth
-        , halfHeight
-        )
-
-      val isInBottomRight = isItemInQuad
-        ( itemX
-        , itemY
-        , itemWidth
-        , itemHeight
-        , middleX
-        , middleY
-        , halfWidth
-        , halfHeight
-        )
+      val items = Vector.fromList items
+      val hw = w div 2
+      val hh = h div 2
     in
-      if isInTopLeft then TOP_LEFT
-      else if isInTopRight then TOP_RIGHT
-      else if isInBottomLeft then BOTTOM_LEFT
-      else if isInBottomRight then BOTTOM_RIGHT
-      else PARENT_QUADRANT
+      LEAF {
+        items = items,
+        x = x,
+        y = y,
+        w = hw,
+        h = hh
+      }
     end
 
-  fun splitLeaf (qX, qY, qW, qH, tl, tr, bl, br, elements, pos) =
+  fun mkTopRight (x, y, w, h, items) =
+    let
+      val items = Vector.fromList items
+      val hw = w div 2
+      val hh = h div 2
+      val x = x + hw
+    in
+      LEAF {
+      items = items,
+      x = x,
+      y = y,
+      w = hw,
+      h = hh
+      }
+    end
+
+  fun mkBottomLeft (x, y, w, h, items) =
+    let
+      val items = Vector.fromList items
+      val hw = w div 2
+      val hh = h div 2
+      val y = y + hh
+    in
+      LEAF {
+        items = items,
+        x = x,
+        y = y,
+        w = hw,
+        h = hh
+      }
+    end
+
+  fun mkBottomRight (x, y, w, h, items) =
+    let
+      val items = Vector.fromList items
+      val hw = w div 2
+      val hh = h div 2
+      val x = x + hw
+      val y = y + hh
+    in
+      LEAF {
+        items = items,
+        x = x,
+        y = y,
+        w = hw,
+        h = hh
+      }
+    end
+
+  fun splitLeaf (x, y, w, h, tl: item list, tr: item list, bl: item list, br:
+    item list, elements, pos) =
     if pos < 0 then
       let
-        val tl = Vector.fromList tl
-        val tr = Vector.fromList tr
-        val bl = Vector.fromList bl
-        val br = Vector.fromList br
+        val tl = mkTopLeft (x, y, w, h, tl)
+        val tr = mkTopRight (x, y, w, h, tr)
+        val bl = mkBottomLeft (x, y, w, h, bl)
+        val br = mkBottomRight (x, y, w, h, br)
       in
         NODE
-          { topLeft = LEAF tl
-          , topRight = LEAF tr
-          , bottomLeft = LEAF bl
-          , bottomRight = LEAF br
+          { topLeft = tl
+          , topRight = tr
+          , bottomLeft = bl
+          , bottomRight = br
+          , x = x
+          , y = y
+          , w = w
+          , h = h
           }
       end
     else
@@ -206,10 +228,10 @@ struct
         val item = Vector.sub (elements, pos)
         val {startX = iX, startY = iY, width = iW, height = iH, ...} = item
 
-        val vtl = visitTopLeft (iX, iY, iW, iH, qX, qY, qW, qH)
-        val vtr = visitTopRight (iX, iY, iW, iH, qX, qY, qW, qH)
-        val vbl = visitBottomLeft (iX, iY, iW, iH, qX, qY, qW, qH)
-        val vbr = visitBottomRight (iX, iY, iW, iH, qX, qY, qW, qH)
+        val vtl = visitTopLeft (iX, iY, iW, iH, x, y, w, h)
+        val vtr = visitTopRight (iX, iY, iW, iH, x, y, w, h)
+        val vbl = visitBottomLeft (iX, iY, iW, iH, x, y, w, h)
+        val vbr = visitBottomRight (iX, iY, iW, iH, x, y, w, h)
 
         val tl = if vtl then item :: tl else tl
 
@@ -219,159 +241,83 @@ struct
 
         val br = if vbr then item :: br else br
       in
-        splitLeaf (qX, qY, qW, qH, tl, tr, bl, br, elements, pos - 1)
+        splitLeaf (x, y, w, h, tl, tr, bl, br, elements, pos - 1)
       end
 
-  fun insert
-    ( itemX
-    , itemY
-    , itemWidth
-    , itemHeight
-    , quadX
-    , quadY
-    , quadWidth
-    , quadHeight
-    , itemID
-    , tree: t
-    ) =
+  fun insert (iX, iY, iW, iH, itemID, tree: t) =
     case tree of
-      NODE {topLeft, topRight, bottomLeft, bottomRight} =>
+      NODE {topLeft, topRight, bottomLeft, bottomRight, x, y, w, h} =>
+      if isCollidingPlus (iX, iY, iW, iH, x, y, w, h) then
         let
-          val halfW = quadWidth div 2
-          val halfH = quadHeight div 2
-
-          val midX = halfW + quadX
-          val midY = halfH + quadY
-
-          val iX = itemX
-          val iY = itemY
-          val iW = itemWidth
-          val iH = itemHeight
-
-          val qX = quadX
-          val qY = quadY
-          val qW = quadWidth
-          val qH = quadHeight
-
-          val vtl = visitTopLeft (iX, iY, iW, iH, qX, qY, qW, qH)
-          val vtr = visitTopRight (iX, iY, iW, iH, qX, qY, qW, qH)
-          val vbl = visitBottomLeft (iX, iY, iW, iH, qX, qY, qW, qH)
-          val vbr = visitBottomRight (iX, iY, iW, iH, qX, qY, qW, qH)
-
-          val tl =
-            if vtl then
-              insert (iX, iY, iW, iH, qX, qY, halfW, halfH, itemID, topLeft)
-            else
-              topLeft
-
-          val tr =
-            if vtr then
-              insert (iX, iY, iW, iH, midX, qY, halfW, halfH, itemID, topRight)
-            else
-              topRight
-
-          val bl =
-            if vbl then
-              insert
-                (iX, iY, iW, iH, qX, midY, halfW, halfH, itemID, bottomLeft)
-            else
-              bottomLeft
-
-          val br =
-            if vbr then
-              insert
-                (iX, iY, iW, iH, midX, midY, halfW, halfH, itemID, bottomRight)
-            else
-              bottomRight
+          (* we are not necessarily inserting into all nodes.
+           * If isCollidingPlus returns false recursively, 
+           * we return the same node back. *)
+          val tl = insert (iX, iY, iW, iH, itemID, topLeft)
+          val tr = insert (iX, iY, iW, iH, itemID, topRight)
+          val bl = insert (iX, iY, iW, iH, itemID, bottomLeft)
+          val br = insert (iX, iY, iW, iH, itemID, bottomRight)
         in
-          NODE {topLeft = tl, topRight = tr, bottomLeft = bl, bottomRight = br}
+          NODE {topLeft = tl, topRight = tr, bottomLeft = bl, bottomRight = br
+          , x = x, y = y, w = w, h = h
+          }
         end
-    | LEAF elements =>
-        if Vector.length elements + 1 > maxSize then
-          (* have to calculate quadrants and split *)
-          let
-            val pos = Vector.length elements - 1
-            val item = mkItem (itemID, itemX, itemY, itemWidth, itemHeight)
+      else
+        tree
+    | LEAF {items, x, y, w, h} =>
+        if isCollidingPlus (iX, iY, iW, iH, x, y, w, h) then
+          if Vector.length items + 1 > maxSize then
+            (* have to calculate quadrants and split *)
+            let
+              val pos = Vector.length items - 1
+              val item = mkItem (itemID, iX, iY, iW, iH)
 
-            val halfW = quadWidth div 2
-            val halfH = quadHeight div 2
+              val vtl = visitTopLeft (iX, iY, iW, iH, x, y, w, h)
+              val vtr = visitTopRight (iX, iY, iW, iH, x, y, w, h)
+              val vbl = visitBottomLeft (iX, iY, iW, iH, x, y, w, h)
+              val vbr = visitBottomRight (iX, iY, iW, iH, x, y, w, h)
 
-            val midX = halfW + quadX
-            val midY = halfH + quadY
+              val tl = if vtl then [item] else []
 
-            val iX = itemX
-            val iY = itemY
-            val iW = itemWidth
-            val iH = itemHeight
+              val tr = if vtr then [item] else []
 
-            val qX = quadX
-            val qY = quadY
-            val qW = quadWidth
-            val qH = quadHeight
+              val bl = if vbl then [item] else []
 
-            val vtl = visitTopLeft (iX, iY, iW, iH, qX, qY, qW, qH)
-            val vtr = visitTopRight (iX, iY, iW, iH, qX, qY, qW, qH)
-            val vbl = visitBottomLeft (iX, iY, iW, iH, qX, qY, qW, qH)
-            val vbr = visitBottomRight (iX, iY, iW, iH, qX, qY, qW, qH)
-
-            val pos = Vector.length elements - 1
-            val item = mkItem (itemID, itemX, itemY, itemWidth, itemHeight)
-
-            val tl = if vtl then [item] else []
-
-            val tr = if vtr then [item] else []
-
-            val bl = if vbl then [item] else []
-
-            val br = if vbr then [item] else []
-
-            val pe = []
-          in
-            splitLeaf
-              ( quadX
-              , quadY
-              , quadWidth
-              , quadHeight
-              , tl
-              , tr
-              , bl
-              , br
-              , elements
-              , pos
-              )
-          end
-        else
-          (* can insert itemID in elements vector *)
-          let
-            val item = mkItem (itemID, itemX, itemY, itemWidth, itemHeight)
-            val elements = Vector.concat [elements, Vector.fromList [item]]
-          in
-            LEAF elements
-          end
-
-  fun isBetween (start, checkStart, finish, checkFinish) =
-    (* if check containhs start/finish *)
-    (checkStart <= start andalso checkFinish >= finish)
-    orelse
-    (* if start/finish containhs check *)
-    (start <= checkStart andalso finish >= checkFinish)
-    orelse
-    (* if checkStart between start and finish *)
-    (start <= checkStart andalso finish >= checkStart)
-    orelse
-    (* if checkFinish is between start and finish *)
-    (start <= checkFinish andalso finish >= checkFinish)
+              val br = if vbr then [item] else []
+            in
+              splitLeaf
+                ( x
+                , y
+                , w
+                , h
+                , tl
+                , tr
+                , bl
+                , br
+                , items
+                , pos
+                )
+            end
+          else
+            (* can insert itemID in items vector *)
+            let
+              val item = mkItem (itemID, iX, iY, iW, iH)
+              val items = Vector.concat [items, Vector.fromList [item]]
+            in
+              LEAF {items = items, x = x, y = y, w = w, h = h}
+            end
+        else 
+          (* bounds of new item don't fit inside leaf so return old tree *)
+          tree
 
   fun isColliding (iX, iY, iW, iH, itemID, checkWith: item) =
     let
-      val itemEndX = iX + iW
-      val itemEndY = iY + iH
-      val {itemID = checkID, startX, startY, width, height, ...} = checkWith
-      val endX = startX + width
-      val endY = startY + height
+      val {itemID = checkID, startX = cX, startY = cY, width = cW, height = cH, ...} = checkWith
     in
-      isBetween (iX, startX, itemEndX, endX)
-      andalso isBetween (iY, startY, itemEndY, endY) andalso itemID <> checkID
+      iX < cX + cW andalso
+      iX + iW > cX andalso
+      iY < cY + cH andalso
+      iY + iH > cY andalso 
+      itemID <> checkID
     end
 
   fun getCollisionsVec (iX, iY, iW, iH, itemID, pos, elements, acc) =
@@ -387,130 +333,86 @@ struct
         getCollisionsVec (iX, iY, iW, iH, itemID, pos + 1, elements, acc)
       end
 
-  fun getCollisionsAll (iX, iY, iW, iH, qW, qH, itemID, acc, tree) =
+  fun getCollisionsAll (iX, iY, iW, iH, itemID, acc, tree) =
     case tree of
-      NODE {topLeft, topRight, bottomLeft, bottomRight} =>
-        let
-          val halfWidth = qW div 2
-          val halfHeight = qH div 2
+      NODE {topLeft, topRight, bottomLeft, bottomRight, x, y, w, h} =>
+        if isCollidingPlus (iX, iY, iW, iH, x, y, w, h) then
+          let
+            val acc = getCollisionsAll
+              (iX, iY, iW, iH, itemID, acc, topLeft)
 
-          val acc = getCollisionsAll
-            (iX, iY, iW, iH, halfWidth, halfHeight, itemID, acc, topLeft)
+            val acc = getCollisionsAll
+              (iX, iY, iW, iH, itemID, acc, topRight)
 
-          val acc = getCollisionsAll
-            (iX, iY, iW, iH, halfWidth, halfHeight, itemID, acc, topRight)
-
-          val acc = getCollisionsAll
-            (iX, iY, iW, iH, halfWidth, halfHeight, itemID, acc, bottomLeft)
-        in
-          getCollisionsAll
-            (iX, iY, iW, iH, halfWidth, halfWidth, itemID, acc, bottomRight)
-        end
-    | LEAF elements =>
-        getCollisionsVec (iX, iY, iW, iH, itemID, 0, elements, acc)
+            val acc = getCollisionsAll
+              (iX, iY, iW, iH, itemID, acc, bottomLeft)
+          in
+            getCollisionsAll
+              (iX, iY, iW, iH, itemID, acc, bottomRight)
+          end
+        else
+          acc
+    | LEAF {items, x, y, w, h} =>
+        if isCollidingPlus (iX, iY, iW, iH, x, y, w, h) then
+          getCollisionsVec (iX, iY, iW, iH, itemID, 0, items, acc)
+        else acc
 
   fun helpGetCollisions
-    ( itemX
-    , itemY
-    , itemWidth
-    , itemHeight
-    , quadX
-    , quadY
-    , quadWidth
-    , quadHeight
+    ( iX
+    , iY
+    , iW
+    , iH
     , itemID
     , acc
     , tree: t
     ) =
     case tree of
-      NODE {topLeft, topRight, bottomLeft, bottomRight} =>
+      NODE {topLeft, topRight, bottomLeft, bottomRight, x, y, w, h} =>
+      if isCollidingPlus (iX, iY, iW, iH, x, y, w, h) then
         let
-          val halfW = quadWidth div 2
-          val halfH = quadHeight div 2
-
-          val midX = halfW + quadX
-          val midY = halfH + quadY
-
-          val iX = itemX
-          val iY = itemY
-          val iW = itemWidth
-          val iH = itemHeight
-
-          val qX = quadX
-          val qY = quadY
-          val qW = quadWidth
-          val qH = quadHeight
-
-          val vtl = visitTopLeft (iX, iY, iW, iH, qX, qY, qW, qH)
-          val vtr = visitTopRight (iX, iY, iW, iH, qX, qY, qW, qH)
-          val vbl = visitBottomLeft (iX, iY, iW, iH, qX, qY, qW, qH)
-          val vbr = visitBottomRight (iX, iY, iW, iH, qX, qY, qW, qH)
-
           val acc =
-            if vtl then
               helpGetCollisions
-                (iX, iY, iW, iH, qX, qY, halfW, halfH, itemID, acc, topLeft)
-            else
-              acc
+                (iX, iY, iW, iH, itemID, acc, topLeft)
 
           val acc =
-            if vtr then
               helpGetCollisions
-                (iX, iY, iW, iH, midX, qY, halfW, halfH, itemID, acc, topRight)
-            else
-              acc
+                (iX, iY, iW, iH, itemID, acc, topRight)
 
           val acc =
-            if vbl then
               helpGetCollisions
                 ( iX
                 , iY
                 , iW
                 , iH
-                , qX
-                , midY
-                , halfW
-                , halfH
                 , itemID
                 , acc
                 , bottomLeft
                 )
-            else
-              acc
-
-          val acc =
-            if vbl then
+        in
               helpGetCollisions
                 ( iX
                 , iY
                 , iW
                 , iH
-                , midX
-                , midY
-                , halfW
-                , halfH
                 , itemID
                 , acc
                 , bottomRight
                 )
-            else
-              acc
-        in
-          acc
         end
-    | LEAF elements =>
-        getCollisionsVec
-          (itemX, itemY, itemWidth, itemHeight, itemID, 0, elements, acc)
+      else
+        acc
+    | LEAF {items, x, y, w, h} =>
+        if isCollidingPlus (iX, iY, iW, iH, x, y, w, h) then
+          getCollisionsVec
+            (iX, iY, iW, iH, itemID, 0, items, acc)
+        else
+          acc
 
   fun getCollisions
     ( itemX
     , itemY
     , itemWidth
     , itemHeight
-    , quadX
-    , quadY
-    , quadWidth
-    , quadHeight
     , itemID
     , tree
     ) =
@@ -519,10 +421,6 @@ struct
       , itemY
       , itemWidth
       , itemHeight
-      , quadX
-      , quadY
-      , quadWidth
-      , quadHeight
       , itemID
       , []
       , tree
@@ -576,328 +474,6 @@ struct
         QUERY_ON_BOTTOM_SIDE
     end
 
-  (* like getCollisionsVec, but instead of consing just the itemID, 
-   * it also conses the "collision-side" information.
-   * *)
-  fun getCollisionSideVec (iX, iY, iW, iH, itemID, pos, elements, acc) =
-    if pos = Vector.length elements then
-      acc
-    else
-      let
-        val item = Vector.sub (elements, pos)
-        val acc =
-          if isColliding (iX, iY, iW, iH, itemID, item) then
-            let val side = getCollisionSide (iX, iY, iW, iH, item)
-            in (side, #itemID item) :: acc
-            end
-          else
-            acc
-      in
-        getCollisionSideVec (iX, iY, iW, iH, itemID, pos + 1, elements, acc)
-      end
-
-  fun getCollisionSidesAll (iX, iY, iW, iH, qW, qH, itemID, acc, tree) =
-    case tree of
-      NODE {topLeft, topRight, bottomLeft, bottomRight} =>
-        let
-          val halfWidth = qW div 2
-          val halfHeight = qH div 2
-
-          val acc = getCollisionSidesAll
-            (iX, iY, iW, iH, halfWidth, halfHeight, itemID, acc, topLeft)
-
-          val acc = getCollisionSidesAll
-            (iX, iY, iW, iH, halfWidth, halfHeight, itemID, acc, topRight)
-
-          val acc = getCollisionSidesAll
-            (iX, iY, iW, iH, halfWidth, halfHeight, itemID, acc, bottomLeft)
-        in
-          getCollisionSidesAll
-            (iX, iY, iW, iH, halfWidth, halfWidth, itemID, acc, bottomRight)
-        end
-    | LEAF elements =>
-        getCollisionSideVec (iX, iY, iW, iH, itemID, 0, elements, acc)
-
-  fun helpGetCollisionSides
-    ( itemX
-    , itemY
-    , itemWidth
-    , itemHeight
-    , quadX
-    , quadY
-    , quadWidth
-    , quadHeight
-    , itemID
-    , acc
-    , tree: t
-    ) =
-    case tree of
-      NODE {topLeft, topRight, bottomLeft, bottomRight} =>
-        let
-          val halfW = quadWidth div 2
-          val halfH = quadHeight div 2
-
-          val midX = halfW + quadX
-          val midY = halfH + quadY
-
-          val iX = itemX
-          val iY = itemY
-          val iW = itemWidth
-          val iH = itemHeight
-
-          val qX = quadX
-          val qY = quadY
-          val qW = quadWidth
-          val qH = quadHeight
-
-          val vtl = visitTopLeft (iX, iY, iW, iH, qX, qY, qW, qH)
-          val vtr = visitTopRight (iX, iY, iW, iH, qX, qY, qW, qH)
-          val vbl = visitBottomLeft (iX, iY, iW, iH, qX, qY, qW, qH)
-          val vbr = visitBottomRight (iX, iY, iW, iH, qX, qY, qW, qH)
-
-          val acc =
-            if vtl then
-              helpGetCollisionSides
-                (iX, iY, iW, iH, qX, qY, halfW, halfH, itemID, acc, topLeft)
-            else
-              acc
-
-          val acc =
-            if vtr then
-              helpGetCollisionSides
-                (iX, iY, iW, iH, midX, qY, halfW, halfH, itemID, acc, topRight)
-            else
-              acc
-
-          val acc =
-            if vbl then
-              helpGetCollisionSides
-                ( iX
-                , iY
-                , iW
-                , iH
-                , qX
-                , midY
-                , halfW
-                , halfH
-                , itemID
-                , acc
-                , bottomLeft
-                )
-            else
-              acc
-
-          val acc =
-            if vbl then
-              helpGetCollisionSides
-                ( iX
-                , iY
-                , iW
-                , iH
-                , midX
-                , midY
-                , halfW
-                , halfH
-                , itemID
-                , acc
-                , bottomRight
-                )
-            else
-              acc
-        in
-          acc
-        end
-    | LEAF elements =>
-        getCollisionSideVec
-          (itemX, itemY, itemWidth, itemHeight, itemID, 0, elements, acc)
-
-  fun getCollisionSides
-    ( itemX
-    , itemY
-    , itemWidth
-    , itemHeight
-    , quadX
-    , quadY
-    , quadWidth
-    , quadHeight
-    , itemID
-    , tree
-    ) =
-    helpGetCollisionSides
-      ( itemX
-      , itemY
-      , itemWidth
-      , itemHeight
-      , quadX
-      , quadY
-      , quadWidth
-      , quadHeight
-      , itemID
-      , []
-      , tree
-      )
-
-  fun getCollisionsBelowVec (iX, iY, iW, iH, itemID, pos, elements, acc) =
-    if pos = Vector.length elements then
-      acc
-    else
-      let
-        val item = Vector.sub (elements, pos)
-        val {itemID = curID, ...} = item
-      in
-        if isColliding (iX, iY, iW, iH, itemID, item) then
-          case getCollisionSide (iX, iY, iW, iH, item) of
-            QUERY_ON_BOTTOM_SIDE =>
-              getCollisionsBelowVec
-                (iX, iY, iW, iH, itemID, pos + 1, elements, curID :: acc)
-          | _ =>
-              getCollisionsBelowVec
-                (iX, iY, iW, iH, itemID, pos + 1, elements, acc)
-        else
-          getCollisionsBelowVec (iX, iY, iW, iH, itemID, pos + 1, elements, acc)
-      end
-
-  fun getCollisionsBelowAll (iX, iY, iW, iH, qW, qH, itemID, acc, tree) =
-    case tree of
-      NODE {topLeft, topRight, bottomLeft, bottomRight} =>
-        let
-          val halfWidth = qW div 2
-          val halfHeight = qH div 2
-
-          val acc = getCollisionsBelowAll
-            (iX, iY, iW, iH, halfWidth, halfHeight, itemID, acc, topLeft)
-
-          val acc = getCollisionsBelowAll
-            (iX, iY, iW, iH, halfWidth, halfHeight, itemID, acc, topRight)
-
-          val acc = getCollisionsBelowAll
-            (iX, iY, iW, iH, halfWidth, halfHeight, itemID, acc, bottomLeft)
-        in
-          getCollisionsBelowAll
-            (iX, iY, iW, iH, halfWidth, halfWidth, itemID, acc, bottomRight)
-        end
-    | LEAF elements =>
-        getCollisionsBelowVec (iX, iY, iW, iH, itemID, 0, elements, acc)
-
-  fun helpGetCollisionsBelow
-    ( itemX
-    , itemY
-    , itemWidth
-    , itemHeight
-    , quadX
-    , quadY
-    , quadWidth
-    , quadHeight
-    , itemID
-    , acc
-    , tree: t
-    ) =
-    case tree of
-      NODE {topLeft, topRight, bottomLeft, bottomRight} =>
-        let
-          val halfW = quadWidth div 2
-          val halfH = quadHeight div 2
-
-          val midX = halfW + quadX
-          val midY = halfH + quadY
-
-          val iX = itemX
-          val iY = itemY
-          val iW = itemWidth
-          val iH = itemHeight
-
-          val qX = quadX
-          val qY = quadY
-          val qW = quadWidth
-          val qH = quadHeight
-
-          val vtl = visitTopLeft (iX, iY, iW, iH, qX, qY, qW, qH)
-          val vtr = visitTopRight (iX, iY, iW, iH, qX, qY, qW, qH)
-          val vbl = visitBottomLeft (iX, iY, iW, iH, qX, qY, qW, qH)
-          val vbr = visitBottomRight (iX, iY, iW, iH, qX, qY, qW, qH)
-
-          val acc =
-            if vtl then
-              helpGetCollisionsBelow
-                (iX, iY, iW, iH, qX, qY, halfW, halfH, itemID, acc, topLeft)
-            else
-              acc
-
-          val acc =
-            if vtr then
-              helpGetCollisionsBelow
-                (iX, iY, iW, iH, midX, qY, halfW, halfH, itemID, acc, topRight)
-            else
-              acc
-
-          val acc =
-            if vbl then
-              helpGetCollisionsBelow
-                ( iX
-                , iY
-                , iW
-                , iH
-                , qX
-                , midY
-                , halfW
-                , halfH
-                , itemID
-                , acc
-                , bottomLeft
-                )
-            else
-              acc
-
-          val acc =
-            if vbl then
-              helpGetCollisionsBelow
-                ( iX
-                , iY
-                , iW
-                , iH
-                , midX
-                , midY
-                , halfW
-                , halfH
-                , itemID
-                , acc
-                , bottomRight
-                )
-            else
-              acc
-        in
-          acc
-        end
-    | LEAF elements =>
-        getCollisionsBelowVec
-          (itemX, itemY, itemWidth, itemHeight, itemID, 0, elements, acc)
-
-  fun getCollisionsBelow
-    ( itemX
-    , itemY
-    , itemWidth
-    , itemHeight
-    , quadX
-    , quadY
-    , quadWidth
-    , quadHeight
-    , itemID
-    , tree
-    ) =
-    helpGetCollisionsBelow
-      ( itemX
-      , itemY
-      , itemWidth
-      , itemHeight
-      , quadX
-      , quadY
-      , quadWidth
-      , quadHeight
-      , itemID
-      , []
-      , tree
-      )
-
   fun hasCollisionAtVec (iX, iY, iW, iH, itemID, pos, elements) =
     if pos = Vector.length elements then
       false
@@ -905,86 +481,38 @@ struct
       let
         val item = Vector.sub (elements, pos)
       in
-        if isColliding (iX, iY, iW, iH, itemID, item) then
-          let
-            val _ = print
-              ("quad-tree.sml: has collision: \n" ^ itemToString item ^ "\n")
-          in
-            true
-          end
-        else
-          hasCollisionAtVec (iX, iY, iW, iH, itemID, pos + 1, elements)
+        isColliding (iX, iY, iW, iH, itemID, item) orelse
+        hasCollisionAtVec (iX, iY, iW, iH, itemID, pos + 1, elements)
       end
 
   fun hasCollisionAt
-    ( itemX
-    , itemY
-    , itemWidth
-    , itemHeight
-    , quadX
-    , quadY
-    , quadWidth
-    , quadHeight
+    ( iX
+    , iY
+    , iW
+    , iH
     , itemID
     , tree
     ) =
     case tree of
-      NODE {topLeft, topRight, bottomLeft, bottomRight} =>
-        let
-          val halfW = quadWidth div 2
-          val halfH = quadHeight div 2
-
-          val midX = halfW + quadX
-          val midY = halfH + quadY
-
-          val iX = itemX
-          val iY = itemY
-          val iW = itemWidth
-          val iH = itemHeight
-
-          val qX = quadX
-          val qY = quadY
-          val qW = quadWidth
-          val qH = quadHeight
-
-          val vtl = visitTopLeft (iX, iY, iW, iH, qX, qY, qW, qH)
-          val vtr = visitTopRight (iX, iY, iW, iH, qX, qY, qW, qH)
-          val vbl = visitBottomLeft (iX, iY, iW, iH, qX, qY, qW, qH)
-          val vbr = visitBottomRight (iX, iY, iW, iH, qX, qY, qW, qH)
-
-          val tl =
-            if vtl then
-              hasCollisionAt
-                (iX, iY, iW, iH, qX, qY, halfW, halfH, itemID, topLeft)
-            else
-              false
-
-          val tr =
-            if vtr then
-              hasCollisionAt
-                (iX, iY, iW, iH, midX, qY, halfW, halfH, itemID, topRight)
-            else
-              false
-
-          val bl =
-            if vbl then
-              hasCollisionAt
-                (iX, iY, iW, iH, qX, midY, halfW, halfH, itemID, bottomLeft)
-            else
-              false
-
-          val br =
-            if vbl then
-              hasCollisionAt
-                (iX, iY, iW, iH, midX, midY, halfW, halfH, itemID, bottomRight)
-            else
-              false
-        in
-          tl orelse tr orelse bl orelse br
-        end
-    | LEAF elements =>
-        hasCollisionAtVec
-          (itemX, itemY, itemWidth, itemHeight, itemID, 0, elements)
+      NODE {topLeft, topRight, bottomLeft, bottomRight, x, y, w, h} =>
+        if isCollidingPlus (iX, iY, iW, iH, x, y, w, h) then
+                hasCollisionAt
+                  (iX, iY, iW, iH, itemID, topLeft)
+                  orelse
+                hasCollisionAt
+                  (iX, iY, iW, iH, itemID, topRight)
+                  orelse
+                hasCollisionAt
+                  (iX, iY, iW, iH, itemID, bottomLeft)
+                  orelse
+                hasCollisionAt
+                  (iX, iY, iW, iH, itemID, bottomRight)
+        else 
+          false
+    | LEAF {items, x, y, w, h} =>
+        if isCollidingPlus (iX, iY, iW, iH, x, y, w, h) then
+          hasCollisionAtVec (iX, iY, iW, iH, itemID, 0, items)
+        else false
 
   fun getItemIDVec (iX, iY, iW, iH, pos, elements) =
     if pos = Vector.length elements then
@@ -997,62 +525,29 @@ struct
         else getItemIDVec (iX, iY, iW, iH, pos + 1, elements)
       end
 
-  fun getItemID (itemX, itemY, itemW, itemH, quadX, quadY, quadW, quadH, tree) =
+  fun getItemID (iX, iY, iW, iH, tree) =
     case tree of
-      NODE {topLeft, topRight, bottomLeft, bottomRight} =>
-        let
-          val halfW = quadW div 2
-          val halfH = quadH div 2
+      NODE {topLeft, topRight, bottomLeft, bottomRight, x, y, w, h} =>
+        if isCollidingPlus (iX, iY, iW, iH, x, y, w, h) then
+          let
+            val try1 = getItemID (iX, iY, iW, iH, topLeft)
+            val try2 = getItemID (iX, iY, iW, iH, topRight)
+            val try3 = getItemID (iX, iY, iW, iH, bottomLeft)
+            val try4 = getItemID (iX, iY, iW, iH, bottomRight)
 
-          val midX = halfW + quadX
-          val midY = halfH + quadY
-
-          val iX = itemX
-          val iY = itemY
-          val iW = itemW
-          val iH = itemH
-
-          val qX = quadX
-          val qY = quadY
-          val qW = quadW
-          val qH = quadH
-
-          val vtl = visitTopLeft (iX, iY, iW, iH, qX, qY, qW, qH)
-          val vtr = visitTopRight (iX, iY, iW, iH, qX, qY, qW, qH)
-          val vbl = visitBottomLeft (iX, iY, iW, iH, qX, qY, qW, qH)
-          val vbr = visitBottomRight (iX, iY, iW, iH, qX, qY, qW, qH)
-
-          val try1 =
-            if vtl then
-              getItemID (iX, iY, iW, iH, qX, qY, halfW, halfH, topLeft)
-            else
-              ~1
-
-          val try2 =
-            if vtr then
-              getItemID (iX, iY, iW, iH, midX, qY, halfW, halfH, topRight)
-            else
-              ~1
-
-          val try3 =
-            if vbl then
-              getItemID (iX, iY, iW, iH, qX, midY, halfW, halfH, bottomLeft)
-            else
-              ~1
-
-          val try4 =
-            if vbl then
-              getItemID (iX, iY, iW, iH, midX, midY, halfW, halfH, bottomRight)
-            else
-              ~1
-
-          (* get max: we assume query was narrow enough 
-           * that only one ID is valid *)
-          val a = Int.max (try1, try2)
-          val a = Int.max (a, try3)
-          val a = Int.max (a, try4)
-        in
-          a
-        end
-    | LEAF elements => getItemIDVec (itemX, itemY, itemW, itemH, 0, elements)
+            (* get max: we assume query was narrow enough 
+             * that only one ID is valid *)
+            val a = Int.max (try1, try2)
+            val a = Int.max (a, try3)
+            val a = Int.max (a, try4)
+          in
+            a
+          end
+        else
+          ~1
+    | LEAF {items, x, y, w, h} => 
+        if isCollidingPlus (iX, iY, iW, iH, x, y, w, h) then
+          getItemIDVec (iX, iY, iW, iH, 0, items)
+        else
+          ~1
 end

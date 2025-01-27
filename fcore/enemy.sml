@@ -34,11 +34,9 @@ struct
       val {x, y, health, ...} = enemy
 
       val size = Constants.enemySize
-      val ww = Constants.worldWidth
-      val wh = Constants.worldHeight
 
-      val hasCollision = QuadTree.hasCollisionAt
-        (x, y, size, size, 0, 0, ww, wh, ~1, projectileTree)
+      val hasCollision = QuadHelp.hasCollisionAt
+        (x, y, size, size, projectileTree)
     in
       if hasCollision then
         if health = 1 then
@@ -182,10 +180,8 @@ struct
         val {id, x, y, ...} = Vector.sub (enemyVec, pos)
 
         val size = Constants.enemySize
-        val ww = Constants.worldWidth
-        val wh = Constants.worldHeight
 
-        val acc = QuadTree.insert (x, y, size, size, 0, 0, ww, wh, id, acc)
+        val acc = QuadHelp.insert (x, y, size, size, id, acc)
       in
         helpGenerateTree (pos + 1, enemyVec, acc)
       end

@@ -6,8 +6,8 @@ struct
     else
       let
         val {id, x, y, width, height} = Vector.sub (wallVec, pos)
-        val acc = QuadTree.insert
-          (x, y, width, height, 0, 0, 1920, 1080, id, acc)
+        val acc = QuadHelp.insert
+          (x, y, width, height, id, acc)
       in
         helpGenerateTree (pos + 1, wallVec, acc)
       end
