@@ -2,12 +2,6 @@ signature QUAD_TREE =
 sig
   type t
 
-  datatype collision_side =
-    QUERY_ON_LEFT_SIDE
-  | QUERY_ON_TOP_SIDE
-  | QUERY_ON_RIGHT_SIDE
-  | QUERY_ON_BOTTOM_SIDE
-
   val insert: int * int * int * int * int * t -> t
 
   val getCollisions: int * int * int * int * int * t -> int list
@@ -29,87 +23,6 @@ struct
 
   fun create (width, height) =
     LEAF {items = Vector.fromList [], x = 0, y = 0, w = width, h = height}
-
-  fun isColliding (ix, iy, ifx, ify, cx, cy, cfx, cfy) =
-    ix < cfx andalso ifx > cx andalso iy < cfy andalso ify > cy
-
-  fun isCollidingPlus (ix, iy, iw, ih, cx, cy, cw, ch) =
-    let
-      val ifx = ix + iw
-      val ify = iy + ih
-      val cfx = cx + cw
-      val cfy = cy + ch
-    in
-      isColliding (ix, iy, ifx, ify, cx, cy, cfx, cfy)
-    end
-
-  fun visitTopLeft (iX, iY, iW, iH, qX, qY, qW, qH) =
-    let
-      val hw = qW div 2
-      val hh = qH div 2
-
-      val ifx = iX + iW
-      val ify = iY + iH
-
-      val qmx = qX + hw
-      val qmy = qY + hh
-
-      val qfx = qX + qW
-      val qfy = qY + qH
-    in
-      isColliding (iX, iY, ifx, ify, qX, qY, qmx, qmy)
-    end
-
-  fun visitTopRight (iX, iY, iW, iH, qX, qY, qW, qH) =
-    let
-      val hw = qW div 2
-      val hh = qH div 2
-
-      val ifx = iX + iW
-      val ify = iY + iH
-
-      val qmx = qX + hw
-      val qmy = qY + hh
-
-      val qfx = qX + qW
-      val qfy = qY + qH
-    in
-      isColliding (iX, iY, ifx, ify, qmx, qY, qfx, qmy)
-    end
-
-  fun visitBottomLeft (iX, iY, iW, iH, qX, qY, qW, qH) =
-    let
-      val hw = qW div 2
-      val hh = qH div 2
-
-      val ifx = iX + iW
-      val ify = iY + iH
-
-      val qmx = qX + hw
-      val qmy = qY + hh
-
-      val qfx = qX + qW
-      val qfy = qY + qH
-    in
-      isColliding (iX, iY, ifx, ify, qX, qmy, qmx, qfy)
-    end
-
-  fun visitBottomRight (iX, iY, iW, iH, qX, qY, qW, qH) =
-    let
-      val hw = qW div 2
-      val hh = qH div 2
-
-      val ifx = iX + iW
-      val ify = iY + iH
-
-      val qmx = qX + hw
-      val qmy = qY + hh
-
-      val qfx = qX + qW
-      val qfy = qY + qH
-    in
-      isColliding (iX, iY, ifx, ify, qmx, qmy, qfx, qfy)
-    end
 
   fun mkItem (id, startX, startY, width, height) : item =
     { itemID = id
@@ -349,54 +262,6 @@ struct
 
   fun getCollisions (itemX, itemY, itemWidth, itemHeight, itemID, tree) =
     helpGetCollisions (itemX, itemY, itemWidth, itemHeight, itemID, [], tree)
-
-  (* no variant to represent 'no collision' case
-   * because caller should only try getting collision side 
-   * after checking that there is any collision. *)
-  datatype collision_side =
-    QUERY_ON_LEFT_SIDE
-  | QUERY_ON_TOP_SIDE
-  | QUERY_ON_RIGHT_SIDE
-  | QUERY_ON_BOTTOM_SIDE
-
-  (* getCollisionSide function ported from this answer:
-   * https://stackoverflow.com/a/56607347
-   * *)
-  fun getCollisionSide (iX, iY, iW, iH, checkWith: item) =
-    let
-      val iFinishX = iX + iW
-      val iFinishY = iY + iH
-      val iHalfW = iW div 2
-      val iHalfH = iH div 2
-      val iCentreX = iX + iHalfW
-      val iCentreY = iY + iHalfH
-
-      val {startX = cX, startY = cY, width = cW, height = cH, ...} = checkWith
-
-      val cFinishX = cX + cW
-      val cFinishY = cY + cH
-      val cHalfW = cW div 2
-      val cHalfH = cH div 2
-      val cCentreX = cX + cHalfW
-      val cCentreY = cY + cHalfH
-
-      val diffX = iCentreX - cCentreX
-      val diffY = iCentreY - cCentreY
-
-      val minXDist = iHalfW + cHalfW
-      val minYDist = iHalfH + cHalfH
-
-      val depthX = if diffX > 0 then minXDist - diffX else (~minXDist) - diffX
-
-      val depthY = if diffY > 0 then minYDist - diffY else (~minYDist) - diffY
-    in
-      if abs depthX < abs depthY then
-        if depthX > 0 then QUERY_ON_LEFT_SIDE else QUERY_ON_RIGHT_SIDE
-      else if depthY > 0 then
-        QUERY_ON_TOP_SIDE
-      else
-        QUERY_ON_BOTTOM_SIDE
-    end
 
   fun hasCollisionAtVec (iX, iY, iW, iH, itemID, pos, elements) =
     if pos = Vector.length elements then
