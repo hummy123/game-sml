@@ -38,7 +38,10 @@ struct
     end
 
   fun traceRightJumpAscent (x, y, remainingJump, nextPlatID, platTree) =
-    if remainingJump >= Constants.jumpLimit then
+    (* because value of y parameter is at the top, 
+     * we subtract the jump limit by the enemy's size,
+     * so we only check for places enemy can jump to. *)
+    if remainingJump >= Constants.jumpLimit - Constants.enemySize then
       traceRightDescent (x, y, nextPlatID, platTree)
     else
       let
@@ -100,7 +103,7 @@ struct
     end
 
   fun traceLeftJumpAscent (x, y, remainingJump, nextPlatID, platTree) =
-    if remainingJump >= Constants.jumpLimit then
+    if remainingJump >= Constants.jumpLimit - Constants.enemySize then
       traceLeftDescent (x, y, nextPlatID, platTree)
     else
       let
