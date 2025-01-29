@@ -15,17 +15,33 @@ sig
       }
   | LEAF of {items: item vector, x: int, y: int, w: int, h: int}
 
-  val isColliding: int * int * int * int * int * int * int * int -> bool
+  val isColliding: int * int * int * int *
+                   int * int * int * int
+                   -> bool
 
-  val isCollidingPlus: int * int * int * int * int * int * int * int -> bool
+  val isCollidingPlus: int * int * int * int *
+                       int * int * int * int
+                       -> bool
 
-  val visitTopLeft: int * int * int * int * int * int * int * int -> bool
+  val isCollidingItem: int * int * int * int * 
+                       int * item 
+                       -> bool
 
-  val visitTopRight: int * int * int * int * int * int * int * int -> bool
+  val visitTopLeft: int * int * int * int *
+                    int * int * int * int
+                    -> bool
 
-  val visitBottomLeft: int * int * int * int * int * int * int * int -> bool
+  val visitTopRight: int * int * int * int *
+                     int * int * int * int
+                     -> bool
 
-  val visitBottomRight: int * int * int * int * int * int * int * int -> bool
+  val visitBottomLeft: int * int * int * int *
+                       int * int * int * int
+                       -> bool
+
+  val visitBottomRight: int * int * int * int *
+                        int * int * int * int
+                        -> bool
 end
 
 structure QuadTreeType :> QUAD_TREE_TYPE =
@@ -56,6 +72,20 @@ struct
       val cfy = cy + ch
     in
       isColliding (ix, iy, ifx, ify, cx, cy, cfx, cfy)
+    end
+
+  fun isCollidingItem (iX, iY, iW, iH, itemID, checkWith: item) =
+    let
+      val
+        { itemID = checkID
+        , startX = cX
+        , startY = cY
+        , width = cW
+        , height = cH
+        , ...
+        } = checkWith
+    in
+      isCollidingPlus (iX, iY, iW, iH, cX, cY, cW, cH) andalso itemID <> checkID
     end
 
   fun visitTopLeft (iX, iY, iW, iH, qX, qY, qW, qH) =

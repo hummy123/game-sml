@@ -189,21 +189,6 @@ struct
           (* bounds of new item don't fit inside leaf so return old tree *)
           tree
 
-  fun isColliding (iX, iY, iW, iH, itemID, checkWith: item) =
-    let
-      val
-        { itemID = checkID
-        , startX = cX
-        , startY = cY
-        , width = cW
-        , height = cH
-        , ...
-        } = checkWith
-    in
-      iX < cX + cW andalso iX + iW > cX andalso iY < cY + cH
-      andalso iY + iH > cY andalso itemID <> checkID
-    end
-
   fun getCollisionsVec (iX, iY, iW, iH, itemID, pos, elements, acc) =
     if pos = Vector.length elements then
       acc
@@ -211,8 +196,10 @@ struct
       let
         val item = Vector.sub (elements, pos)
         val acc =
-          if isColliding (iX, iY, iW, iH, itemID, item) then #itemID item :: acc
-          else acc
+          if isCollidingItem (iX, iY, iW, iH, itemID, item) then
+            #itemID item :: acc
+          else
+            acc
       in
         getCollisionsVec (iX, iY, iW, iH, itemID, pos + 1, elements, acc)
       end
@@ -270,7 +257,7 @@ struct
       let
         val item = Vector.sub (elements, pos)
       in
-        isColliding (iX, iY, iW, iH, itemID, item)
+        isCollidingItem (iX, iY, iW, iH, itemID, item)
         orelse hasCollisionAtVec (iX, iY, iW, iH, itemID, pos + 1, elements)
       end
 
@@ -297,7 +284,7 @@ struct
       let
         val item = Vector.sub (elements, pos)
       in
-        if isColliding (iX, iY, iW, iH, ~1, item) then #itemID item
+        if isCollidingItem (iX, iY, iW, iH, ~1, item) then #itemID item
         else getItemIDVec (iX, iY, iW, iH, pos + 1, elements)
       end
 
