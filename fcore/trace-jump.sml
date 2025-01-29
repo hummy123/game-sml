@@ -29,7 +29,7 @@ struct
 
   fun traceRightJumpAscent (x, y, remainingJump, nextPlatID, platTree, nextPlatform) =
     if remainingJump >= Constants.jumpLimit then
-      false
+      traceRightJumpDescent (x, y, nextPlatID, platTree)
     else
       let
         val width = Constants.moveEnemyBy
