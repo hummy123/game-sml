@@ -244,14 +244,20 @@ struct
     end
 
   fun getMoveRightPatches (nextPlatform, enemy, platformTree, acc) =
-    if TraceJump.traceRightJump (enemy, #id nextPlatform, platformTree, nextPlatform) then
+    (* important to check for drop first because path of traceRightJump includes
+     * descent of jump/drop.
+     * So, if we check for jump first, we would always jump before dropping
+     * even if jumping is not necessary. *)
+    if TraceJump.traceRightDrop (enemy, #id nextPlatform, platformTree) then
+      EnemyPatch.W_Y_AXIS DROP_BELOW_PLATFORM ::
+      EnemyPatch.W_X_AXIS MOVE_RIGHT ::
+      acc
+    else if TraceJump.traceRightJump (enemy, #id nextPlatform, platformTree) then
       if standingOnArea (enemy, platformTree) then
         EnemyPatch.W_Y_AXIS (JUMPING 0) :: EnemyPatch.W_X_AXIS MOVE_RIGHT :: acc
       else
         EnemyPatch.W_X_AXIS MOVE_RIGHT :: acc
     else
-      (* placeholder: should check if we can move to the next platform while
-      * dropping *)
       EnemyPatch.W_X_AXIS MOVE_RIGHT :: acc
 
   fun getMoveLeftPatches (nextPlatform, enemy, platformTree, acc) =

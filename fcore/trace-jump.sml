@@ -27,7 +27,16 @@ struct
         traceRightJumpDescent (nextX, nextY, nextPlatID, platTree)
       end
 
-  fun traceRightJumpAscent (x, y, remainingJump, nextPlatID, platTree, nextPlatform) =
+  fun traceRightDrop (enemy, nextPlatID, platTree) =
+    let
+      open GameType
+      val {x, y, ...}: enemy = enemy
+      val x = x - Constants.enemySize
+    in
+      traceRightJumpDescent (x, y, nextPlatID, platTree)
+    end
+
+  fun traceRightJumpAscent (x, y, remainingJump, nextPlatID, platTree) =
     if remainingJump >= Constants.jumpLimit then
       traceRightJumpDescent (x, y, nextPlatID, platTree)
     else
@@ -42,22 +51,23 @@ struct
         val nextJump = remainingJump + Constants.moveEnemyBy
       in
         shouldJumpRight orelse
-        traceRightJumpAscent (nextX, nextY, nextJump, nextPlatID, platTree, nextPlatform)
+        traceRightJumpAscent (nextX, nextY, nextJump, nextPlatID, platTree)
       end
 
-  fun traceRightJump (enemy, nextPlatID, platTree, nextPlat) =
+  fun traceRightJump (enemy, nextPlatID, platTree) =
     let
       open GameType
       val {x, y, ...}: enemy = enemy
+      val x = x - Constants.enemySize
     in
       if EnemyPhysics.standingOnArea (x, y, platTree) then
-        traceRightJumpAscent (x, y, 0, nextPlatID, platTree, nextPlat)
+        traceRightJumpAscent (x, y, 0, nextPlatID, platTree)
       else
         case #yAxis enemy of
           JUMPING amt =>
-            traceRightJumpAscent (x, y, amt, nextPlatID, platTree, nextPlat)
+            traceRightJumpAscent (x, y, amt, nextPlatID, platTree)
         | ON_GROUND =>
-            traceRightJumpAscent (x, y, 0, nextPlatID, platTree, nextPlat)
+            traceRightJumpAscent (x, y, 0, nextPlatID, platTree)
         | FALLING =>
             traceRightJumpDescent (x, y, nextPlatID, platTree)
         | DROP_BELOW_PLATFORM =>
