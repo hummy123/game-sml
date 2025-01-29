@@ -468,6 +468,24 @@ struct
       JUMPING _ => getJumpLandingPatches (enemy, newPlatformID, platforms, acc)
     | _ => getFallingPatches (enemy, newPlatformID, platforms, acc)
 
+  (* to be called by FOLLOW_SIME. The FOLLOW_SIME sometimes changes its x axis
+   * to STAY_STILL, so if this happens and we want to patrol,
+   * then start patrolling in the direction the player is in *)
+  fun startPatrolPatches (player, enemy, wallTree, platformTree, acc) =
+    case #xAxis enemy of
+      STAY_STILL =>
+        let
+          val acc = 
+            if #x player <= #x enemy then
+              EnemyPatch.W_X_AXIS MOVE_RIGHT :: acc
+            else
+              EnemyPatch.W_X_AXIS MOVE_LEFT :: acc
+        in
+          acc
+        end
+    | _ =>
+        getPatrollPatches (enemy, wallTree, platformTree, acc)
+
   fun getFollowPatches
     (player: player, enemy, wallTree, platformTree, platforms, acc) =
     let
@@ -477,17 +495,18 @@ struct
 
       val eID = getPlatformBelowEnemy (enemy, platformTree, platforms)
       val eID = if eID = ~1 then #platID enemy else eID
+
     in
       if eID = ~1 orelse pID = ~1 then
         (* without checking that neither of these are ~1 
         * (which means there is no platform below the enemy/player)
         * there is a subscript error because the PathFinding.start
         * function expects neither of these values to be ~1. *)
-        getPatrollPatches (enemy, wallTree, platformTree, acc)
+        startPatrolPatches (player, enemy, wallTree, platformTree, acc)
       else if eID = #nextPlatID enemy then
         getLandingPatches (eID, platforms, enemy, acc)
       else if eID = pID then
-        getPatrollPatches (enemy, wallTree, platformTree, acc)
+        startPatrolPatches (player, enemy, wallTree, platformTree, acc)
       else
         let
           val bestPath = PathFinding.start (pID, eID, platforms, platformTree)
@@ -496,7 +515,7 @@ struct
             nextPlatformID :: _ =>
               let
                 val acc = EnemyPatch.W_NEXT_PLAT_ID nextPlatformID :: acc
-              in
+                val acc =
                 getPathToNextPlatform
                   ( nextPlatformID
                   , platforms
@@ -506,8 +525,23 @@ struct
                   , pID
                   , acc
                   )
+              in
+                EnemyPatch.W_X_AXIS STAY_STILL :: acc
               end
-          | [] => getPatrollPatches (enemy, wallTree, platformTree, acc)
+          | [] => 
+        (case #xAxis enemy of
+          STAY_STILL =>
+            let
+              val acc = 
+                if #x player <= #x enemy then
+                  EnemyPatch.W_X_AXIS MOVE_RIGHT :: acc
+                else
+                  EnemyPatch.W_X_AXIS MOVE_LEFT :: acc
+            in
+              acc
+            end
+        | _ =>
+              startPatrolPatches (player, enemy, wallTree, platformTree, acc))
         end
     end
 
