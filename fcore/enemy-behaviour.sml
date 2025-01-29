@@ -344,7 +344,8 @@ struct
 
           val yDiff = platY - apexY
         in
-          if yDiff > xDiff then
+          if yDiff <= xDiff then
+            (* enemy can reach platform by jumping *)
             let
               val acc =
                 if standingOnArea (enemy, platformTree) then
@@ -368,7 +369,7 @@ struct
           val yDiff = platY - ey
         in
           if yDiff >= xDiff then
-            (* can reach next platform by simply dropping and moving right *)
+            (* can reach next platform by simply dropping and moving left *)
             EnemyPatch.W_Y_AXIS DROP_BELOW_PLATFORM
             :: EnemyPatch.W_X_AXIS MOVE_LEFT :: acc
           else
@@ -380,7 +381,7 @@ struct
               val apexY = ey - (Constants.jumpLimit - jumpAmt)
               val yDiff = platY - apexY
             in
-              if yDiff >= xDiff then
+              if yDiff <= xDiff then
                 (* can reach if we jump and move left *)
                 let
                   val acc =
