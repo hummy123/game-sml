@@ -320,10 +320,6 @@ struct
     let
       val player = #player game
 
-      val _ = print
-        ("(playerX, playerY) = (" ^ Int.toString (#x player) ^ ", "
-         ^ Int.toString (#y player) ^ ")\n")
-
       val patches = getProjectilePatches player
       val player = PlayerPatch.withPatches (player, patches)
 

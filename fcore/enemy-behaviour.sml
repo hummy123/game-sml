@@ -176,10 +176,16 @@ struct
           isBetween (platX, ecx, platFinishX)
         then
           (* can jump from same position enemy is at *)
-          case eyAxis of
-            ON_GROUND => EnemyPatch.W_Y_AXIS (JUMPING 0) :: acc
-          | FALLING => EnemyPatch.W_Y_AXIS (JUMPING 0) :: acc
-          | _ => acc
+          let
+            (* since we want to jump vertically and not risk falling off by
+             * jumping + moving either left or right, make enemy stay still *)
+            val acc = EnemyPatch.W_X_AXIS STAY_STILL :: acc
+          in
+            case eyAxis of
+              ON_GROUND => EnemyPatch.W_Y_AXIS (JUMPING 0) :: acc
+            | FALLING => EnemyPatch.W_Y_AXIS (JUMPING 0) :: acc
+            | _ => acc
+          end
         else (* have to travel either left or right before jumping *) if
           ecx < platX
         then
@@ -219,10 +225,14 @@ struct
           isBetween (platX, ecx, platFinishX)
         then
           (* can jump from same position enemy is at *)
-          case eyAxis of
-            ON_GROUND => EnemyPatch.W_Y_AXIS DROP_BELOW_PLATFORM :: acc
-          | FALLING => EnemyPatch.W_Y_AXIS DROP_BELOW_PLATFORM :: acc
-          | _ => acc
+          let
+            val acc = EnemyPatch.W_X_AXIS STAY_STILL :: acc
+          in
+            case eyAxis of
+              ON_GROUND => EnemyPatch.W_Y_AXIS DROP_BELOW_PLATFORM :: acc
+            | FALLING => EnemyPatch.W_Y_AXIS DROP_BELOW_PLATFORM :: acc
+            | _ => acc
+          end
         else (* have to travel either left or right before jumping *) if
           ecx < platX
         then
@@ -420,24 +430,28 @@ struct
   (* if only one side in x direction overlaps with platform,
    * then move enemy left/right to make them fully overlap with platform *)
   fun getHorizontalLandingPatches (enemy, nextPlatform, acc) =
-    let
-      val {x = px, width = pw, ...} = nextPlatform
-      val pfx = px + pw
-
-      val {x = ex, ...} = enemy
-      val efx = ex + Constants.enemySize
-    in
-      if isBetween (px, ex, pfx) andalso isBetween (px, efx, pfx) then
+    case #xAxis enemy of
+      STAY_STILL =>
         acc
-      else
-        let
-          val startDiff = abs (px - ex)
-          val endDiff = abs (pfx - efx)
-        in
-          if startDiff > endDiff then EnemyPatch.W_X_AXIS MOVE_LEFT :: acc
-          else EnemyPatch.W_X_AXIS MOVE_RIGHT :: acc
-        end
-    end
+    | _ =>
+      let
+        val {x = px, width = pw, ...} = nextPlatform
+        val pfx = px + pw
+
+        val {x = ex, ...} = enemy
+        val efx = ex + Constants.enemySize
+      in
+        if isBetween (px, ex, pfx) andalso isBetween (px, efx, pfx) then
+          acc
+        else
+          let
+            val startDiff = abs (px - ex)
+            val endDiff = abs (pfx - efx)
+          in
+            if startDiff > endDiff then EnemyPatch.W_X_AXIS MOVE_LEFT :: acc
+            else EnemyPatch.W_X_AXIS MOVE_RIGHT :: acc
+          end
+      end
 
   fun getFallingPatches (enemy, newPlatformID, platforms, acc) =
     let
