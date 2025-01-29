@@ -528,20 +528,7 @@ struct
               in
                 EnemyPatch.W_X_AXIS STAY_STILL :: acc
               end
-          | [] => 
-        (case #xAxis enemy of
-          STAY_STILL =>
-            let
-              val acc = 
-                if #x player <= #x enemy then
-                  EnemyPatch.W_X_AXIS MOVE_RIGHT :: acc
-                else
-                  EnemyPatch.W_X_AXIS MOVE_LEFT :: acc
-            in
-              acc
-            end
-        | _ =>
-              startPatrolPatches (player, enemy, wallTree, platformTree, acc))
+          | [] => startPatrolPatches (player, enemy, wallTree, platformTree, acc)
         end
     end
 
