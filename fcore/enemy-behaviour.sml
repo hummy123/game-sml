@@ -249,9 +249,8 @@ struct
      * So, if we check for jump first, we would always jump before dropping
      * even if jumping is not necessary. *)
     if TraceJump.traceRightDrop (enemy, #id nextPlatform, platformTree) then
-      EnemyPatch.W_Y_AXIS DROP_BELOW_PLATFORM ::
-      EnemyPatch.W_X_AXIS MOVE_RIGHT ::
-      acc
+      EnemyPatch.W_Y_AXIS DROP_BELOW_PLATFORM :: EnemyPatch.W_X_AXIS MOVE_RIGHT
+      :: acc
     else if TraceJump.traceRightJump (enemy, #id nextPlatform, platformTree) then
       if standingOnArea (enemy, platformTree) then
         EnemyPatch.W_Y_AXIS (JUMPING 0) :: EnemyPatch.W_X_AXIS MOVE_RIGHT :: acc
@@ -261,79 +260,16 @@ struct
       EnemyPatch.W_X_AXIS MOVE_RIGHT :: acc
 
   fun getMoveLeftPatches (nextPlatform, enemy, platformTree, acc) =
-    let
-      val {x = platX, y = platY, width = platWidth, ...} = nextPlatform
-      val platFinishX = platX + platWidth
-
-      val {x = ex, y = ey, yAxis = eyAxis, ...} = enemy
-
-      val xDiff = ex - platX
-    in
-      if ey > platY then
-        (* enemy is lower than next platform so needs to jump *)
-        let
-          val jumpAmt =
-            case eyAxis of
-              JUMPING amt => amt
-            | _ => 0
-          val apexY = ey - (Constants.jumpLimit - jumpAmt)
-
-          val yDiff = platY - apexY
-        in
-          if yDiff <= xDiff then
-            (* enemy can reach platform by jumping *)
-            let
-              val acc =
-                if standingOnArea (enemy, platformTree) then
-                  EnemyPatch.W_Y_AXIS (JUMPING 0) :: acc
-                else
-                  acc
-            in
-              EnemyPatch.W_X_AXIS MOVE_LEFT :: acc
-            end
-          else
-            EnemyPatch.W_X_AXIS MOVE_LEFT :: acc
-        end
+    if TraceJump.traceLeftDrop (enemy, #id nextPlatform, platformTree) then
+      EnemyPatch.W_Y_AXIS DROP_BELOW_PLATFORM :: EnemyPatch.W_X_AXIS MOVE_LEFT
+      :: acc
+    else if TraceJump.traceLeftJump (enemy, #id nextPlatform, platformTree) then
+      if standingOnArea (enemy, platformTree) then
+        EnemyPatch.W_Y_AXIS (JUMPING 0) :: EnemyPatch.W_X_AXIS MOVE_LEFT :: acc
       else
-        (* platform is below or at same y coordinat as enemy 
-         * so might possibly require dropping below rather than jumping. *)
-        let
-          (* check if we can get to next platform without jumping.
-           * If we can, then simply move rightwards 
-           * and possibly drop below platform. 
-           * Else, jump and move rightwards *)
-          val yDiff = platY - ey
-        in
-          if yDiff >= xDiff then
-            (* can reach next platform by simply dropping and moving left *)
-            EnemyPatch.W_Y_AXIS DROP_BELOW_PLATFORM
-            :: EnemyPatch.W_X_AXIS MOVE_LEFT :: acc
-          else
-            let
-              val jumpAmt =
-                case eyAxis of
-                  JUMPING amt => amt
-                | _ => 0
-              val apexY = ey - (Constants.jumpLimit - jumpAmt)
-              val yDiff = platY - apexY
-            in
-              if yDiff <= xDiff then
-                (* can reach if we jump and move left *)
-                let
-                  val acc =
-                    if standingOnArea (enemy, platformTree) then
-                      EnemyPatch.W_Y_AXIS (JUMPING 0) :: acc
-                    else
-                      acc
-                in
-                  EnemyPatch.W_X_AXIS MOVE_LEFT :: acc
-                end
-              else
-                (* cannot reach yet so move left until we can *)
-                EnemyPatch.W_X_AXIS MOVE_LEFT :: acc
-            end
-        end
-    end
+        EnemyPatch.W_X_AXIS MOVE_LEFT :: acc
+    else
+      EnemyPatch.W_X_AXIS MOVE_LEFT :: acc
 
   (* get patches to help enemy move to nextPlatformID *)
   fun getPathToNextPlatform
@@ -368,27 +304,26 @@ struct
    * then move enemy left/right to make them fully overlap with platform *)
   fun getHorizontalLandingPatches (enemy, nextPlatform, acc) =
     case #xAxis enemy of
-      STAY_STILL =>
-        acc
+      STAY_STILL => acc
     | _ =>
-      let
-        val {x = px, width = pw, ...} = nextPlatform
-        val pfx = px + pw
+        let
+          val {x = px, width = pw, ...} = nextPlatform
+          val pfx = px + pw
 
-        val {x = ex, ...} = enemy
-        val efx = ex + Constants.enemySize
-      in
-        if isBetween (px, ex, pfx) andalso isBetween (px, efx, pfx) then
-          acc
-        else
-          let
-            val startDiff = abs (px - ex)
-            val endDiff = abs (pfx - efx)
-          in
-            if startDiff > endDiff then EnemyPatch.W_X_AXIS MOVE_LEFT :: acc
-            else EnemyPatch.W_X_AXIS MOVE_RIGHT :: acc
-          end
-      end
+          val {x = ex, ...} = enemy
+          val efx = ex + Constants.enemySize
+        in
+          if isBetween (px, ex, pfx) andalso isBetween (px, efx, pfx) then
+            acc
+          else
+            let
+              val startDiff = abs (px - ex)
+              val endDiff = abs (pfx - efx)
+            in
+              if startDiff > endDiff then EnemyPatch.W_X_AXIS MOVE_LEFT :: acc
+              else EnemyPatch.W_X_AXIS MOVE_RIGHT :: acc
+            end
+        end
 
   fun getFallingPatches (enemy, newPlatformID, platforms, acc) =
     let
@@ -426,16 +361,13 @@ struct
     case #xAxis enemy of
       STAY_STILL =>
         let
-          val acc = 
-            if #x player <= #x enemy then
-              EnemyPatch.W_X_AXIS MOVE_RIGHT :: acc
-            else
-              EnemyPatch.W_X_AXIS MOVE_LEFT :: acc
+          val acc =
+            if #x player <= #x enemy then EnemyPatch.W_X_AXIS MOVE_RIGHT :: acc
+            else EnemyPatch.W_X_AXIS MOVE_LEFT :: acc
         in
           acc
         end
-    | _ =>
-        getPatrollPatches (enemy, wallTree, platformTree, acc)
+    | _ => getPatrollPatches (enemy, wallTree, platformTree, acc)
 
   fun getFollowPatches
     (player: player, enemy, wallTree, platformTree, platforms, acc) =
@@ -466,8 +398,7 @@ struct
             nextPlatformID :: _ =>
               let
                 val acc = EnemyPatch.W_NEXT_PLAT_ID nextPlatformID :: acc
-                val acc =
-                getPathToNextPlatform
+                val acc = getPathToNextPlatform
                   ( nextPlatformID
                   , platforms
                   , platformTree
@@ -479,7 +410,8 @@ struct
               in
                 EnemyPatch.W_X_AXIS STAY_STILL :: acc
               end
-          | [] => startPatrolPatches (player, enemy, wallTree, platformTree, acc)
+          | [] =>
+              startPatrolPatches (player, enemy, wallTree, platformTree, acc)
         end
     end
 
