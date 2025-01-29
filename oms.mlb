@@ -28,6 +28,7 @@ fcore/physics.sml
 
 fcore/path-finding.sml
 
+fcore/trace-jump.sml
 fcore/enemy-behaviour.sml
 fcore/enemy.sml
 fcore/player.sml

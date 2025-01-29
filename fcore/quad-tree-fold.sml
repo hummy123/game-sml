@@ -33,7 +33,7 @@ struct
           else
             state
       in
-        foldRegionVec (rx, ry, rh, rh, env, state, pos + 1, elements)
+        foldRegionVec (rx, ry, rw, rh, env, state, pos + 1, elements)
       end
 
   fun foldRegion (rx, ry, rw, rh, env, state, tree) =
