@@ -115,22 +115,6 @@ struct
         end
     | [] => highestID
 
-  fun getPlatformBelowPlayer (player, platformTree, platforms) =
-    let
-      val {x, y, ...} = player
-
-      val searchWidth = Constants.playerSize
-      val searchHeight = Constants.worldHeight - y
-
-      val collisions = QuadTree.getCollisions
-        (x, y, searchWidth, searchHeight, ~1, platformTree)
-      val checkY = y + Constants.playerSize
-
-      val wh = Constants.worldHeight
-    in
-      getHighestPlatform (collisions, platforms, wh, ~1, checkY)
-    end
-
   fun getPlatformBelowEnemy (enemy: enemy, platformTree, platforms) =
     let
       val {x, y, ...} = enemy
@@ -373,8 +357,7 @@ struct
     (player: player, enemy, wallTree, platformTree, platforms, acc) =
     let
       (* todo: possibly get pID and eID of player/enemy in a different way *)
-      val pID = getPlatformBelowPlayer (player, platformTree, platforms)
-      val pID = if pID = ~1 then #platID player else pID
+      val pID = #platID player
 
       val eID = getPlatformBelowEnemy (enemy, platformTree, platforms)
       val eID = if eID = ~1 then #platID enemy else eID
