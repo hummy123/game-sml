@@ -40,7 +40,7 @@ struct
       Vector.fromList []
     else
       let
-        val len = Vector.length vec - 2
+        val len = Vector.length vec - 1
         val slice = VectorSlice.slice (vec, 1, SOME len)
       in
         VectorSlice.vector slice
