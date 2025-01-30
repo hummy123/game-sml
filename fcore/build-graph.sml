@@ -82,6 +82,64 @@ struct
            end
        end)
 
+  (* trace paths for movements:
+   * jump + move right, or drop + move right, 
+   * jump + move left, drop + move right *)
+  structure Horizontal =
+    MakeQuadTreeFold
+      (struct
+         type env = env
+
+         type state = ValSet.elem vector * DistVec.elem vector
+
+         fun minWidth (p1: GameType.platform, p2: GameType.platform) =
+           let
+             val {x = p1x, width = p1w, ...} = p1
+             val {x = p2x, width = p2w, ...} = p2
+
+             val p1fx = p1x + p1w
+             val p2fx = p2x + p2w
+
+             val w1 = abs (p1fx - p2fx)
+             val w2 = abs (p1fx - p2x)
+             val w3 = abs (p1x - p2x)
+             val w4 = abs (p1x - p2fx)
+
+             val min = Int.min (w1, w2)
+             val min = Int.min (min, w3)
+           in
+             Int.min (min, w4)
+           end
+
+         fun pythagoras (width, height) =
+           let
+             val wsq = width * width
+             val hsq = height * height
+             val hypotenuseSq = wsq + hsq
+             val hypSq = Real.fromInt hypotenuseSq
+             val hyp = Math.sqrt hypSq
+           in
+             Real.toInt IEEEReal.TO_NEAREST hyp
+           end
+
+         fun fold (foldPlatID, env: env, (eVals, q)) =
+           let
+             val {platforms, currentPlat, eKeys, distSoFar} = env
+
+             val foldPlat = Platform.find (foldPlatID, platforms)
+             val foldPlatY = #y foldPlat
+             val {y = currentPlatY, id = fromPlatID, ...} = currentPlat
+
+             val height = abs (foldPlatY - currentPlatY)
+             val width = minWidth (currentPlat, foldPlat)
+
+             val newDist = pythagoras (width, height) + distSoFar
+           in
+             insertIfNotExistsOrShorter
+               (newDist, eKeys, eVals, foldPlatID, q, fromPlatID)
+           end
+       end)
+
   fun start (currentPlat: GameType.platform, env: env, state, platformTree) =
     let
       val {x, y, width, ...} = currentPlat
