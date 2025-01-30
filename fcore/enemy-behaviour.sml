@@ -163,7 +163,6 @@ struct
           let
             (* since we want to jump vertically and not risk falling off by
              * jumping + moving either left or right, make enemy stay still *)
-            val acc = EnemyPatch.W_X_AXIS STAY_STILL :: acc
           in
             case eyAxis of
               ON_GROUND => EnemyPatch.W_Y_AXIS (JUMPING 0) :: acc
@@ -210,7 +209,6 @@ struct
         then
           (* can jump from same position enemy is at *)
           let
-            val acc = EnemyPatch.W_X_AXIS STAY_STILL :: acc
           in
             case eyAxis of
               ON_GROUND => EnemyPatch.W_Y_AXIS DROP_BELOW_PLATFORM :: acc
@@ -287,51 +285,13 @@ struct
   (* if only one side in x direction overlaps with platform,
    * then move enemy left/right to make them fully overlap with platform *)
   fun getHorizontalLandingPatches (enemy, nextPlatform, acc) =
-    case #xAxis enemy of
-      STAY_STILL => acc
-    | _ =>
-        let
-          val {x = px, width = pw, ...} = nextPlatform
-          val pfx = px + pw
-
-          val {x = ex, ...} = enemy
-          val efx = ex + Constants.enemySize
-        in
-          if isBetween (px, ex, pfx) andalso isBetween (px, efx, pfx) then
-            acc
-          else
-            let
-              val startDiff = abs (px - ex)
-              val endDiff = abs (pfx - efx)
-            in
-              if startDiff > endDiff then EnemyPatch.W_X_AXIS MOVE_LEFT :: acc
-              else EnemyPatch.W_X_AXIS MOVE_RIGHT :: acc
-            end
-        end
+    acc
 
   fun getFallingPatches (enemy, newPlatformID, platforms, acc) =
-    let
-      val nextPlatform = Platform.find (newPlatformID, platforms)
-      val acc = getHorizontalLandingPatches (enemy, nextPlatform, acc)
-    in
       EnemyPatch.W_NEXT_PLAT_ID ~1 :: acc
-    end
 
   fun getJumpLandingPatches (enemy, nextPlatformID, platforms, acc) =
-    let
-      val nextPlatform = Platform.find (nextPlatformID, platforms)
-      val {y = py, ...} = nextPlatform
-
-      val {y = ey, ...} = enemy
-
-      val acc = getHorizontalLandingPatches (enemy, nextPlatform, acc)
-    in
-      if ey < py - 65 then
-        (* set to falling *)
-        EnemyPatch.W_NEXT_PLAT_ID ~1 :: EnemyPatch.W_Y_AXIS FALLING :: acc
-      else
         acc
-    end
 
   fun getLandingPatches (newPlatformID, platforms, enemy, acc) =
     case #yAxis enemy of
@@ -356,12 +316,8 @@ struct
   fun getFollowPatches
     (player: player, enemy, wallTree, platformTree, platforms, acc) =
     let
-      (* todo: possibly get pID and eID of player/enemy in a different way *)
       val pID = #platID player
-
-      val eID = getPlatformBelowEnemy (enemy, platformTree, platforms)
-      val eID = if eID = ~1 then #platID enemy else eID
-
+      val eID = #platID enemy
     in
       if eID = ~1 orelse pID = ~1 then
         (* without checking that neither of these are ~1 

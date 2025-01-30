@@ -124,7 +124,6 @@ struct
   fun traceLeftJump (enemy: GameType.enemy, nextPlatID, platTree) =
     let
       val {x, y, ...} = enemy
-      val x = x + Constants.enemySize
 
       open GameType
     in

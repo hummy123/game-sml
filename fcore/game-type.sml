@@ -168,25 +168,14 @@ struct
       val walls = Vector.fromList [wall1, wall2, wall3]
       val wallTree = Wall.generateTree walls
 
-      val plat1 = {id = 1, x = 111, y = 711, width = 199}
-      val plat2 = {id = 2, x = 355, y = 759, width = 555}
-      val plat3 = {id = 3, x = 955, y = 659, width = 111}
-      val plat4 = {id = 4, x = 455, y = 855, width = 99}
-      val plat5 = {id = 5, x = 555, y = 811, width = 199}
-      val plat6 = {id = 6, x = 655, y = 710, width = 199}
-      val plat7 = {id = 7, x = 701, y = 855, width = 99}
-      val plat8 = {id = 8, x = 970, y = 815, width = 303}
-      val plat9 = {id = 9, x = 959, y = 705, width = 303}
-      val plat10 = {id = 10, x = 970, y = 759, width = 303}
-      val plat11 = {id = 11, x = 970, y = 595, width = 303}
-      val plat12 = {id = 12, x = 959, y = 535, width = 303}
-      val plat13 = {id = 13, x = 970, y = 495, width = 303}
-      val plat14 = {id = 14, x = 1000, y = 415, width = 303}
-      val plat15 = {id = 15, x = 1000, y = 335, width = 303}
-      val plat16 = {id = 16, x = 1000, y = 295, width = 303}
-      val plat17 = {id = 17, x = 855, y = 599, width = 199}
-      val plat18 = {id = 18, x = 755, y = 499, width = 199}
-      val plat19 = {id = 19, x = 655, y = 399, width = 199}
+      val plat1 = {id = 1, x = 255, y = 855, width = 199}
+      val plat2 = {id = 2, x = 750, y = 855, width = 199}
+      val plat3 = {id = 3, x = 399, y = 755, width = 399}
+      val plat4 = {id = 4, x = 255, y = 655, width = 199}
+      val plat5 = {id = 5, x = 750, y = 655, width = 199}
+      val plat6 = {id = 6, x = 171, y = 555, width = 99}
+      val plat7 = {id = 7, x = 934, y = 555, width = 99}
+      val plat8 = {id = 8, x = 399, y = 555, width = 399}
       val platforms = Vector.fromList
         [ plat1
         , plat2
@@ -196,17 +185,6 @@ struct
         , plat6
         , plat7
         , plat8
-        , plat9
-        , plat10
-        , plat11
-        , plat12
-        , plat13
-        , plat14
-        , plat15
-        , plat16
-        , plat17
-        , plat18
-        , plat19
         ]
       val platformTree = Platform.generateTree platforms
 
