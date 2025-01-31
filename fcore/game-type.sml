@@ -262,15 +262,7 @@ struct
         , nextPlatID = ~1
         }
       val enemies = Vector.fromList [enemy1, enemy2, enemy3, enemy4, enemy5]
-      val startTime = Time.now ()
-      val startTime = Time.toMicroseconds startTime
-
       val graph = Graph.fromPlatforms (platforms, platformTree)
-
-      val finishTime = Time.now ()
-      val finishTime = Time.toMicroseconds finishTime
-      val diff = finishTime - startTime
-      val _ = print ("TIME DIFF = " ^ LargeInt.toString diff ^ "\n")
     in
       { player = player
       , walls = walls
