@@ -35,7 +35,7 @@ struct
   type t = QuadTreeType.t
 
   (* max size of vector before we split it further *)
-  val maxSize = 3
+  val maxSize = 9
 
   fun mkTopLeft (x, y, w, h, items) =
     let
