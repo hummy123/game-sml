@@ -91,7 +91,7 @@ struct
         val nextY = y + Constants.moveEnemyBy
       in
         shouldJumpLeft
-        orelse traceRightDescent (nextX, nextY, nextPlatID, platTree)
+        orelse traceLeftDescent (nextX, nextY, nextPlatID, platTree)
       end
 
   fun traceLeftDrop (enemy: GameType.enemy, nextPlatID, platTree) =

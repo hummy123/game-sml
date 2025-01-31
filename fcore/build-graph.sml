@@ -184,6 +184,48 @@ struct
       traceRightJumpAscent (x, y, 0, platTree, env, state)
     end
 
+  fun traceLeftDescent (x, y, platTree, env, state) =
+    if x <= 0 orelse y >= Constants.worldHeight then
+      state
+    else
+      let
+        val width = Constants.moveEnemyBy
+        val height = Constants.worldHeight - y
+        val state = Horizontal.foldRegion
+          (x, y, width, height, env, state, platTree)
+
+        val nextX = x - Constants.moveEnemyBy
+        val nextY = y + Constants.moveEnemyBy
+      in
+        traceLeftDescent (nextX, nextY, platTree, env, state)
+      end
+
+  fun traceLeftJumpAscent (x, y, remainingJump, platTree, env, state) =
+    if remainingJump >= Constants.jumpLimit - Constants.enemySize then
+      traceLeftDescent (x, y, platTree, env, state)
+    else
+      let
+        val width = Constants.moveEnemyBy
+        val height = Constants.worldHeight - y
+
+        val state = Horizontal.foldRegion
+          (x, y, width, height, env, state, platTree)
+
+        val nextX = x - Constants.moveEnemyBy
+        val nextY = y - Constants.moveEnemyBy
+        val nextJump = remainingJump + Constants.moveEnemyBy
+      in
+        traceLeftJumpAscent (nextX, nextY, nextJump, platTree, env, state)
+      end
+
+  fun traceLeftJump (currentPlat: GameType.platform, env, state, platTree) =
+    let
+      val {x, y, ...} = currentPlat
+      val x = x + Constants.enemySize
+    in
+      traceLeftJumpAscent (x, y, 0, platTree, env, state)
+    end
+
   fun start (currentPlat: GameType.platform, env: env, state, platformTree) =
     let
       val {x, y, width, ...} = currentPlat
@@ -197,6 +239,6 @@ struct
 
       val state = traceRightJump (currentPlat, env, state, platformTree)
     in
-      state
+      traceLeftJump (currentPlat, env, state, platformTree)
     end
 end
