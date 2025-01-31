@@ -23,19 +23,24 @@ struct
       , QuadTree.create (Constants.worldWidth, Constants.worldHeight)
       )
 
-  fun helpFind (findNum, vec, low, high) =
+  fun helpFindPos (findNum, vec, low, high) =
     let
       val mid = low + ((high - low) div 2)
       val platform = Vector.sub (vec, mid)
       val {id = curNum, x = _, y = _, width = _} = platform
     in
-      if curNum = findNum then platform
-      else if curNum < findNum then helpFind (findNum, vec, mid + 1, high)
-      else helpFind (findNum, vec, low, mid - 1)
+      if curNum = findNum then mid
+      else if curNum < findNum then helpFindPos (findNum, vec, mid + 1, high)
+      else helpFindPos (findNum, vec, low, mid - 1)
     end
 
+  fun findPos (findNum, vec) =
+    helpFindPos (findNum, vec, 0, Vector.length vec - 1)
+
   fun find (findNum, vec) =
-    helpFind (findNum, vec, 0, Vector.length vec - 1)
+    let val pos = findPos (findNum, vec)
+    in Vector.sub (vec, pos)
+    end
 
   fun helpGetDrawVecWider
     (pos, platVec, acc, winWidth, winHeight, ratio, yOffset) =
