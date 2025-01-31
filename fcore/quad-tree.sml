@@ -97,10 +97,7 @@ struct
         val br = mkBottomRight (x, y, w, h, br)
       in
         NODE
-          { topLeft = tl
-          , topRight = tr
-          , bottomLeft = bl
-          , bottomRight = br
+          { nodes = Vector.fromList [tl, tr, bl, br]
           , x = x
           , y = y
           , w = w
@@ -130,22 +127,19 @@ struct
 
   fun insert (iX, iY, iW, iH, itemID, tree: t) =
     case tree of
-      NODE {topLeft, topRight, bottomLeft, bottomRight, x, y, w, h} =>
+      NODE {nodes, x, y, w, h} =>
         if isCollidingPlus (iX, iY, iW, iH, x, y, w, h) then
           let
             (* we are not necessarily inserting into all nodes.
              * If isCollidingPlus returns false recursively, 
              * we return the same node back. *)
-            val tl = insert (iX, iY, iW, iH, itemID, topLeft)
-            val tr = insert (iX, iY, iW, iH, itemID, topRight)
-            val bl = insert (iX, iY, iW, iH, itemID, bottomLeft)
-            val br = insert (iX, iY, iW, iH, itemID, bottomRight)
+            val tl = insert (iX, iY, iW, iH, itemID, Vector.sub (nodes, tlIdx))
+            val tr = insert (iX, iY, iW, iH, itemID, Vector.sub (nodes, trIdx))
+            val bl = insert (iX, iY, iW, iH, itemID, Vector.sub (nodes, blIdx))
+            val br = insert (iX, iY, iW, iH, itemID, Vector.sub (nodes, brIdx))
           in
             NODE
-              { topLeft = tl
-              , topRight = tr
-              , bottomLeft = bl
-              , bottomRight = br
+              { nodes = Vector.fromList [tl, tr, bl, br]
               , x = x
               , y = y
               , w = w
@@ -206,16 +200,19 @@ struct
 
   fun getCollisionsAll (iX, iY, iW, iH, itemID, acc, tree) =
     case tree of
-      NODE {topLeft, topRight, bottomLeft, bottomRight, x, y, w, h} =>
+      NODE {nodes, x, y, w, h} =>
         if isCollidingPlus (iX, iY, iW, iH, x, y, w, h) then
           let
-            val acc = getCollisionsAll (iX, iY, iW, iH, itemID, acc, topLeft)
+            val acc = 
+              getCollisionsAll (iX, iY, iW, iH, itemID, acc, Vector.sub (nodes, tlIdx))
 
-            val acc = getCollisionsAll (iX, iY, iW, iH, itemID, acc, topRight)
+            val acc = 
+              getCollisionsAll (iX, iY, iW, iH, itemID, acc, Vector.sub (nodes, trIdx))
 
-            val acc = getCollisionsAll (iX, iY, iW, iH, itemID, acc, bottomLeft)
+            val acc = 
+              getCollisionsAll (iX, iY, iW, iH, itemID, acc, Vector.sub (nodes, blIdx))
           in
-            getCollisionsAll (iX, iY, iW, iH, itemID, acc, bottomRight)
+            getCollisionsAll (iX, iY, iW, iH, itemID, acc, Vector.sub (nodes, brIdx))
           end
         else
           acc
@@ -227,17 +224,20 @@ struct
 
   fun helpGetCollisions (iX, iY, iW, iH, itemID, acc, tree: t) =
     case tree of
-      NODE {topLeft, topRight, bottomLeft, bottomRight, x, y, w, h} =>
+      NODE {nodes, x, y, w, h} =>
         if isCollidingPlus (iX, iY, iW, iH, x, y, w, h) then
           let
-            val acc = helpGetCollisions (iX, iY, iW, iH, itemID, acc, topLeft)
+            val acc = 
+              helpGetCollisions (iX, iY, iW, iH, itemID, acc, Vector.sub (nodes, tlIdx))
 
-            val acc = helpGetCollisions (iX, iY, iW, iH, itemID, acc, topRight)
+            val acc = 
+              helpGetCollisions (iX, iY, iW, iH, itemID, acc, Vector.sub (nodes, trIdx))
 
-            val acc = helpGetCollisions
-              (iX, iY, iW, iH, itemID, acc, bottomLeft)
+            val acc = 
+              helpGetCollisions (iX, iY, iW, iH, itemID, acc, Vector.sub (nodes, blIdx))
           in
-            helpGetCollisions (iX, iY, iW, iH, itemID, acc, bottomRight)
+            helpGetCollisions 
+            (iX, iY, iW, iH, itemID, acc, Vector.sub (nodes, brIdx))
           end
         else
           acc
@@ -263,12 +263,12 @@ struct
 
   fun hasCollisionAt (iX, iY, iW, iH, itemID, tree) =
     case tree of
-      NODE {topLeft, topRight, bottomLeft, bottomRight, x, y, w, h} =>
+      NODE {nodes, x, y, w, h} =>
         if isCollidingPlus (iX, iY, iW, iH, x, y, w, h) then
-          hasCollisionAt (iX, iY, iW, iH, itemID, topLeft)
-          orelse hasCollisionAt (iX, iY, iW, iH, itemID, topRight)
-          orelse hasCollisionAt (iX, iY, iW, iH, itemID, bottomLeft)
-          orelse hasCollisionAt (iX, iY, iW, iH, itemID, bottomRight)
+          hasCollisionAt (iX, iY, iW, iH, itemID, Vector.sub (nodes, tlIdx))
+          orelse hasCollisionAt (iX, iY, iW, iH, itemID, Vector.sub (nodes, trIdx))
+          orelse hasCollisionAt (iX, iY, iW, iH, itemID, Vector.sub (nodes, blIdx))
+          orelse hasCollisionAt (iX, iY, iW, iH, itemID, Vector.sub (nodes, brIdx))
         else
           false
     | LEAF {items, x, y, w, h} =>
@@ -290,13 +290,13 @@ struct
 
   fun getItemID (iX, iY, iW, iH, tree) =
     case tree of
-      NODE {topLeft, topRight, bottomLeft, bottomRight, x, y, w, h} =>
+      NODE {nodes, x, y, w, h} =>
         if isCollidingPlus (iX, iY, iW, iH, x, y, w, h) then
           let
-            val try1 = getItemID (iX, iY, iW, iH, topLeft)
-            val try2 = getItemID (iX, iY, iW, iH, topRight)
-            val try3 = getItemID (iX, iY, iW, iH, bottomLeft)
-            val try4 = getItemID (iX, iY, iW, iH, bottomRight)
+            val try1 = getItemID (iX, iY, iW, iH, Vector.sub (nodes, tlIdx))
+            val try2 = getItemID (iX, iY, iW, iH, Vector.sub (nodes, trIdx))
+            val try3 = getItemID (iX, iY, iW, iH, Vector.sub (nodes, blIdx))
+            val try4 = getItemID (iX, iY, iW, iH, Vector.sub (nodes, brIdx))
 
             (* get max: we assume query was narrow enough 
              * that only one ID is valid *)

@@ -4,16 +4,18 @@ sig
 
   datatype t =
     NODE of
-      { topLeft: t
-      , topRight: t
-      , bottomLeft: t
-      , bottomRight: t
+      { nodes: t vector
       , x: int
       , y: int
       , w: int
       , h: int
       }
   | LEAF of {items: item vector, x: int, y: int, w: int, h: int}
+
+  val tlIdx: int
+  val trIdx: int
+  val blIdx: int
+  val brIdx: int
 
   val isColliding: int * int * int * int *
                    int * int * int * int
@@ -50,16 +52,18 @@ struct
 
   datatype t =
     NODE of
-      { topLeft: t
-      , topRight: t
-      , bottomLeft: t
-      , bottomRight: t
+      { nodes: t vector
       , x: int
       , y: int
       , w: int
       , h: int
       }
   | LEAF of {items: item vector, x: int, y: int, w: int, h: int}
+
+  val tlIdx = 0
+  val trIdx = 1
+  val blIdx = 2
+  val brIdx = 3
 
   fun isColliding (ix, iy, ifx, ify, cx, cy, cfx, cfy) =
     ix < cfx andalso ifx > cx andalso iy < cfy andalso ify > cy

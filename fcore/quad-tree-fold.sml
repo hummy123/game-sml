@@ -38,14 +38,17 @@ struct
 
   fun foldRegion (rx, ry, rw, rh, env, state, tree) =
     case tree of
-      NODE {topLeft, topRight, bottomLeft, bottomRight, x, y, w, h} =>
+      NODE {nodes, x, y, w, h} =>
         if isCollidingPlus (rx, ry, rw, rh, x, y, w, h) then
           let
-            val state = foldRegion (rx, ry, rw, rh, env, state, topLeft)
-            val state = foldRegion (rx, ry, rw, rh, env, state, topRight)
-            val state = foldRegion (rx, ry, rw, rh, env, state, bottomLeft)
+            val state = 
+              foldRegion (rx, ry, rw, rh, env, state, Vector.sub (nodes, tlIdx))
+            val state = 
+              foldRegion (rx, ry, rw, rh, env, state, Vector.sub (nodes, trIdx))
+            val state = 
+              foldRegion (rx, ry, rw, rh, env, state, Vector.sub (nodes, blIdx))
           in
-            foldRegion (rx, ry, rw, rh, env, state, bottomRight)
+            foldRegion (rx, ry, rw, rh, env, state, Vector.sub (nodes, brIdx))
           end
         else
           state
