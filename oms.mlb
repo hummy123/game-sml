@@ -27,6 +27,7 @@ fcore/enemy-patch.sml
 fcore/physics.sml
 
 fcore/build-graph.sml
+fcore/graph.sml
 fcore/path-finding.sml
 
 fcore/trace-jump.sml

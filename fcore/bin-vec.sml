@@ -213,3 +213,15 @@ structure DistVec =
 
        fun g ({distance = a, ...}: elem, {distance = b, ...}: elem) = a > b
      end)
+
+structure PlatSet =
+  MakeBinVec
+    (struct
+       type elem = {distance: int, id: int}
+
+       fun l ({id = a, ...}: elem, {id = b, ...}: elem) = a < b
+
+       fun eq ({id = a, ...}: elem, {id = b, ...}: elem) = a = b
+
+       fun g ({id = a, ...}: elem, {id = b, ...}: elem) = a > b
+     end)
