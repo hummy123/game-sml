@@ -96,55 +96,7 @@ struct
           end
       end
 
-  (* dead loop function: remove after adding graph to game type 
-   * and moving to other loop *)
-  fun loop (pID, eID, platforms, platformTree, q, eKeys, eVals) =
-    if IntSet.contains (pID, eKeys) then
-      (* return path if we explored pid *)
-      getPathList (pID, eID, eKeys, eVals)
-    else
-      (* continue dijkstra's algorithm *)
-      let
-        (* filtering duplicates because we have no decrease-key operation *)
-        val q = filterMinDuplicates (q, eKeys)
-      in
-        if DistVec.isEmpty q then
-          (* return empty list to signify that there is no path *)
-          []
-        else
-          (* find reachable values from min in quad tree *)
-          let
-            val {distance = distSoFar, id = minID, comesFrom} =
-              DistVec.findMin q
-            val plat = Platform.find (minID, platforms)
-
-            (* add explored *)
-            val insPos = IntSet.findInsPos (minID, eKeys)
-            val eKeys = IntSet.insert (eKeys, minID, insPos)
-            val eVals =
-              ValSet.insert
-                (eVals, {distance = distSoFar, from = comesFrom}, insPos)
-
-            (* on each loop, increment distSoFar by 15.
-             * Result: paths that require jumps to fewer platforms are
-             * incentivised a little bit. *)
-            val env =
-              { platforms = platforms
-              , currentPlat = plat
-              , eKeys = eKeys
-              , distSoFar = distSoFar + 15
-              }
-
-            (* fold over quad tree, updating any distances 
-             * we find the shortest path for *)
-            val (eVals, q) =
-              BuildGraph.start (plat, env, (eVals, q), platformTree)
-          in
-            loop (pID, eID, platforms, platformTree, q, eKeys, eVals)
-          end
-      end
-
-  fun start (pID, eID, platforms, platformTree) =
+  fun start (pID, eID, platforms, platformTree, graph) =
     let
       (* initialise data structures: the priority queue and the explored map *)
       val q = DistVec.fromList [{distance = 0, id = eID, comesFrom = eID}]
@@ -163,6 +115,6 @@ struct
      * then we're done reconstructing the path and can return the path list.
      * *)
     in
-      loop (pID, eID, platforms, platformTree, q, eKeys, eVals)
+      loop (pID, eID, platforms, platformTree, q, eKeys, eVals, graph)
     end
 end

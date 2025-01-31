@@ -12,6 +12,7 @@ struct
     , wallTree
     , platforms
     , platformTree
+    , graph
     ) =
     let
       val {x, y, mainAttack, attacked, ...} = player
@@ -35,6 +36,7 @@ struct
               , platforms
               , platformTree
               , player
+              , graph
               )
 
             (* add collided enemies to player record, 
@@ -64,6 +66,7 @@ struct
                    , platforms
                    , platformTree
                    , player
+                   , graph
                    )
                in
                  (player, enemies)
@@ -89,6 +92,7 @@ struct
                      , platforms
                      , platformTree
                      , player
+                     , graph
                      )
                  in
                    (player, enemies)
@@ -109,6 +113,7 @@ struct
                      , platforms
                      , platformTree
                      , player
+                     , graph
                      )
                  in
                    (player, enemies)

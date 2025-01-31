@@ -22,8 +22,11 @@ struct
         PlatSet.insert (platSet, insRecord, pos)
     end
 
-  type env =
-    {platforms: GameType.platform vector, currentPlat: GameType.platform}
+  (* duplicate of type alias declared in GameType.
+   * SML's structural type system is nice for allowing this. *)
+  type platform = {id: int, x: int, y: int, width: int}
+
+  type env = {platforms: platform vector, currentPlat: platform}
 
   structure Vertical =
     MakeQuadTreeFold
@@ -51,7 +54,7 @@ struct
 
          type state = PlatSet.elem vector
 
-         fun minWidth (p1: GameType.platform, p2: GameType.platform) =
+         fun minWidth (p1: platform, p2: platform) =
            let
              val {x = p1x, width = p1w, ...} = p1
              val {x = p2x, width = p2w, ...} = p2
@@ -134,7 +137,7 @@ struct
         traceRightJumpAscent (nextX, nextY, nextJump, platTree, env, platSet)
       end
 
-  fun traceRightJump (currentPlat: GameType.platform, env, platSet, platTree) =
+  fun traceRightJump (currentPlat: platform, env, platSet, platTree) =
     let
       val {x, y, width, ...} = currentPlat
       val x = x - Constants.enemySize + width
@@ -176,7 +179,7 @@ struct
         traceLeftJumpAscent (nextX, nextY, nextJump, platTree, env, platSet)
       end
 
-  fun traceLeftJump (currentPlat: GameType.platform, env, platSet, platTree) =
+  fun traceLeftJump (currentPlat: platform, env, platSet, platTree) =
     let
       val {x, y, ...} = currentPlat
       val x = x + Constants.enemySize
@@ -184,7 +187,7 @@ struct
       traceLeftJumpAscent (x, y, 0, platTree, env, platSet)
     end
 
-  fun start (currentPlat: GameType.platform, env: env, platSet, platformTree) =
+  fun start (currentPlat: platform, env: env, platSet, platformTree) =
     let
       val {x, y, width, ...} = currentPlat
 
@@ -201,12 +204,10 @@ struct
     end
 
   fun build (currentPlat, platforms, platformTree) =
-    let
-      val env = {currentPlat = currentPlat, platforms = platforms}
-    in
-      start (currentPlat, env, PlatSet.empty, platformTree)
+    let val env = {currentPlat = currentPlat, platforms = platforms}
+    in start (currentPlat, env, PlatSet.empty, platformTree)
     end
 
-  fun fromPlatforms (platforms: GameType.platform vector, platformTree) =
+  fun fromPlatforms (platforms: platform vector, platformTree) =
     Vector.map (fn plat => build (plat, platforms, platformTree)) platforms
 end

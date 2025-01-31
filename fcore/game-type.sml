@@ -66,6 +66,7 @@ sig
     , platforms: platform vector
     , platformTree: QuadTree.t
     , enemies: enemy vector
+    , graph: PlatSet.elem vector vector
     }
 
   val initial: game_type
@@ -140,6 +141,7 @@ struct
     , platforms: platform vector
     , platformTree: QuadTree.t
     , enemies: enemy vector
+    , graph: PlatSet.elem vector vector
     }
 
   val initial: game_type =
@@ -217,27 +219,49 @@ struct
         }
       val enemy2 =
         { id = 2
-        , x = 555
-        , y = 945
+        , x = 777
+        , y = 333
         , health = 1
         , xAxis = MOVE_LEFT
         , yAxis = FALLING
-        , variant = EnemyVariants.PATROL_SLIME
+        , variant = EnemyVariants.FOLLOW_SLIME
         , platID = ~1
         , nextPlatID = ~1
         }
       val enemy3 =
         { id = 3
-        , x = 979
-        , y = 945
+        , x = 555
+        , y = 135
         , health = 1
         , xAxis = MOVE_RIGHT
         , yAxis = FALLING
-        , variant = EnemyVariants.PATROL_SLIME
+        , variant = EnemyVariants.FOLLOW_SLIME
         , platID = ~1
         , nextPlatID = ~1
         }
-      val enemies = Vector.fromList [enemy1]
+      val enemy4 =
+        { id = 4
+        , x = 555
+        , y = 555
+        , health = 1
+        , xAxis = MOVE_RIGHT
+        , yAxis = FALLING
+        , variant = EnemyVariants.FOLLOW_SLIME
+        , platID = ~1
+        , nextPlatID = ~1
+        }
+      val enemy5 =
+        { id = 5
+        , x = 199
+        , y = 333
+        , health = 1
+        , xAxis = MOVE_RIGHT
+        , yAxis = FALLING
+        , variant = EnemyVariants.FOLLOW_SLIME
+        , platID = ~1
+        , nextPlatID = ~1
+        }
+      val enemies = Vector.fromList [enemy1, enemy2, enemy3, enemy4, enemy5]
     in
       { player = player
       , walls = walls
@@ -245,6 +269,7 @@ struct
       , platforms = platforms
       , platformTree = platformTree
       , enemies = enemies
+      , graph = Graph.fromPlatforms (platforms, platformTree)
       }
     end
 end

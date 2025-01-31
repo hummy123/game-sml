@@ -161,8 +161,8 @@ struct
         then
           (* can jump from same position enemy is at *)
           let
-            (* since we want to jump vertically and not risk falling off by
-             * jumping + moving either left or right, make enemy stay still *)
+          (* since we want to jump vertically and not risk falling off by
+           * jumping + moving either left or right, make enemy stay still *)
           in
             case eyAxis of
               ON_GROUND => EnemyPatch.W_Y_AXIS (JUMPING 0) :: acc
@@ -208,8 +208,7 @@ struct
           isBetween (platX, ecx, platFinishX)
         then
           (* can jump from same position enemy is at *)
-          let
-          in
+          let in
             case eyAxis of
               ON_GROUND => EnemyPatch.W_Y_AXIS DROP_BELOW_PLATFORM :: acc
             | FALLING => EnemyPatch.W_Y_AXIS DROP_BELOW_PLATFORM :: acc
@@ -284,14 +283,12 @@ struct
 
   (* if only one side in x direction overlaps with platform,
    * then move enemy left/right to make them fully overlap with platform *)
-  fun getHorizontalLandingPatches (enemy, nextPlatform, acc) =
-    acc
+  fun getHorizontalLandingPatches (enemy, nextPlatform, acc) = acc
 
   fun getFallingPatches (enemy, newPlatformID, platforms, acc) =
-      EnemyPatch.W_NEXT_PLAT_ID ~1 :: acc
+    EnemyPatch.W_NEXT_PLAT_ID ~1 :: acc
 
-  fun getJumpLandingPatches (enemy, nextPlatformID, platforms, acc) =
-        acc
+  fun getJumpLandingPatches (enemy, nextPlatformID, platforms, acc) = acc
 
   fun getLandingPatches (newPlatformID, platforms, enemy, acc) =
     case #yAxis enemy of
@@ -314,7 +311,7 @@ struct
     | _ => getPatrollPatches (enemy, wallTree, platformTree, acc)
 
   fun getFollowPatches
-    (player: player, enemy, wallTree, platformTree, platforms, acc) =
+    (player: player, enemy, wallTree, platformTree, platforms, graph, acc) =
     let
       val pID = #platID player
       val eID = #platID enemy
@@ -331,7 +328,8 @@ struct
         startPatrolPatches (player, enemy, wallTree, platformTree, acc)
       else
         let
-          val bestPath = PathFinding.start (pID, eID, platforms, platformTree)
+          val bestPath = PathFinding.start
+            (pID, eID, platforms, platformTree, graph)
         in
           case bestPath of
             nextPlatformID :: _ =>
@@ -355,7 +353,7 @@ struct
     end
 
   fun getVariantPatches
-    (enemy, walls, wallTree, platforms, platformTree, player, acc) =
+    (enemy, walls, wallTree, platforms, platformTree, player, graph, acc) =
     let
       open EnemyVariants
     in
@@ -363,6 +361,6 @@ struct
         PATROL_SLIME => getPatrollPatches (enemy, wallTree, platformTree, acc)
       | FOLLOW_SIME =>
           getFollowPatches
-            (player, enemy, wallTree, platformTree, platforms, acc)
+            (player, enemy, wallTree, platformTree, platforms, graph, acc)
     end
 end

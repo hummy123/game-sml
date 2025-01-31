@@ -28,6 +28,7 @@ struct
     , platforms
     , platformTree
     , player
+    , graph
     ) =
     let
       val {x, y, health, ...} = enemy
@@ -47,7 +48,15 @@ struct
 
             (* get patches specific to this type of enemy *)
             val patches = EnemyBehaviour.getVariantPatches
-              (enemy, walls, wallTree, platforms, platformTree, player, [])
+              ( enemy
+              , walls
+              , wallTree
+              , platforms
+              , platformTree
+              , player
+              , graph
+              , []
+              )
             val enemy = EnemyPatch.withPatches (enemy, patches)
 
             val patches = EnemyPhysics.getPhysicsPatches enemy
@@ -66,7 +75,7 @@ struct
 
           (* get patches specific to this type of enemy *)
           val patches = EnemyBehaviour.getVariantPatches
-            (enemy, walls, wallTree, platforms, platformTree, player, [])
+            (enemy, walls, wallTree, platforms, platformTree, player, graph, [])
           val enemy = EnemyPatch.withPatches (enemy, patches)
 
           val patches = EnemyPhysics.getPhysicsPatches enemy
@@ -92,6 +101,7 @@ struct
     , platforms
     , platformTree
     , player
+    , graph
     ) =
     if pos < 0 then
       Vector.fromList acc
@@ -107,6 +117,7 @@ struct
           , platforms
           , platformTree
           , player
+          , graph
           )
       in
         filterProjectileCollisions
@@ -119,6 +130,7 @@ struct
           , platforms
           , platformTree
           , player
+          , graph
           )
       end
 
@@ -136,6 +148,7 @@ struct
     , platforms
     , platformTree
     , player
+    , graph
     ) =
     if pos < 0 then
       Vector.fromList acc
@@ -155,6 +168,7 @@ struct
               , platforms
               , platformTree
               , player
+              , graph
               )
       in
         filterWhenAttacked
@@ -168,6 +182,7 @@ struct
           , platforms
           , platformTree
           , player
+          , graph
           )
       end
 

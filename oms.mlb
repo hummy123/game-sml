@@ -19,16 +19,16 @@ end
 
 fcore/wall.sml
 fcore/platform.sml
+
+fcore/graph.sml
+fcore/path-finding.sml
+
 fcore/enemy-variants.sml
 fcore/game-type.sml
 
 fcore/player-patch.sml
 fcore/enemy-patch.sml
 fcore/physics.sml
-
-fcore/build-graph.sml
-fcore/graph.sml
-fcore/path-finding.sml
 
 fcore/trace-jump.sml
 fcore/enemy-behaviour.sml

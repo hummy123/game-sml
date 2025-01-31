@@ -2,7 +2,8 @@ structure GameUpdate =
 struct
   fun update (game, input) =
     let
-      val {player, walls, wallTree, platforms, platformTree, enemies} = game
+      val {player, walls, wallTree, platforms, platformTree, enemies, graph} =
+        game
 
       val player = Player.runPhysicsAndInput (game, input)
 
@@ -18,6 +19,7 @@ struct
         , wallTree
         , platforms
         , platformTree
+        , graph
         )
     in
       { player = player
@@ -26,6 +28,7 @@ struct
       , platforms = platforms
       , platformTree = platformTree
       , enemies = enemies
+      , graph = graph
       }
     end
 end
