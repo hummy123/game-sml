@@ -140,6 +140,50 @@ struct
            end
        end)
 
+  fun traceRightDescent (x, y, platTree, env, state) =
+    if x >= Constants.worldWidth orelse y >= Constants.worldHeight then
+      (* we hit bounds of screen and saw that there was 
+       * no way to jump to next nextPlatID *)
+      state
+    else
+      let
+        val width = Constants.moveEnemyBy
+        val height = Constants.worldHeight - y
+        val state = Horizontal.foldRegion
+          (x, y, width, height, env, state, platTree)
+
+        val nextX = x + Constants.moveEnemyBy
+        val nextY = y + Constants.moveEnemyBy
+      in
+        traceRightDescent (nextX, nextY, platTree, env, state)
+      end
+
+  fun traceRightJumpAscent (x, y, remainingJump, platTree, env, state) =
+    if remainingJump >= Constants.jumpLimit - Constants.enemySize then
+      traceRightDescent (x, y, platTree, env, state)
+    else
+      let
+        val width = Constants.moveEnemyBy
+        val height = Constants.worldHeight - y
+
+        val state = Horizontal.foldRegion
+          (x, y, width, height, env, state, platTree)
+
+        val nextX = x + Constants.moveEnemyBy
+        val nextY = y - Constants.moveEnemyBy
+        val nextJump = remainingJump + Constants.moveEnemyBy
+      in
+        traceRightJumpAscent (nextX, nextY, nextJump, platTree, env, state)
+      end
+
+  fun traceRightJump (currentPlat: GameType.platform, env, state, platTree) =
+    let
+      val {x, y, width, ...} = currentPlat
+      val x = x - Constants.enemySize + width
+    in
+      traceRightJumpAscent (x, y, 0, platTree, env, state)
+    end
+
   fun start (currentPlat: GameType.platform, env: env, state, platformTree) =
     let
       val {x, y, width, ...} = currentPlat
@@ -148,9 +192,11 @@ struct
       val searchY = y - Constants.jumpLimit
       val height = Constants.worldHeight - searchY
 
-      val (eVals, q) = Vertical.foldRegion
+      val state = Vertical.foldRegion
         (x, searchY, width, height, env, state, platformTree)
+
+      val state = traceRightJump (currentPlat, env, state, platformTree)
     in
-      (eVals, q)
+      state
     end
 end
