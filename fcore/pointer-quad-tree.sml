@@ -1,4 +1,19 @@
-structure PointerQuadTree =
+signature POINTER_QUAD_TREE =
+sig
+  type t
+
+  val insert: int * int * int * int * int * t -> t
+
+  val getCollisions: int * int * int * int * int * t -> int list
+
+  val hasCollisionAt: int * int * int * int * int * t -> bool
+
+  val getItemID: int * int * int * int * t -> int
+
+  val create: int * int -> t
+end
+
+structure PointerQuadTree: POINTER_QUAD_TREE =
 struct
   open PointerQuadTreeType
 
@@ -195,4 +210,40 @@ struct
         let val newItem = mkItem (itemID, ix, iy, iw, ih)
         in splitShareLeaf (qx, qy, qw, qh, oldItems, newItem)
         end
+
+  fun insert (iX, iY, iW, iH, itemID, tree: t) =
+    let
+      val {width, height, tree} = tree
+      val tree =
+        helpInsert (iX, iY, iW, iH, itemID, 0, 0, width, height, tree)
+    in
+      {width = width, height = height, tree = tree}
+    end
+
+  structure GetCollisions = MakePointerQuadTreeFold (struct
+    type env = unit
+    type state = int list
+    fun fold (itemID, (), lst) = itemID :: lst
+  end)
+
+  fun getCollisions (itemX, itemY, itemWidth, itemHeight, _, tree) =
+    GetCollisions.foldRegion (itemX, itemY, itemWidth, itemHeight, (), [], tree)
+
+  structure HasCollisionAt = MakePointerQuadTreeFold (struct
+    type env = unit
+    type state = bool
+    fun fold _ = true
+  end)
+
+  fun hasCollisionAt (ix, iy, iw, ih, _, tree) =
+    HasCollisionAt.foldRegion (ix, iy, iw, ih, (), false, tree)
+
+  structure GetItemID = MakePointerQuadTreeFold (struct
+    type env = unit
+    type state = int
+    fun fold (itemID, (), curID) = Int.max (itemID, curID)
+  end)
+
+  fun getItemID (ix, iy, iw, ih, tree) =
+    GetItemID.foldRegion (ix, iy, iw, ih, (), ~1, tree)
 end

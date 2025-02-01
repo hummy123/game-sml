@@ -7,6 +7,10 @@ fcore/quad-tree-type.sml
 fcore/quad-tree-fold.sml
 fcore/quad-tree.sml
 
+fcore/pointer-quad-tree-type.sml
+fcore/pointer-quad-tree-fold.sml
+fcore/pointer-quad-tree.sml
+
 fcore/bin-search.sml
 fcore/bin-vec.sml
 
@@ -38,9 +42,6 @@ fcore/projectile.sml
 
 fcore/player-enemy.sml
 fcore/game-update.sml
-
-fcore/pointer-quad-tree-type.sml
-fcore/pointer-quad-tree.sml
 
 (* shell *)
 $(SML_LIB)/basis/mlton.mlb
