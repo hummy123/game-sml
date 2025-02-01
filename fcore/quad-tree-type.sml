@@ -3,14 +3,8 @@ sig
   type item = {itemID: int, startX: int, startY: int, width: int, height: int}
 
   datatype t =
-    NODE of
-      { nodes: t vector
-      , x: int
-      , y: int
-      , w: int
-      , h: int
-      }
-  | LEAF of {items: item vector, x: int, y: int, w: int, h: int}
+    NODE of t vector
+  | LEAF of item vector
 
   val tlIdx: int
   val trIdx: int
@@ -51,14 +45,8 @@ struct
   type item = {itemID: int, startX: int, startY: int, width: int, height: int}
 
   datatype t =
-    NODE of
-      { nodes: t vector
-      , x: int
-      , y: int
-      , w: int
-      , h: int
-      }
-  | LEAF of {items: item vector, x: int, y: int, w: int, h: int}
+    NODE of t vector
+  | LEAF of item vector
 
   val tlIdx = 0
   val trIdx = 1
