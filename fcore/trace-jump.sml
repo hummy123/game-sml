@@ -103,7 +103,7 @@ struct
     end
 
   fun traceLeftJumpAscent (x, y, remainingJump, nextPlatID, platTree) =
-    if remainingJump >= Constants.jumpLimit - Constants.enemySize then
+    if x <= 0 orelse remainingJump >= Constants.jumpLimit - Constants.enemySize then
       traceLeftDescent (x, y, nextPlatID, platTree)
     else
       let
@@ -124,6 +124,7 @@ struct
   fun traceLeftJump (enemy: GameType.enemy, nextPlatID, platTree) =
     let
       val {x, y, ...} = enemy
+      val x = x + 75
 
       open GameType
     in
