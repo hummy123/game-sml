@@ -228,16 +228,16 @@ struct
       acc
     end
 
-  fun getRecoilPatches player =
+  fun getRecoilPatches (player, patches) =
     case #recoil player of
-      NO_RECOIL => []
+      NO_RECOIL => patches
     | RECOIL_LEFT recoiled =>
         (* if player is recoiling, don't accept or adjust any input.
          * However, if player has reached the recoil limit, exit the recoil
          * state and accept input.
          * *)
         if recoiled = Constants.recoilLimit then
-          [W_RECOIL NO_RECOIL]
+          W_RECOIL NO_RECOIL :: patches
         else
           let
             val {x, y, health, attacked, facing, xAxis, ...} = player
@@ -252,17 +252,13 @@ struct
             val recoil = RECOIL_LEFT recoiled
             val facing = getFacing (facing, xAxis)
           in
-            [ W_X x
-            , W_X_AXIS xAxis
-            , W_Y_AXIS yAxis
-            , W_JUMP_PRESSED jumpPressed
-            , W_RECOIL recoil
-            , W_FACING facing
-            ]
+            W_X x :: W_X_AXIS xAxis :: W_Y_AXIS yAxis
+            :: W_JUMP_PRESSED jumpPressed :: W_RECOIL recoil :: W_FACING facing
+            :: patches
           end
     | RECOIL_RIGHT recoiled =>
         if recoiled = Constants.recoilLimit then
-          [W_RECOIL NO_RECOIL]
+          W_RECOIL NO_RECOIL :: patches
         else
           let
             val {x, y, health, attacked, facing, xAxis, ...} = player
@@ -275,13 +271,9 @@ struct
             val recoil = RECOIL_RIGHT recoiled
             val facing = getFacing (facing, xAxis)
           in
-            [ W_X x
-            , W_X_AXIS xAxis
-            , W_Y_AXIS yAxis
-            , W_JUMP_PRESSED jumpPressed
-            , W_RECOIL recoil
-            , W_FACING facing
-            ]
+            W_X x :: W_X_AXIS xAxis :: W_Y_AXIS yAxis
+            :: W_JUMP_PRESSED jumpPressed :: W_RECOIL recoil :: W_FACING facing
+            :: patches
           end
 
   fun helpMoveProjectiles (pos, projectiles, acc) =
@@ -321,27 +313,25 @@ struct
       val player = #player game
 
       val patches = getProjectilePatches player
+      val patches = getRecoilPatches (player, patches)
       val player = PlayerPatch.withPatches (player, patches)
 
-      val patches = getRecoilPatches player
-      val player = PlayerPatch.withPatches (player, patches)
-
-      val player =
-        (* we only accept and handle input if player is not recoiling *)
+      val patches =
+        (* we only accept and handle input if player is not recoiling.
+         * It's important to apply the recoil patches after handling input
+         * because we want to act on the latest recoil state straight away. *)
         case #recoil player of
-          NO_RECOIL =>
-            let val patches = getInputPatches (player, input)
-            in PlayerPatch.withPatches (player, patches)
-            end
-        | _ => player
+          NO_RECOIL => getInputPatches (player, input)
+        | _ => []
 
+      (* animate projectiles *)
       val player =
         let
           val e = #enemies player
           val e =
             Vector.map
               (fn {angle} => {angle = if angle < 360 then angle + 5 else 0}) e
-          val patches = [W_ENEMIES e]
+          val patches = W_ENEMIES e :: patches
         in
           PlayerPatch.withPatches (player, patches)
         end
