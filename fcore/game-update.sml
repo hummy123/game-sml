@@ -5,22 +5,9 @@ struct
       val {player, walls, wallTree, platforms, platformTree, enemies, graph} =
         game
 
-      val player = Player.runPhysicsAndInput (game, input)
-
       val enemyTree = Enemy.generateTree enemies
+      val player = Player.runPhysicsAndInput (game, input, enemyTree)
 
-      (* check player-enemy collisions and react *)
-      val (player, enemies) = PlayerEnemy.checkCollisions
-        ( player
-        , enemies
-        , enemyTree
-        , #projectiles player
-        , walls
-        , wallTree
-        , platforms
-        , platformTree
-        , graph
-        )
     in
       { player = player
       , walls = walls

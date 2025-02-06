@@ -228,7 +228,7 @@ struct
       acc
     end
 
-  fun getRecoilPatches (player, patches) =
+  fun getRecoilPatches (player: player, patches) =
     case #recoil player of
       NO_RECOIL => patches
     | RECOIL_LEFT recoiled =>
@@ -300,50 +300,12 @@ struct
           end
       end
 
-  fun getProjectilePatches ({projectiles, ...}) =
+  fun getProjectilePatches ({projectiles, ...}: player) =
     let
       val newProjectiles = helpMoveProjectiles
         (Vector.length projectiles - 1, projectiles, [])
     in
       [W_PROJECTILES newProjectiles]
-    end
-
-  fun runPhysicsAndInput (game: game_type, input) =
-    let
-      val player = #player game
-
-      val patches = getProjectilePatches player
-      val patches = getRecoilPatches (player, patches)
-      val player = PlayerPatch.withPatches (player, patches)
-
-      val patches =
-        (* we only accept and handle input if player is not recoiling.
-         * It's important to apply the recoil patches after handling input
-         * because we want to act on the latest recoil state straight away. *)
-        case #recoil player of
-          NO_RECOIL => getInputPatches (player, input)
-        | _ => []
-
-      (* animate projectiles *)
-      val player =
-        let
-          val e = #enemies player
-          val e =
-            Vector.map
-              (fn {angle} => {angle = if angle < 360 then angle + 5 else 0}) e
-          val patches = W_ENEMIES e :: patches
-        in
-          PlayerPatch.withPatches (player, patches)
-        end
-
-      val patches = PlayerPhysics.getPhysicsPatches player
-      val player = PlayerPatch.withPatches (player, patches)
-
-      val {walls, wallTree, platforms, platformTree, ...} = game
-      val patches = PlayerPhysics.getEnvironmentPatches
-        (player, walls, wallTree, platforms, platformTree)
-    in
-      PlayerPatch.withPatches (player, patches)
     end
 
   structure FoldEnemies =
@@ -390,11 +352,73 @@ struct
                in
                  eCentreX < pCentreX
                end
-             val patches = getEnemyRecoilPatches (player, playerOnRight, patches)
+             val patches =
+               getEnemyRecoilPatches (player, playerOnRight, patches)
            in
              W_ATTACKED (ATTACKED 0) :: patches
            end
        end)
+
+  fun runPhysicsAndInput (game: game_type, input, enemyTree) =
+    let
+      val player = #player game
+
+      val patches = getProjectilePatches player
+      val patches = getRecoilPatches (player, patches)
+      val player = PlayerPatch.withPatches (player, patches)
+
+      val patches =
+        (* we only accept and handle input if player is not recoiling.
+         * It's important to apply the recoil patches after handling input
+         * because we want to act on the latest recoil state straight away. *)
+        case #recoil player of
+          NO_RECOIL => getInputPatches (player, input)
+        | _ => []
+
+      val patches =
+        (* control timer for how long player should be immune to damage
+         * after being attacked *)
+        case #attacked player of
+          ATTACKED amt =>
+            if amt >= Constants.attackedLimit then
+              W_ATTACKED NOT_ATTACKED :: patches
+            else
+              W_ATTACKED (ATTACKED (amt + 1)) :: patches
+        | _ => patches
+
+      (* animate projectiles *)
+      val player =
+        let
+          val e = #enemies player
+          val e =
+            Vector.map
+              (fn {angle} => {angle = if angle < 360 then angle + 5 else 0}) e
+          val patches = W_ENEMIES e :: patches
+        in
+          PlayerPatch.withPatches (player, patches)
+        end
+
+      val patches = PlayerPhysics.getPhysicsPatches player
+      val player = PlayerPatch.withPatches (player, patches)
+
+      val {walls, wallTree, platforms, platformTree, ...} = game
+      val patches = PlayerPhysics.getEnvironmentPatches
+        (player, walls, wallTree, platforms, platformTree)
+      val player = PlayerPatch.withPatches (player, patches)
+
+      (* player reaction to collisions with enemies *)
+      val patches =
+        let
+          val {x, y, ...} = player
+          val size = Constants.playerSize
+          val env = (#enemies game, player)
+          val state = []
+        in
+          FoldEnemies.foldRegion (x, y, size, size, env, state, enemyTree)
+        end
+    in
+      PlayerPatch.withPatches (player, patches)
+    end
 
   (* todo: add attacked enemies to player's 'enemies' field *)
   fun concatAttackedEnemies (player: player, enemyCollisions) =
@@ -404,74 +428,6 @@ struct
       val allDefeated = Vector.concat [oldDefeated, newDefeated]
     in
       PlayerPatch.withPatch (player, W_ENEMIES allDefeated)
-    end
-
-  fun getEnemyRecoilPatches (player, playerOnRight, acc) =
-    if playerOnRight then
-      let
-        val newRecoil = RECOIL_RIGHT 0
-        val newAttacked = ATTACKED 0
-      in
-        W_RECOIL newRecoil :: W_ATTACKED newAttacked :: W_FACING FACING_LEFT
-        :: W_Y_AXIS FALLING :: W_X_AXIS STAY_STILL :: acc
-      end
-    else
-      let
-        val newRecoil = RECOIL_LEFT 0
-        val newAttacked = ATTACKED 0
-      in
-        W_RECOIL newRecoil :: W_ATTACKED newAttacked :: W_FACING FACING_RIGHT
-        :: W_Y_AXIS FALLING :: W_X_AXIS STAY_STILL :: acc
-      end
-
-  fun enemyCollisionReaction (player: player, enemies: enemy vector, lst, acc) =
-    case lst of
-      id :: tl =>
-        let
-          val playerOnRight =
-            (* check if collision is closer to left side of enemy or right
-             * and then chose appropriate direction to recoil in *)
-            let
-              val {x, ...} = player
-              val pFinishX = x + Constants.playerSize
-              val pHalfW = Constants.playerSize div 2
-              val pCentreX = x + pHalfW
-
-              val {x = ex, y = ey, ...} = Enemy.find (id, enemies)
-              val eFinishX = ex + Constants.enemySize
-              val eHalfW = Constants.enemySize div 2
-              val eCentreX = ex + eHalfW
-            in
-              eCentreX < pCentreX
-            end
-
-          val acc = getEnemyRecoilPatches (player, playerOnRight, acc)
-        in
-          enemyCollisionReaction (player, enemies, tl, acc)
-        end
-    | [] => PlayerPatch.withPatches (player, acc)
-
-  fun incrementAttacked (player, amt) =
-    let val patch = ATTACKED (amt + 1)
-    in PlayerPatch.withPatch (player, W_ATTACKED patch)
-    end
-
-  fun exitAttackedAndCheckEnemies (player, enemies, enemyCollisions) =
-    enemyCollisionReaction
-      (player, enemies, enemyCollisions, [W_ATTACKED NOT_ATTACKED])
-
-  fun getEnemyCollisionsWhenAttacking (x, y, enemyTree) =
-    let
-      val x = x - Constants.halfPlayerSize
-      val y = y - Constants.halfPlayerSize
-      val size = Constants.playerSize * 2
-
-      val ww = Constants.worldWidth
-      val wh = Constants.worldHeight
-      val enemyCollisions = QuadTree.getCollisions
-        (x, y, size, size, ~1, enemyTree)
-    in
-      Vector.fromList enemyCollisions
     end
 
   (*** DRAWING FUNCTIONS ***)

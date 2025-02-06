@@ -36,7 +36,6 @@ fcore/enemy.sml
 fcore/player.sml
 fcore/projectile.sml
 
-fcore/player-enemy.sml
 fcore/game-update.sml
 
 (* shell *)
