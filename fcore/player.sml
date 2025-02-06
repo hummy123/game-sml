@@ -406,18 +406,23 @@ struct
         (player, walls, wallTree, platforms, platformTree)
       val player = PlayerPatch.withPatches (player, patches)
 
-      (* player reaction to collisions with enemies *)
-      val patches =
-        let
-          val {x, y, ...} = player
-          val size = Constants.playerSize
-          val env = (#enemies game, player)
-          val state = []
-        in
-          FoldEnemies.foldRegion (x, y, size, size, env, state, enemyTree)
-        end
     in
-      PlayerPatch.withPatches (player, patches)
+      (* player reaction to collisions with enemies.
+       * We only detect collisions if player is not in invincibility period
+       * after being previously attacked. *)
+      case #attacked player of
+        ATTACKED _ => player
+      | _ =>
+          let
+            val {x, y, ...} = player
+            val size = Constants.playerSize
+            val env = (#enemies game, player)
+            val state = []
+            val patches = FoldEnemies.foldRegion
+              (x, y, size, size, env, state, enemyTree)
+          in
+            PlayerPatch.withPatches (player, patches)
+          end
     end
 
   (* todo: add attacked enemies to player's 'enemies' field *)
