@@ -346,6 +346,57 @@ struct
       PlayerPatch.withPatches (player, patches)
     end
 
+  structure FoldEnemies =
+    MakeQuadTreeFold
+      (struct
+         type env = enemy vector * player
+         type state = PlayerPatch.player_patch list
+
+         fun getEnemyRecoilPatches (player, playerOnRight, acc) =
+           if playerOnRight then
+             let
+               val newRecoil = RECOIL_RIGHT 0
+               val newAttacked = ATTACKED 0
+             in
+               W_RECOIL newRecoil :: W_ATTACKED newAttacked
+               :: W_FACING FACING_LEFT :: W_Y_AXIS FALLING
+               :: W_X_AXIS STAY_STILL :: acc
+             end
+           else
+             let
+               val newRecoil = RECOIL_LEFT 0
+               val newAttacked = ATTACKED 0
+             in
+               W_RECOIL newRecoil :: W_ATTACKED newAttacked
+               :: W_FACING FACING_RIGHT :: W_Y_AXIS FALLING
+               :: W_X_AXIS STAY_STILL :: acc
+             end
+
+         fun fold (enemyID, (enemies, player: player), patches) =
+           let
+             val playerOnRight =
+               (* check if collision is closer to left side of enemy or right
+                * and then chose appropriate direction to recoil in *)
+               let
+                 val {x, ...} = player
+                 val pFinishX = x + Constants.playerSize
+                 val pHalfW = Constants.playerSize div 2
+                 val pCentreX = x + pHalfW
+
+                 val {x = ex, y = ey, ...} = Enemy.find (enemyID, enemies)
+                 val eFinishX = ex + Constants.enemySize
+                 val eHalfW = Constants.enemySize div 2
+                 val eCentreX = ex + eHalfW
+               in
+                 eCentreX < pCentreX
+               end
+             val patches = getEnemyRecoilPatches (player, playerOnRight, patches)
+           in
+             W_ATTACKED (ATTACKED 0) :: patches
+           end
+       end)
+
+  (* todo: add attacked enemies to player's 'enemies' field *)
   fun concatAttackedEnemies (player: player, enemyCollisions) =
     let
       val newDefeated = Vector.map (fn id => {angle = 360}) enemyCollisions
@@ -422,6 +473,8 @@ struct
     in
       Vector.fromList enemyCollisions
     end
+
+  (*** DRAWING FUNCTIONS ***)
 
   (* block is placeholder asset *)
   fun helpGetDrawVec (x, y, size, width, height, attacked, mainAttack) =
