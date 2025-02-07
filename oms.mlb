@@ -15,6 +15,7 @@ ann
 in
   fcore/block.sml
   fcore/field.sml
+  fcore/chain-edge.sml
 end
 
 fcore/wall.sml

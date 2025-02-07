@@ -548,7 +548,7 @@ struct
     case #mainAttack player of
       MAIN_ATTACKING {length, ...} =>
         let
-          val {x, y, ...} = player
+          val {x, y, facing, ...} = player
           val wratio = width / Constants.worldWidthReal
           val hratio = height / Constants.worldHeightReal
           val x =
@@ -573,18 +573,13 @@ struct
               val {charge, ...} = player
               val alpha = Real32.fromInt charge / 60.0
             in
-              Field.lerp
-                ( x
-                , y
-                , realLength
-                , realSize
-                , width
-                , height
-                , 0.7
-                , 0.7
-                , 1.0
-                , alpha
-                )
+              case facing of
+                FACING_RIGHT =>
+                  ChainEdgeRight.lerp
+                    (x, y, realLength, realSize, width, height, 0.5, 0.5, 0.5)
+              | FACING_LEFT =>
+                  ChainEdgeLeft.lerp
+                    (x, y, realLength, realSize, width, height, 0.5, 0.5, 0.5)
             end
           else
             let
@@ -603,18 +598,13 @@ struct
               val {charge, ...} = player
               val alpha = Real32.fromInt charge / 60.0
             in
-              Field.lerp
-                ( x
-                , y
-                , realLength
-                , realSize
-                , width
-                , height
-                , 0.7
-                , 0.7
-                , 1.0
-                , alpha
-                )
+              case facing of
+                FACING_RIGHT =>
+                  ChainEdgeRight.lerp
+                    (x, y, realLength, realSize, width, height, 0.5, 0.5, 0.5)
+              | FACING_LEFT =>
+                  ChainEdgeLeft.lerp
+                    (x, y, realLength, realSize, width, height, 0.5, 0.5, 0.5)
             end
         end
     | _ => Vector.fromList []
