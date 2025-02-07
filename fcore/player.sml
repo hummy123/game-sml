@@ -81,13 +81,19 @@ struct
           end
     end
 
-  fun prevWasNotAttacking prevAttack = prevAttack <> MAIN_ATTACKING
-
   (* called only when player has no projectiles or was not previously attacking *)
   fun helpGetMainAttackPatches (attackHeld, chargeHeld, charge) =
-    if attackHeld andalso charge > 0 then W_MAIN_ATTACK MAIN_ATTACKING
-    else if chargeHeld andalso not attackHeld then W_MAIN_ATTACK MAIN_CHARGING
-    else W_MAIN_ATTACK MAIN_NOT_ATTACKING
+    let
+      val attack =
+        if attackHeld andalso charge > 0 then
+          MAIN_ATTACKING {length = 3, growing = true}
+        else if chargeHeld andalso not attackHeld then
+          MAIN_CHARGING
+        else
+          MAIN_NOT_ATTACKING
+    in
+      W_MAIN_ATTACK attack
+    end
 
   fun degreesToRadians degrees = Real32.fromInt degrees * Constants.projectilePi
 
@@ -164,12 +170,30 @@ struct
           in
             mainAttack :: acc
           end
-    | MAIN_ATTACKING =>
+    | MAIN_ATTACKING {length, growing} =>
         let
           val mainAttack =
-            helpGetMainAttackPatches (attackHeld, chargeHeld, charge)
+            if growing then
+              if length < Constants.attackLengthLimit then
+                let val newLength = length + Constants.moveProjectileBy
+                in MAIN_ATTACKING {length = newLength, growing = true}
+                end
+              else
+                let
+                  val newLength = length - Constants.moveProjectileBy
+                in
+                  if newLength <= 0 then MAIN_NOT_ATTACKING
+                  else MAIN_ATTACKING {length = newLength, growing = false}
+                end
+            else
+              let
+                val newLength = length - Constants.moveProjectileBy
+              in
+                if newLength <= 0 then MAIN_NOT_ATTACKING
+                else MAIN_ATTACKING {length = newLength, growing = false}
+              end
         in
-          mainAttack :: acc
+          W_MAIN_ATTACK mainAttack :: acc
         end
     | MAIN_THROWING =>
         if attackHeld then
@@ -207,7 +231,7 @@ struct
       val charge =
         case mainAttack of
           MAIN_CHARGING => Int.min (charge + 1, Constants.maxCharge)
-        | MAIN_ATTACKING => Int.max (charge - 1, 0)
+        | MAIN_ATTACKING _ => (* todo: rework charge *) Int.max (charge - 1, 0)
         | _ => charge
 
       val acc = [W_X_AXIS xAxis, W_FACING facing, W_CHARGE charge]
@@ -437,18 +461,18 @@ struct
         * and be compared with attackLengthLimit 
         * and the attack should shrink at some point as well *)
         case #mainAttack player of
-          MAIN_ATTACKING =>
+          MAIN_ATTACKING {length, ...} =>
             let
-              val size = Constants.playerSize
+              val height = Constants.playerSize
               val {x, y, facing, enemies, ...} = player
               val x =
                 (case facing of
-                   FACING_RIGHT => x + size
-                 | FACING_LEFT => x - size)
+                   FACING_RIGHT => x + length
+                 | FACING_LEFT => x - length)
 
               val state = []
               val newDefeated = AttackEnemies.foldRegion
-                (x, y, size, size, (), state, enemyTree)
+                (x, y, length, height, (), state, enemyTree)
               val allDefeated =
                 Vector.concat [Vector.fromList newDefeated, enemies]
             in
@@ -492,7 +516,7 @@ struct
                Block.lerp (x, y, size, size, width, height, 0.9, 0.9, 0.9)
              else
                Block.lerp (x, y, size, size, width, height, 0.5, 0.5, 0.5))
-    | MAIN_ATTACKING =>
+    | MAIN_ATTACKING _ =>
         (case attacked of
            NOT_ATTACKED =>
              Block.lerp (x, y, size, size, width, height, 1.0, 0.5, 0.5)
@@ -551,9 +575,7 @@ struct
 
   fun getFieldVec (player: player, width, height) =
     case #mainAttack player of
-      MAIN_NOT_ATTACKING => Vector.fromList []
-    | MAIN_THROWING => Vector.fromList []
-    | _ =>
+      MAIN_ATTACKING {length, ...} =>
         let
           val {x, y, ...} = player
           val wratio = width / Constants.worldWidthReal
@@ -561,7 +583,7 @@ struct
           val x =
             case #facing player of
               FACING_RIGHT => x + Constants.playerSize
-            | FACING_LEFT => x - Constants.playerSize
+            | FACING_LEFT => x - Constants.playerSize - length
         in
           if wratio < hratio then
             let
@@ -574,13 +596,24 @@ struct
               val x = Real32.fromInt x * wratio
               val y = Real32.fromInt y * wratio + yOffset
 
-              val realSize = (Constants.playerSizeReal) * wratio
+              val realLength = Real32.fromInt length * wratio
+              val realSize = Constants.playerSizeReal * wratio
 
               val {charge, ...} = player
               val alpha = Real32.fromInt charge / 60.0
             in
               Field.lerp
-                (x, y, realSize, realSize, width, height, 0.7, 0.7, 1.0, alpha)
+                ( x
+                , y
+                , realLength
+                , realSize
+                , width
+                , height
+                , 0.7
+                , 0.7
+                , 1.0
+                , alpha
+                )
             end
           else
             let
@@ -593,15 +626,27 @@ struct
               val x = Real32.fromInt x * hratio + xOffset
               val y = Real32.fromInt y * hratio
 
-              val realSize = (Constants.playerSizeReal) * hratio
+              val realLength = Real32.fromInt length * wratio + xOffset
+              val realSize = Constants.playerSizeReal * hratio
 
               val {charge, ...} = player
               val alpha = Real32.fromInt charge / 60.0
             in
               Field.lerp
-                (x, y, realSize, realSize, width, height, 0.7, 0.7, 1.0, alpha)
+                ( x
+                , y
+                , realLength
+                , realSize
+                , width
+                , height
+                , 0.7
+                , 0.7
+                , 1.0
+                , alpha
+                )
             end
         end
+    | _ => Vector.fromList []
 
   fun helpGetPelletVec
     ( playerX

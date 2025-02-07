@@ -21,7 +21,7 @@ sig
 
   datatype main_attack =
     MAIN_NOT_ATTACKING
-  | MAIN_ATTACKING
+  | MAIN_ATTACKING of {length: int, growing: bool}
   | MAIN_CHARGING
   | MAIN_THROWING
 
@@ -96,7 +96,7 @@ struct
 
   datatype main_attack =
     MAIN_NOT_ATTACKING
-  | MAIN_ATTACKING
+  | MAIN_ATTACKING of {length: int, growing: bool}
   | MAIN_CHARGING
   | MAIN_THROWING
 
