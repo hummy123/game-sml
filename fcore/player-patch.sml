@@ -11,6 +11,7 @@ sig
   | W_X of int
   | W_Y of int
   | W_JUMP_PRESSED of bool
+  | W_MAIN_ATTACK_PRESSED of bool
   | W_ENEMIES of GameType.defeated_enemies vector
   | W_CHARGE of int
   | W_PROJECTILES of GameType.player_projectile vector
@@ -33,6 +34,7 @@ struct
   | W_X of int
   | W_Y of int
   | W_JUMP_PRESSED of bool
+  | W_MAIN_ATTACK_PRESSED of bool
   | W_ENEMIES of GameType.defeated_enemies vector
   | W_CHARGE of int
   | W_PROJECTILES of GameType.player_projectile vector
@@ -256,6 +258,24 @@ struct
             , platID
             )
       | W_JUMP_PRESSED jumpPressed =>
+          mkPlayer
+            ( health
+            , xAxis
+            , yAxis
+            , x
+            , y
+            , jumpPressed
+            , recoil
+            , attacked
+            , mainAttack
+            , facing
+            , mainAttackPressed
+            , enemies
+            , charge
+            , projectiles
+            , platID
+            )
+      | W_MAIN_ATTACK_PRESSED mainAttackPressed =>
           mkPlayer
             ( health
             , xAxis

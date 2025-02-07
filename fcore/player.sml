@@ -82,17 +82,16 @@ struct
     end
 
   (* called only when player has no projectiles or was not previously attacking *)
-  fun helpGetMainAttackPatches (attackHeld, chargeHeld, charge) =
+  fun helpGetMainAttackPatches (attackHeld, mainAttackPressed, charge, acc) =
     let
       val attack =
-        if attackHeld andalso charge > 0 then
+        if attackHeld andalso not mainAttackPressed then
           MAIN_ATTACKING {length = 3, growing = true}
-        else if chargeHeld andalso not attackHeld then
-          MAIN_CHARGING
         else
           MAIN_NOT_ATTACKING
     in
-      W_MAIN_ATTACK attack
+      W_MAIN_ATTACK_PRESSED (attackHeld andalso mainAttackPressed)
+      :: W_MAIN_ATTACK attack :: acc
     end
 
   fun degreesToRadians degrees = Real32.fromInt degrees * Constants.projectilePi
@@ -146,30 +145,19 @@ struct
     , charge
     , player
     , acc
+    , mainAttackPressed
     ) =
     case prevAttack of
       MAIN_NOT_ATTACKING =>
-        if attackHeld andalso Vector.length defeteadEnemies > 0 then
+        if
+          attackHeld andalso not mainAttackPressed
+          andalso Vector.length defeteadEnemies > 0
+        then
           (* shoot projectiles if player was not attacking previously, 
            * and there is more than one enemy *)
           getThrowPatches (defeteadEnemies, projectiles, player, acc)
         else
-          let
-            val mainAttack =
-              helpGetMainAttackPatches (attackHeld, chargeHeld, charge)
-          in
-            mainAttack :: acc
-          end
-    | MAIN_CHARGING =>
-        if attackHeld andalso Vector.length defeteadEnemies > 0 then
-          getThrowPatches (defeteadEnemies, projectiles, player, acc)
-        else
-          let
-            val mainAttack =
-              helpGetMainAttackPatches (attackHeld, chargeHeld, charge)
-          in
-            mainAttack :: acc
-          end
+          helpGetMainAttackPatches (attackHeld, mainAttackPressed, charge, acc)
     | MAIN_ATTACKING {length, growing} =>
         let
           val mainAttack =
@@ -193,18 +181,13 @@ struct
                 else MAIN_ATTACKING {length = newLength, growing = false}
               end
         in
-          W_MAIN_ATTACK mainAttack :: acc
+          W_MAIN_ATTACK_PRESSED true :: W_MAIN_ATTACK mainAttack :: acc
         end
     | MAIN_THROWING =>
         if attackHeld then
           acc
         else
-          let
-            val mainAttack =
-              helpGetMainAttackPatches (attackHeld, chargeHeld, charge)
-          in
-            mainAttack :: acc
-          end
+          helpGetMainAttackPatches (attackHeld, mainAttackPressed, charge, acc)
 
   fun getInputPatches (player: player, input) =
     let
@@ -228,11 +211,7 @@ struct
       val xAxis = getXAxis (leftHeld, rightHeld)
       val facing = getFacing (facing, xAxis)
 
-      val charge =
-        case mainAttack of
-          MAIN_CHARGING => Int.min (charge + 1, Constants.maxCharge)
-        | MAIN_ATTACKING _ => (* todo: rework charge *) Int.max (charge - 1, 0)
-        | _ => charge
+      val charge = (* todo: rework charge *) charge
 
       val acc = [W_X_AXIS xAxis, W_FACING facing, W_CHARGE charge]
 
@@ -245,6 +224,7 @@ struct
         , charge
         , player
         , acc
+        , mainAttackPressed
         )
 
       val acc = getJumpPatches (player, upHeld, downHeld, acc)
@@ -467,7 +447,7 @@ struct
               val {x, y, facing, enemies, ...} = player
               val x =
                 (case facing of
-                   FACING_RIGHT => x + length
+                   FACING_RIGHT => x + Constants.playerSize
                  | FACING_LEFT => x - length)
 
               val state = []
@@ -525,15 +505,6 @@ struct
                Block.lerp (x, y, size, size, width, height, 1.0, 0.9, 0.9)
              else
                Block.lerp (x, y, size, size, width, height, 1.0, 0.5, 0.5))
-    | MAIN_CHARGING =>
-        (case attacked of
-           NOT_ATTACKED =>
-             Block.lerp (x, y, size, size, width, height, 1.0, 0.5, 0.5)
-         | ATTACKED amt =>
-             if amt mod 5 = 0 then
-               Block.lerp (x, y, size, size, width, height, 1.0, 0.9, 0.9)
-             else
-               Block.lerp (x, y, size, size, width, height, 1.0, 0.5, 0.5))
 
   fun getDrawVec (player: player, width, height) =
     let
@@ -583,7 +554,7 @@ struct
           val x =
             case #facing player of
               FACING_RIGHT => x + Constants.playerSize
-            | FACING_LEFT => x - Constants.playerSize - length
+            | FACING_LEFT => x - length
         in
           if wratio < hratio then
             let
@@ -626,7 +597,7 @@ struct
               val x = Real32.fromInt x * hratio + xOffset
               val y = Real32.fromInt y * hratio
 
-              val realLength = Real32.fromInt length * wratio + xOffset
+              val realLength = Real32.fromInt length * hratio
               val realSize = Constants.playerSizeReal * hratio
 
               val {charge, ...} = player
