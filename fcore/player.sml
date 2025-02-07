@@ -558,6 +558,10 @@ struct
           val {x, y, ...} = player
           val wratio = width / Constants.worldWidthReal
           val hratio = height / Constants.worldHeightReal
+          val x =
+            case #facing player of
+              FACING_RIGHT => x + Constants.playerSize
+            | FACING_LEFT => x - Constants.playerSize
         in
           if wratio < hratio then
             let
@@ -567,12 +571,10 @@ struct
                 else if height < scale then (scale - height) / 2.0
                 else 0.0
 
-              val x = (Real32.fromInt x - Constants.halfPlayerSizeReal) * wratio
-              val y =
-                (Real32.fromInt y - Constants.halfPlayerSizeReal) * wratio
-                + yOffset
+              val x = Real32.fromInt x * wratio
+              val y = Real32.fromInt y * wratio + yOffset
 
-              val realSize = (Constants.playerSizeReal * 2.0) * wratio
+              val realSize = (Constants.playerSizeReal) * wratio
 
               val {charge, ...} = player
               val alpha = Real32.fromInt charge / 60.0
@@ -588,12 +590,10 @@ struct
                 else if width < scale then (scale - width) / 2.0
                 else 0.0
 
-              val x =
-                (Real32.fromInt x - Constants.halfPlayerSizeReal) * hratio
-                + xOffset
-              val y = (Real32.fromInt y - Constants.halfPlayerSizeReal) * hratio
+              val x = Real32.fromInt x * hratio + xOffset
+              val y = Real32.fromInt y * hratio
 
-              val realSize = (Constants.playerSizeReal * 2.0) * hratio
+              val realSize = (Constants.playerSizeReal) * hratio
 
               val {charge, ...} = player
               val alpha = Real32.fromInt charge / 60.0
