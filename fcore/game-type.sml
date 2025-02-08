@@ -58,6 +58,9 @@ sig
     , nextPlatID: int
     }
 
+  type falling_enemy =
+    {falling: bool, x: int, y: int, variant: EnemyVariants.t, jumped: int}
+
   type game_type =
     { player: player
     , walls: wall vector
@@ -66,6 +69,7 @@ sig
     , platformTree: QuadTree.t
     , enemies: enemy vector
     , graph: PlatSet.elem vector vector
+    , fallingEnemies: falling_enemy vector
     }
 
   val initial: game_type
@@ -132,6 +136,9 @@ struct
     , nextPlatID: int
     }
 
+  type falling_enemy =
+    {falling: bool, x: int, y: int, variant: EnemyVariants.t, jumped: int}
+
   type game_type =
     { player: player
     , walls: wall vector
@@ -140,6 +147,7 @@ struct
     , platformTree: QuadTree.t
     , enemies: enemy vector
     , graph: PlatSet.elem vector vector
+    , fallingEnemies: falling_enemy vector
     }
 
   val initial: game_type =
@@ -269,6 +277,7 @@ struct
       , platformTree = platformTree
       , enemies = enemies
       , graph = graph
+      , fallingEnemies = Vector.fromList []
       }
     end
 end

@@ -394,18 +394,29 @@ struct
     , platformTree
     , projectileTree
     , enemyList
+    , fallingList
     ) =
     let
       val {x, y, ...} = enemy
       val size = Constants.enemySize
-
-      val isAttacked =
-        QuadTree.hasCollisionAt (x, y, size, size, ~1, projectileTree)
-        orelse isCollidingWithPlayerAttack (player, enemy)
     in
-      if isAttacked then
-        (* no matter what projectiles hits it, PATROL_SLIME should be filtered out *)
-        enemyList
+      if QuadTree.hasCollisionAt (x, y, size, size, ~1, projectileTree) then
+        (* if projectile hits, filter out from this list, and add to list of
+         * fallingEnemies *)
+        let
+          val fallingList =
+            { falling = false
+            , x = x
+            , y = y
+            , variant = #variant enemy
+            , jumped = 0
+            } :: fallingList
+        in
+          (enemyList, fallingList)
+        end
+      else if isCollidingWithPlayerAttack (player, enemy) then
+        (* filter out when any projectile hits *)
+        (enemyList, fallingList)
       else
         (* since we're not filtering out, update the enemy's state and cons enemy *)
         let
@@ -421,7 +432,7 @@ struct
             (enemy, walls, wallTree, platforms, platformTree)
           val enemy = EnemyPatch.withPatches (enemy, patches)
         in
-          enemy :: enemyList
+          (enemy :: enemyList, fallingList)
         end
     end
 
@@ -435,18 +446,29 @@ struct
     , projectileTree
     , graph
     , enemyList
+    , fallingList
     ) =
     let
       val {x, y, ...} = enemy
       val size = Constants.enemySize
-
-      val isAttacked =
-        QuadTree.hasCollisionAt (x, y, size, size, ~1, projectileTree)
-        orelse isCollidingWithPlayerAttack (player, enemy)
     in
-      if isAttacked then
+      if QuadTree.hasCollisionAt (x, y, size, size, ~1, projectileTree) then
+        (* if projectile hits, filter out from this list, and add to list of
+         * fallingEnemies *)
+        let
+          val fallingList =
+            { falling = false
+            , x = x
+            , y = y
+            , variant = #variant enemy
+            , jumped = 0
+            } :: fallingList
+        in
+          (enemyList, fallingList)
+        end
+      else if isCollidingWithPlayerAttack (player, enemy) then
         (* filter out when any projectile hits *)
-        enemyList
+        (enemyList, fallingList)
       else
         (* since we're not filtering out, update the enemy's state and cons enemy *)
         let
@@ -463,7 +485,7 @@ struct
             (enemy, walls, wallTree, platforms, platformTree)
           val enemy = EnemyPatch.withPatches (enemy, patches)
         in
-          enemy :: enemyList
+          (enemy :: enemyList, fallingList)
         end
     end
 
@@ -478,6 +500,7 @@ struct
     , player
     , graph
     , enemyList
+    , fallingList
     ) =
     let
       open EnemyVariants
@@ -493,6 +516,7 @@ struct
             , platformTree
             , projectileTree
             , enemyList
+            , fallingList
             )
       | FOLLOW_SIME =>
           updateFollowState
@@ -505,6 +529,7 @@ struct
             , projectileTree
             , graph
             , enemyList
+            , fallingList
             )
     end
 end

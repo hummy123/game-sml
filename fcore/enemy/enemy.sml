@@ -17,9 +17,10 @@ struct
     , player
     , graph
     , enemyList
+    , fallingList
     ) =
     if pos < 0 then
-      Vector.fromList enemyList
+      (Vector.fromList enemyList, fallingList)
     else
       let
         val enemy = Vector.sub (enemies, pos)
@@ -28,7 +29,7 @@ struct
          * 1. updating enemy  and :: cons :: ing to enemyList, or 
          * 2. filtering enemy if projectile hit which enemy should not survive
          * *)
-        val enemyList = EnemyBehaviour.updateEnemyState
+        val (enemyList, fallingList) = EnemyBehaviour.updateEnemyState
           ( enemy
           , projectiles
           , projectileTree
@@ -39,6 +40,7 @@ struct
           , player
           , graph
           , enemyList
+          , fallingList
           )
       in
         updateEnemyList
@@ -53,6 +55,7 @@ struct
           , player
           , graph
           , enemyList
+          , fallingList
           )
       end
 
