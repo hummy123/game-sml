@@ -23,7 +23,28 @@ struct
       , QuadTree.create (Constants.worldWidth, Constants.worldHeight)
       )
 
-  fun updateList (pos, vec, acc) =
+  fun isCollidingWithPlayerAttack (player: player, fx, fy) =
+    let
+      val {x = px, y = py, mainAttack, facing, ...} = player
+    in
+      case mainAttack of
+        MAIN_ATTACKING {length, ...} =>
+          let
+            val px =
+              (case facing of
+                 FACING_RIGHT => px + Constants.playerSize
+               | FACING_LEFT => px - length)
+
+            val pSize = Constants.playerSize
+            val fSize = Constants.enemySize
+          in
+            Collision.isCollidingPlus
+              (px, py, length, pSize, fx, fy, fSize, fSize)
+          end
+      | _ => false
+    end
+
+  fun updateList (pos, vec, player: player, acc) =
     if pos < 0 then
       acc
     else
@@ -34,7 +55,10 @@ struct
         val ww = Constants.worldWidth
         val wh = Constants.worldHeight
       in
-        if Collision.isColliding (x, y, size, size, 0, 0, ww, wh) then
+        if isCollidingWithPlayerAttack (player : player, x, y) then
+          (* filter out if player is attacking falling enemy *)
+          updateList (pos - 1, vec, player, acc)
+        else if Collision.isCollidingPlus (x, y, size, size, 0, 0, ww, wh) then
           (* move falling enemy up or down depending on jumped *)
           let
             val updated =
@@ -51,12 +75,12 @@ struct
                 , variant = variant
                 }
           in
-            updateList (pos - 1, vec, updated :: acc)
+            updateList (pos - 1, vec, player, updated :: acc)
           end
         else
           (* if current is not colliding with world's bounds, then filter out 
            * as it is off screen *)
-          updateList (pos - 1, vec, acc)
+          updateList (pos - 1, vec, player, acc)
       end
 
   fun helpGetDrawVec

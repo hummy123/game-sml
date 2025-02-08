@@ -21,7 +21,7 @@ struct
 
       (* update state of falling enemies and possibly filter *)
       val fallingEnemies = FallingEnemies.updateList
-        (Vector.length fallingEnemies - 1, fallingEnemies, [])
+        (Vector.length fallingEnemies - 1, fallingEnemies, player, [])
 
       val (enemies, fallingEnemies) = Enemy.updateEnemyList
         ( Vector.length enemies - 1
