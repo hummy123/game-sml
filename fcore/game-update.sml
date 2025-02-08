@@ -19,7 +19,11 @@ struct
       val projectiles = #projectiles player
       val projectileTree = Projectile.generateTree projectiles
 
-      val (enemies, newFallingEnemies) = Enemy.updateEnemyList
+      (* update state of falling enemies and possibly filter *)
+      val fallingEnemies = FallingEnemies.updateList
+        (Vector.length fallingEnemies - 1, fallingEnemies, [])
+
+      val (enemies, fallingEnemies) = Enemy.updateEnemyList
         ( Vector.length enemies - 1
         , enemies
         , projectiles
@@ -31,10 +35,10 @@ struct
         , player
         , graph
         , []
-        , []
+        , fallingEnemies
         )
 
-      val fallingEnemies = Vector.fromList newFallingEnemies
+      val fallingEnemies = Vector.fromList fallingEnemies
     in
       { player = player
       , walls = walls

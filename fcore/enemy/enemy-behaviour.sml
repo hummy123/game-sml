@@ -405,12 +405,7 @@ struct
          * fallingEnemies *)
         let
           val fallingList =
-            { falling = false
-            , x = x
-            , y = y
-            , variant = #variant enemy
-            , jumped = 0
-            } :: fallingList
+            {x = x, y = y, variant = #variant enemy, jumped = 0} :: fallingList
         in
           (enemyList, fallingList)
         end
@@ -457,12 +452,7 @@ struct
          * fallingEnemies *)
         let
           val fallingList =
-            { falling = false
-            , x = x
-            , y = y
-            , variant = #variant enemy
-            , jumped = 0
-            } :: fallingList
+            {x = x, y = y, variant = #variant enemy, jumped = 0} :: fallingList
         in
           (enemyList, fallingList)
         end

@@ -35,6 +35,7 @@ fcore/physics.sml
 fcore/trace-jump.sml
 fcore/enemy/enemy-behaviour.sml
 fcore/enemy/enemy.sml
+fcore/enemy/falling-enemies.sml
 fcore/player.sml
 fcore/projectile.sml
 
