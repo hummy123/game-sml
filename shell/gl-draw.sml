@@ -242,7 +242,8 @@ struct
           val wallVec = Wall.getDrawVec (#walls game, width, height)
           val platVec = Platform.getDrawVec (#platforms game, width, height)
           val chainVec = Player.getFieldVec (#player game, width, height)
-          val wallVec = Vector.concat [wallVec, platVec, chainVec]
+          val fallingVec = FallingEnemies.getDrawVec (game, width, height)
+          val wallVec = Vector.concat [wallVec, platVec, chainVec, fallingVec]
 
           (* temp *)
           val pelletVec = Player.getPelletVec (#player game, width, height)

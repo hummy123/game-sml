@@ -451,8 +451,16 @@ struct
                  | FACING_LEFT => x - length)
 
               val state = []
+              (* detect collisions from enemies who are hit by attack *)
               val newDefeated = AttackEnemies.foldRegion
                 (x, y, length, height, (), state, enemyTree)
+
+              (* detect collisions from falling enemies too *)
+              val fallingTree =
+                FallingEnemies.generateTree (#fallingEnemies game)
+              val newDefeated = AttackEnemies.foldRegion
+                (x, y, length, height, (), newDefeated, fallingTree)
+
               val allDefeated =
                 Vector.concat [Vector.fromList newDefeated, enemies]
             in
