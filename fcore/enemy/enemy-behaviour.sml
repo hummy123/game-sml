@@ -2,6 +2,42 @@ structure EnemyBehaviour =
 struct
   open GameType
 
+  fun isColliding (ix, iy, ifx, ify, cx, cy, cfx, cfy) =
+    ix < cfx andalso ifx > cx andalso iy < cfy andalso ify > cy
+
+  fun isCollidingPlus (ix, iy, iw, ih, cx, cy, cw, ch) =
+    let
+      val ifx = ix + iw
+      val ify = iy + ih
+      val cfx = cx + cw
+      val cfy = cy + ch
+    in
+      isColliding (ix, iy, ifx, ify, cx, cy, cfx, cfy)
+    end
+
+  (* if player is attacking, does enemy collide with attack? *)
+  fun isCollidingWithPlayerAttack (player: player, enemy: enemy) =
+    let
+      val {x = px, y = py, facing, mainAttack, ...} = player
+      val pSize = Constants.playerSize
+
+      val {x = ex, y = ey, ...} = enemy
+      val eSize = Constants.enemySize
+    in
+      case mainAttack of
+        MAIN_ATTACKING {length, ...} =>
+          (case facing of
+             FACING_RIGHT =>
+               let val px = px + pSize
+               in isCollidingPlus (px, py, length, pSize, ex, ey, eSize, eSize)
+               end
+           | FACING_LEFT =>
+               let val px = px - length
+               in isCollidingPlus (px, py, length, pSize, ex, ey, eSize, eSize)
+               end)
+      | _ => false
+    end
+
   fun canWalkAhead (x, y, wallTree, platformTree) =
     let
       val y = y + Constants.enemySize - 5
@@ -358,12 +394,24 @@ struct
     | _ => enemy
 
   fun updatePatrolState
-    (enemy, walls, wallTree, platforms, platformTree, projectileTree, enemyList) =
+    ( player
+    , enemy
+    , walls
+    , wallTree
+    , platforms
+    , platformTree
+    , projectileTree
+    , enemyList
+    ) =
     let
       val {x, y, ...} = enemy
       val size = Constants.enemySize
+
+      val isAttacked =
+        QuadTree.hasCollisionAt (x, y, size, size, ~1, projectileTree)
+        orelse isCollidingWithPlayerAttack (player, enemy)
     in
-      if QuadTree.hasCollisionAt (x, y, size, size, ~1, projectileTree) then
+      if isAttacked then
         (* no matter what projectiles hits it, PATROL_SLIME should be filtered out *)
         enemyList
       else
@@ -399,8 +447,12 @@ struct
     let
       val {x, y, ...} = enemy
       val size = Constants.enemySize
+
+      val isAttacked =
+        QuadTree.hasCollisionAt (x, y, size, size, ~1, projectileTree)
+        orelse isCollidingWithPlayerAttack (player, enemy)
     in
-      if QuadTree.hasCollisionAt (x, y, size, size, ~1, projectileTree) then
+      if isAttacked then
         (* filter out when any projectile hits *)
         enemyList
       else
@@ -441,7 +493,8 @@ struct
       case #variant enemy of
         PATROL_SLIME =>
           updatePatrolState
-            ( enemy
+            ( player
+            , enemy
             , walls
             , wallTree
             , platforms
