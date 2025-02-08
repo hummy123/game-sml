@@ -2,6 +2,7 @@ $(SML_LIB)/basis/basis.mlb
 
 (* fcore *)
 fcore/constants.sml
+fcore/collision.sml
 
 fcore/quad-tree-type.sml
 fcore/quad-tree-fold.sml

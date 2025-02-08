@@ -1,20 +1,6 @@
 structure EnemyBehaviour =
 struct
   open GameType
-
-  fun isColliding (ix, iy, ifx, ify, cx, cy, cfx, cfy) =
-    ix < cfx andalso ifx > cx andalso iy < cfy andalso ify > cy
-
-  fun isCollidingPlus (ix, iy, iw, ih, cx, cy, cw, ch) =
-    let
-      val ifx = ix + iw
-      val ify = iy + ih
-      val cfx = cx + cw
-      val cfy = cy + ch
-    in
-      isColliding (ix, iy, ifx, ify, cx, cy, cfx, cfy)
-    end
-
   (* if player is attacking, does enemy collide with attack? *)
   fun isCollidingWithPlayerAttack (player: player, enemy: enemy) =
     let
@@ -28,12 +14,18 @@ struct
         MAIN_ATTACKING {length, ...} =>
           (case facing of
              FACING_RIGHT =>
-               let val px = px + pSize
-               in isCollidingPlus (px, py, length, pSize, ex, ey, eSize, eSize)
+               let
+                 val px = px + pSize
+               in
+                 Collision.isCollidingPlus
+                   (px, py, length, pSize, ex, ey, eSize, eSize)
                end
            | FACING_LEFT =>
-               let val px = px - length
-               in isCollidingPlus (px, py, length, pSize, ex, ey, eSize, eSize)
+               let
+                 val px = px - length
+               in
+                 Collision.isCollidingPlus
+                   (px, py, length, pSize, ex, ey, eSize, eSize)
                end)
       | _ => false
     end
