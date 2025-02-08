@@ -31,7 +31,7 @@ struct
       QuadTree.hasCollisionAt (ex, ey, width, height, ~1, tree)
     end
 
-  fun getPatrollPatches (enemy: enemy, wallTree, platformTree, acc) =
+  fun getPatrolPatches (enemy: enemy, wallTree, platformTree, acc) =
     let
       (* This function is meant to check 
        * if enemy should switch the horizontal direction 
@@ -308,7 +308,7 @@ struct
         in
           acc
         end
-    | _ => getPatrollPatches (enemy, wallTree, platformTree, acc)
+    | _ => getPatrolPatches (enemy, wallTree, platformTree, acc)
 
   fun getFollowPatches
     (player: player, enemy, wallTree, platformTree, platforms, graph, acc) =
@@ -352,15 +352,114 @@ struct
         end
     end
 
-  fun getVariantPatches
-    (enemy, walls, wallTree, platforms, platformTree, player, graph, acc) =
+  fun withDefaultYAxis (enemy: enemy) =
+    case #yAxis enemy of
+      ON_GROUND => EnemyPatch.withPatch (enemy, EnemyPatch.W_Y_AXIS FALLING)
+    | _ => enemy
+
+  fun updatePatrolState
+    (enemy, walls, wallTree, platforms, platformTree, projectileTree, enemyList) =
+    let
+      val {x, y, ...} = enemy
+      val size = Constants.enemySize
+    in
+      if QuadTree.hasCollisionAt (x, y, size, size, ~1, projectileTree) then
+        (* no matter what projectiles hits it, PATROL_SLIME should be filtered out *)
+        enemyList
+      else
+        (* since we're not filtering out, update the enemy's state and cons enemy *)
+        let
+          val enemy = withDefaultYAxis enemy
+
+          val patches = getPatrolPatches (enemy, wallTree, platformTree, [])
+          val enemy = EnemyPatch.withPatches (enemy, patches)
+
+          val patches = EnemyPhysics.getPhysicsPatches enemy
+          val enemy = EnemyPatch.withPatches (enemy, patches)
+
+          val patches = EnemyPhysics.getEnvironmentPatches
+            (enemy, walls, wallTree, platforms, platformTree)
+          val enemy = EnemyPatch.withPatches (enemy, patches)
+        in
+          enemy :: enemyList
+        end
+    end
+
+  fun updateFollowState
+    ( player
+    , enemy
+    , walls
+    , wallTree
+    , platforms
+    , platformTree
+    , projectileTree
+    , graph
+    , enemyList
+    ) =
+    let
+      val {x, y, ...} = enemy
+      val size = Constants.enemySize
+    in
+      if QuadTree.hasCollisionAt (x, y, size, size, ~1, projectileTree) then
+        (* filter out when any projectile hits *)
+        enemyList
+      else
+        (* since we're not filtering out, update the enemy's state and cons enemy *)
+        let
+          val enemy = withDefaultYAxis enemy
+
+          val patches = getFollowPatches
+            (player, enemy, wallTree, platformTree, platforms, graph, [])
+          val enemy = EnemyPatch.withPatches (enemy, patches)
+
+          val patches = EnemyPhysics.getPhysicsPatches enemy
+          val enemy = EnemyPatch.withPatches (enemy, patches)
+
+          val patches = EnemyPhysics.getEnvironmentPatches
+            (enemy, walls, wallTree, platforms, platformTree)
+          val enemy = EnemyPatch.withPatches (enemy, patches)
+        in
+          enemy :: enemyList
+        end
+    end
+
+  fun updateEnemyState
+    ( enemy
+    , projectiles
+    , projectileTree
+    , walls
+    , wallTree
+    , platforms
+    , platformTree
+    , player
+    , graph
+    , enemyList
+    ) =
     let
       open EnemyVariants
     in
       case #variant enemy of
-        PATROL_SLIME => getPatrollPatches (enemy, wallTree, platformTree, acc)
+        PATROL_SLIME =>
+          updatePatrolState
+            ( enemy
+            , walls
+            , wallTree
+            , platforms
+            , platformTree
+            , projectileTree
+            , enemyList
+            )
       | FOLLOW_SIME =>
-          getFollowPatches
-            (player, enemy, wallTree, platformTree, platforms, graph, acc)
+          updateFollowState
+            ( player
+            , enemy
+            , walls
+            , wallTree
+            , platforms
+            , platformTree
+            , projectileTree
+            , graph
+            , enemyList
+            )
     end
 end

@@ -24,16 +24,16 @@ fcore/platform.sml
 fcore/graph.sml
 fcore/path-finding.sml
 
-fcore/enemy-variants.sml
+fcore/enemy/enemy-variants.sml
 fcore/game-type.sml
 
 fcore/player-patch.sml
-fcore/enemy-patch.sml
+fcore/enemy/enemy-patch.sml
 fcore/physics.sml
 
 fcore/trace-jump.sml
-fcore/enemy-behaviour.sml
-fcore/enemy.sml
+fcore/enemy/enemy-behaviour.sml
+fcore/enemy/enemy.sml
 fcore/player.sml
 fcore/projectile.sml
 
