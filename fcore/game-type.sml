@@ -58,7 +58,7 @@ sig
     , nextPlatID: int
     }
 
-  type falling_enemy = {x: int, y: int, variant: EnemyVariants.t, jumped: int}
+  type falling_enemy = {x: int, y: int, variant: EnemyVariants.t}
 
   type game_type =
     { player: player
@@ -135,7 +135,7 @@ struct
     , nextPlatID: int
     }
 
-  type falling_enemy = {x: int, y: int, variant: EnemyVariants.t, jumped: int}
+  type falling_enemy = {x: int, y: int, variant: EnemyVariants.t}
 
   type game_type =
     { player: player

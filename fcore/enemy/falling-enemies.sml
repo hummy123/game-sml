@@ -49,7 +49,7 @@ struct
       acc
     else
       let
-        val {x, y, jumped, variant} = Vector.sub (vec, pos)
+        val {x, y, variant} = Vector.sub (vec, pos)
 
         val size = Constants.enemySize
         val ww = Constants.worldWidth
@@ -59,21 +59,10 @@ struct
           (* filter out if player is attacking falling enemy *)
           updateList (pos - 1, vec, player, acc)
         else if Collision.isCollidingPlus (x, y, size, size, 0, 0, ww, wh) then
-          (* move falling enemy up or down depending on jumped *)
+          (* move falling enemy upwards *)
           let
             val updated =
-              if jumped < Constants.jumpLimit then
-                { x = x
-                , y = y - Constants.moveEnemyBy
-                , jumped = jumped + Constants.moveEnemyBy
-                , variant = variant
-                }
-              else
-                { x = x
-                , y = y + Constants.moveEnemyBy
-                , jumped = jumped
-                , variant = variant
-                }
+              {x = x, y = y - Constants.moveEnemyBy, variant = variant}
           in
             updateList (pos - 1, vec, player, updated :: acc)
           end
@@ -89,7 +78,7 @@ struct
       Vector.concat acc
     else
       let
-        val {x, y, variant = _, jumped = _} = Vector.sub (fallingVec, pos)
+        val {x, y, variant = _} = Vector.sub (fallingVec, pos)
 
         val x = Real32.fromInt x * ratio + xOffset
         val y = Real32.fromInt y * ratio + yOffset
