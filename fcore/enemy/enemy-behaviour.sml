@@ -338,6 +338,23 @@ struct
         end
     | _ => getPatrolPatches (enemy, wallTree, platformTree, acc)
 
+  fun isInFollowRange (player, enemy) =
+    let
+      val {x = px, y = py, ...} = player
+      val pfx = px + Constants.playerSize
+      val pfy = py + Constants.playerSize
+
+      val range = 199
+
+      val {x = ex, y = ey, ...} = enemy
+      val eStartX = ex - range
+      val eStartY = ey - range
+      val efx = ex + Constants.enemySize + range
+      val efy = ey + Constants.enemySize + range
+    in
+      Collision.isColliding (px, py, pfx, pfy, eStartX, eStartY, efx, efy)
+    end
+
   fun getFollowPatches
     (player: player, enemy, wallTree, platformTree, platforms, graph, acc) =
     let
@@ -354,7 +371,8 @@ struct
         getLandingPatches (eID, platforms, enemy, acc)
       else if eID = pID then
         startPatrolPatches (player, enemy, wallTree, platformTree, acc)
-      else
+      else if isInFollowRange (player, enemy) then
+        (* line of sight: only follow player if player is in some range *)
         let
           val bestPath = PathFinding.start
             (pID, eID, platforms, platformTree, graph)
@@ -378,6 +396,8 @@ struct
           | [] =>
               startPatrolPatches (player, enemy, wallTree, platformTree, acc)
         end
+      else
+        startPatrolPatches (player, enemy, wallTree, platformTree, acc)
     end
 
   fun withDefaultYAxis (enemy: enemy) =
