@@ -46,6 +46,8 @@ sig
     , platID: int
     }
 
+  datatype bat_dir_y = UP | DOWN
+
   type enemy =
     { id: int
     , health: int
@@ -57,6 +59,9 @@ sig
     , platID: int
     , nextPlatID: int
     , batRest: int
+    , batDirY: bat_dir_y
+    , batMaxY: int
+    , batMinY: int
     }
 
   type falling_enemy = {x: int, y: int, variant: EnemyVariants.t}
@@ -124,6 +129,8 @@ struct
     , platID: int
     }
 
+  datatype bat_dir_y = UP | DOWN
+
   type enemy =
     { id: int
     , health: int
@@ -135,6 +142,9 @@ struct
     , platID: int
     , nextPlatID: int
     , batRest: int
+    , batDirY: bat_dir_y
+    , batMaxY: int
+    , batMinY: int
     }
 
   type falling_enemy = {x: int, y: int, variant: EnemyVariants.t}
@@ -223,6 +233,9 @@ struct
         , platID = ~1
         , nextPlatID = ~1
         , batRest = 0
+        , batDirY = UP
+        , batMaxY = 635
+        , batMinY = 475
         }
       val enemies = Vector.fromList [enemy1]
       val graph = Graph.fromPlatforms (platforms, platformTree)

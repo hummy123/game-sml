@@ -9,6 +9,9 @@ sig
   | W_PLAT_ID of int
   | W_NEXT_PLAT_ID of int
   | W_BAT_REST of int
+  | W_BAT_MAX_Y of int
+  | W_BAT_MIN_Y of int
+  | W_BAT_DIR_Y of GameType.bat_dir_y
 
   val withPatch: GameType.enemy * enemy_patch -> GameType.enemy
 
@@ -26,9 +29,25 @@ struct
   | W_PLAT_ID of int
   | W_NEXT_PLAT_ID of int
   | W_BAT_REST of int
+  | W_BAT_MAX_Y of int
+  | W_BAT_MIN_Y of int
+  | W_BAT_DIR_Y of GameType.bat_dir_y
 
   fun mkEnemy
-    (id, health, x, y, xAxis, yAxis, variant, platID, nextPlatID, batRest) =
+    ( id
+    , health
+    , x
+    , y
+    , xAxis
+    , yAxis
+    , variant
+    , platID
+    , nextPlatID
+    , batRest
+    , batDirY
+    , batMaxY
+    , batMinY
+    ) =
     { id = id
     , health = health
     , x = x
@@ -39,12 +58,28 @@ struct
     , platID = platID
     , nextPlatID = nextPlatID
     , batRest = batRest
+    , batDirY = batDirY
+    , batMaxY = batMaxY
+    , batMinY = batMinY
     }
 
   fun withPatch (enemy, patch) =
     let
-      val {id, health, x, y, xAxis, yAxis, variant, platID, nextPlatID, batRest} =
-        enemy
+      val
+        { id
+        , health
+        , x
+        , y
+        , xAxis
+        , yAxis
+        , variant
+        , platID
+        , nextPlatID
+        , batRest
+        , batDirY
+        , batMaxY
+        , batMinY
+        } = enemy
     in
       case patch of
         W_HEALTH health =>
@@ -59,6 +94,9 @@ struct
             , platID
             , nextPlatID
             , batRest
+            , batDirY
+            , batMaxY
+            , batMinY
             )
       | W_X x =>
           mkEnemy
@@ -72,6 +110,9 @@ struct
             , platID
             , nextPlatID
             , batRest
+            , batDirY
+            , batMaxY
+            , batMinY
             )
       | W_X_AXIS xAxis =>
           mkEnemy
@@ -85,6 +126,9 @@ struct
             , platID
             , nextPlatID
             , batRest
+            , batDirY
+            , batMaxY
+            , batMinY
             )
       | W_Y y =>
           mkEnemy
@@ -98,6 +142,9 @@ struct
             , platID
             , nextPlatID
             , batRest
+            , batDirY
+            , batMaxY
+            , batMinY
             )
       | W_Y_AXIS yAxis =>
           mkEnemy
@@ -111,6 +158,9 @@ struct
             , platID
             , nextPlatID
             , batRest
+            , batDirY
+            , batMaxY
+            , batMinY
             )
       | W_PLAT_ID platID =>
           mkEnemy
@@ -124,6 +174,9 @@ struct
             , platID
             , nextPlatID
             , batRest
+            , batDirY
+            , batMaxY
+            , batMinY
             )
       | W_NEXT_PLAT_ID nextPlatID =>
           mkEnemy
@@ -137,6 +190,9 @@ struct
             , platID
             , nextPlatID
             , batRest
+            , batDirY
+            , batMaxY
+            , batMinY
             )
       | W_BAT_REST batRest =>
           mkEnemy
@@ -150,6 +206,57 @@ struct
             , platID
             , nextPlatID
             , batRest
+            , batDirY
+            , batMaxY
+            , batMinY
+            )
+      | W_BAT_MAX_Y batMaxY =>
+          mkEnemy
+            ( id
+            , health
+            , x
+            , y
+            , xAxis
+            , yAxis
+            , variant
+            , platID
+            , nextPlatID
+            , batRest
+            , batDirY
+            , batMaxY
+            , batMinY
+            )
+      | W_BAT_MIN_Y batMinY =>
+          mkEnemy
+            ( id
+            , health
+            , x
+            , y
+            , xAxis
+            , yAxis
+            , variant
+            , platID
+            , nextPlatID
+            , batRest
+            , batDirY
+            , batMaxY
+            , batMinY
+            )
+      | W_BAT_DIR_Y batDirY =>
+          mkEnemy
+            ( id
+            , health
+            , x
+            , y
+            , xAxis
+            , yAxis
+            , variant
+            , platID
+            , nextPlatID
+            , batRest
+            , batDirY
+            , batMaxY
+            , batMinY
             )
     end
 

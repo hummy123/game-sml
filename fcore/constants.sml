@@ -30,7 +30,7 @@ struct
   val enemySize = 35
   val enemySizeReal: Real32.real = 35.0
   val moveEnemyBy = 3
-  val batRestLimit = 75
+  val batRestLimit = 55
 
   val moveProjectileBy = 11
 end
