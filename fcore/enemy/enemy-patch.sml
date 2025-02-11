@@ -25,7 +25,8 @@ struct
   | W_PLAT_ID of int
   | W_NEXT_PLAT_ID of int
 
-  fun mkEnemy (id, health, x, y, xAxis, yAxis, variant, platID, nextPlatID) =
+  fun mkEnemy
+    (id, health, x, y, xAxis, yAxis, variant, platID, nextPlatID, batRest) =
     { id = id
     , health = health
     , x = x
@@ -35,27 +36,106 @@ struct
     , variant = variant
     , platID = platID
     , nextPlatID = nextPlatID
+    , batRest = batRest
     }
 
   fun withPatch (enemy, patch) =
     let
-      val {id, health, x, y, xAxis, yAxis, variant, platID, nextPlatID} = enemy
+      val {id, health, x, y, xAxis, yAxis, variant, platID, nextPlatID, batRest} =
+        enemy
     in
       case patch of
         W_HEALTH health =>
-          mkEnemy (id, health, x, y, xAxis, yAxis, variant, platID, nextPlatID)
+          mkEnemy
+            ( id
+            , health
+            , x
+            , y
+            , xAxis
+            , yAxis
+            , variant
+            , platID
+            , nextPlatID
+            , batRest
+            )
       | W_X x =>
-          mkEnemy (id, health, x, y, xAxis, yAxis, variant, platID, nextPlatID)
+          mkEnemy
+            ( id
+            , health
+            , x
+            , y
+            , xAxis
+            , yAxis
+            , variant
+            , platID
+            , nextPlatID
+            , batRest
+            )
       | W_X_AXIS xAxis =>
-          mkEnemy (id, health, x, y, xAxis, yAxis, variant, platID, nextPlatID)
+          mkEnemy
+            ( id
+            , health
+            , x
+            , y
+            , xAxis
+            , yAxis
+            , variant
+            , platID
+            , nextPlatID
+            , batRest
+            )
       | W_Y y =>
-          mkEnemy (id, health, x, y, xAxis, yAxis, variant, platID, nextPlatID)
+          mkEnemy
+            ( id
+            , health
+            , x
+            , y
+            , xAxis
+            , yAxis
+            , variant
+            , platID
+            , nextPlatID
+            , batRest
+            )
       | W_Y_AXIS yAxis =>
-          mkEnemy (id, health, x, y, xAxis, yAxis, variant, platID, nextPlatID)
+          mkEnemy
+            ( id
+            , health
+            , x
+            , y
+            , xAxis
+            , yAxis
+            , variant
+            , platID
+            , nextPlatID
+            , batRest
+            )
       | W_PLAT_ID platID =>
-          mkEnemy (id, health, x, y, xAxis, yAxis, variant, platID, nextPlatID)
+          mkEnemy
+            ( id
+            , health
+            , x
+            , y
+            , xAxis
+            , yAxis
+            , variant
+            , platID
+            , nextPlatID
+            , batRest
+            )
       | W_NEXT_PLAT_ID nextPlatID =>
-          mkEnemy (id, health, x, y, xAxis, yAxis, variant, platID, nextPlatID)
+          mkEnemy
+            ( id
+            , health
+            , x
+            , y
+            , xAxis
+            , yAxis
+            , variant
+            , platID
+            , nextPlatID
+            , batRest
+            )
     end
 
   fun withPatches (enemy, lst) =

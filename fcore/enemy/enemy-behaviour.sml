@@ -528,7 +528,7 @@ struct
             , enemyList
             , fallingList
             )
-      | FOLLOW_SIME =>
+      | FOLLOW_SLIME =>
           updateFollowState
             ( player
             , enemy
