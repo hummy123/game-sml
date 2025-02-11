@@ -499,6 +499,55 @@ struct
         end
     end
 
+  fun updateStraightBat
+    (player, enemy, walls, wallTree, projectileTree, enemyList, fallingList) =
+    let
+      val {x, y, batRest, ...} = enemy
+      val size = Constants.enemySize
+    in
+      if QuadTree.hasCollisionAt (x, y, size, size, ~1, wallTree) then
+        (* has collision with wall *)
+        let
+          val enemy =
+            if batRest >= Constants.batRestLimit then
+              (* make enemy move in opposite direction *)
+              case #xAxis enemy of
+                MOVE_RIGHT =>
+                  EnemyPatch.withPatches
+                    ( enemy
+                    , [ EnemyPatch.W_X_AXIS MOVE_LEFT
+                      , EnemyPatch.W_X (x - (Constants.moveEnemyBy * 9))
+                      ]
+                    )
+              | MOVE_LEFT =>
+                  EnemyPatch.withPatches
+                    ( enemy
+                    , [ EnemyPatch.W_X_AXIS MOVE_RIGHT
+                      , EnemyPatch.W_X (x + (Constants.moveEnemyBy * 9))
+                      ]
+                    )
+              | _ => enemy
+            else
+              (* keep resting until we hit rest limit *)
+              EnemyPatch.withPatch (enemy, EnemyPatch.W_BAT_REST (batRest + 1))
+        in
+          (enemy :: enemyList, fallingList)
+        end
+      else
+        (* no collision, so continue moving in direction *)
+        let
+          val patches =
+            case #xAxis enemy of
+              MOVE_RIGHT => [EnemyPatch.W_X (x + Constants.moveEnemyBy)]
+            | MOVE_LEFT => [EnemyPatch.W_X (x - Constants.moveEnemyBy)]
+            | STAY_STILL => []
+          val patches = EnemyPatch.W_BAT_REST 0 :: patches
+          val enemy = EnemyPatch.withPatches (enemy, patches)
+        in
+          (enemy :: enemyList, fallingList)
+        end
+    end
+
   fun updateEnemyState
     ( enemy
     , projectiles
@@ -538,6 +587,16 @@ struct
             , platformTree
             , projectileTree
             , graph
+            , enemyList
+            , fallingList
+            )
+      | STRAIGHT_BAT =>
+          updateStraightBat
+            ( player
+            , enemy
+            , walls
+            , wallTree
+            , projectileTree
             , enemyList
             , fallingList
             )

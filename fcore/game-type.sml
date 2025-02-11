@@ -217,9 +217,9 @@ struct
         , x = 751
         , y = 555
         , health = 1
-        , xAxis = STAY_STILL
+        , xAxis = MOVE_RIGHT
         , yAxis = FALLING
-        , variant = EnemyVariants.FOLLOW_SLIME
+        , variant = EnemyVariants.STRAIGHT_BAT
         , platID = ~1
         , nextPlatID = ~1
         , batRest = 0

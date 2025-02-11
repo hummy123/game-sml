@@ -8,6 +8,7 @@ sig
   | W_Y_AXIS of GameType.y_axis
   | W_PLAT_ID of int
   | W_NEXT_PLAT_ID of int
+  | W_BAT_REST of int
 
   val withPatch: GameType.enemy * enemy_patch -> GameType.enemy
 
@@ -24,6 +25,7 @@ struct
   | W_Y_AXIS of GameType.y_axis
   | W_PLAT_ID of int
   | W_NEXT_PLAT_ID of int
+  | W_BAT_REST of int
 
   fun mkEnemy
     (id, health, x, y, xAxis, yAxis, variant, platID, nextPlatID, batRest) =
@@ -124,6 +126,19 @@ struct
             , batRest
             )
       | W_NEXT_PLAT_ID nextPlatID =>
+          mkEnemy
+            ( id
+            , health
+            , x
+            , y
+            , xAxis
+            , yAxis
+            , variant
+            , platID
+            , nextPlatID
+            , batRest
+            )
+      | W_BAT_REST batRest =>
           mkEnemy
             ( id
             , health
