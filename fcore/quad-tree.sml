@@ -26,7 +26,7 @@ struct
       val vec = Vector.fromList []
       val tree = LEAF vec
     in
-      { tree = tree, width = width, height = height }
+      {tree = tree, width = width, height = height}
     end
 
   fun mkItem (id, startX, startY, width, height) : item =
@@ -41,10 +41,8 @@ struct
   val maxSize = 16
 
   fun mkLeaf items =
-    let
-      val items = Vector.fromList items
-    in
-      LEAF items
+    let val items = Vector.fromList items
+    in LEAF items
     end
 
   fun splitLeaf
@@ -65,7 +63,7 @@ struct
         val tr = mkLeaf tr
         val bl = mkLeaf bl
         val br = mkLeaf br
-        val nodes =  Vector.fromList [tl, tr, bl, br]
+        val nodes = Vector.fromList [tl, tr, bl, br]
       in
         NODE nodes
       end
@@ -101,20 +99,18 @@ struct
 
           val tl = Vector.sub (nodes, tlIdx)
           val tl =
-            if vtl then
-              helpInsert (ix, iy, iw, ih, itemID, qw, qy, hw, hh, tl)
-            else 
-              tl
+            if vtl then helpInsert (ix, iy, iw, ih, itemID, qw, qy, hw, hh, tl)
+            else tl
 
           val tr = Vector.sub (nodes, trIdx)
           val tr =
             if vtr then
               helpInsert (ix, iy, iw, ih, itemID, qx + hw, qy, hw, hh, tr)
-            else 
+            else
               tr
 
           val bl = Vector.sub (nodes, blIdx)
-          val bl = 
+          val bl =
             if vbl then
               helpInsert (ix, iy, iw, ih, itemID, qx, qy + hh, hw, hh, bl)
             else
@@ -124,7 +120,7 @@ struct
           val br =
             if vbr then
               helpInsert (ix, iy, iw, ih, itemID, qx + hw, qy + hh, hw, hh, br)
-            else 
+            else
               br
 
           val nodes = Vector.fromList [tl, tr, bl, br]
@@ -160,35 +156,40 @@ struct
   fun insert (iX, iY, iW, iH, itemID, tree: t) =
     let
       val {width, height, tree} = tree
-      val tree =
-        helpInsert (iX, iY, iW, iH, itemID, 0, 0, width, height, tree)
+      val tree = helpInsert (iX, iY, iW, iH, itemID, 0, 0, width, height, tree)
     in
       {width = width, height = height, tree = tree}
     end
 
-  structure GetCollisions = MakeQuadTreeFold (struct
-    type env = unit
-    type state = int list
-    fun fold (itemID, (), lst) = itemID :: lst
-  end)
+  structure GetCollisions =
+    MakeQuadTreeFold
+      (struct
+         type env = unit
+         type state = int list
+         fun fold (itemID, (), lst) = itemID :: lst
+       end)
 
   fun getCollisions (itemX, itemY, itemWidth, itemHeight, _, tree) =
     GetCollisions.foldRegion (itemX, itemY, itemWidth, itemHeight, (), [], tree)
 
-  structure HasCollisionAt = MakeQuadTreeFold (struct
-    type env = unit
-    type state = bool
-    fun fold _ = true
-  end)
+  structure HasCollisionAt =
+    MakeQuadTreeFold
+      (struct
+         type env = unit
+         type state = bool
+         fun fold _ = true
+       end)
 
   fun hasCollisionAt (ix, iy, iw, ih, _, tree) =
     HasCollisionAt.foldRegion (ix, iy, iw, ih, (), false, tree)
 
-  structure GetItemID = MakeQuadTreeFold (struct
-    type env = unit
-    type state = int
-    fun fold (itemID, (), curID) = Int.max (itemID, curID)
-  end)
+  structure GetItemID =
+    MakeQuadTreeFold
+      (struct
+         type env = unit
+         type state = int
+         fun fold (itemID, (), curID) = Int.max (itemID, curID)
+       end)
 
   fun getItemID (ix, iy, iw, ih, tree) =
     GetItemID.foldRegion (ix, iy, iw, ih, (), ~1, tree)

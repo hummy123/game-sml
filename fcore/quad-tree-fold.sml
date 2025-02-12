@@ -10,9 +10,15 @@ signature MAKE_QUAD_TREE_FOLD =
 sig
   structure Fn: QUAD_FOLDER
 
-  val foldRegion: int * int * int * int * 
-                  Fn.env * Fn.state * {tree: QuadTreeType.t, width: int, height: int}
-                  -> Fn.state
+  val foldRegion:
+    int
+    * int
+    * int
+    * int
+    * Fn.env
+    * Fn.state
+    * {tree: QuadTreeType.t, width: int, height: int}
+    -> Fn.state
 end
 
 functor MakeQuadTreeFold(Fn: QUAD_FOLDER): MAKE_QUAD_TREE_FOLD =
@@ -50,38 +56,79 @@ struct
 
           val state =
             if vtl then
-              helpFoldRegion 
-                (rx, ry, rw, rh, env, state, qx, qy, hw, hh, Vector.sub (nodes, tlIdx))
+              helpFoldRegion
+                ( rx
+                , ry
+                , rw
+                , rh
+                , env
+                , state
+                , qx
+                , qy
+                , hw
+                , hh
+                , Vector.sub (nodes, tlIdx)
+                )
             else
               state
 
-          val state = 
+          val state =
             if vtr then
-              helpFoldRegion 
-                (rx, ry, rw, rh, env, state, qx + hw, qy, hw, hh, Vector.sub (nodes, trIdx))
-            else 
+              helpFoldRegion
+                ( rx
+                , ry
+                , rw
+                , rh
+                , env
+                , state
+                , qx + hw
+                , qy
+                , hw
+                , hh
+                , Vector.sub (nodes, trIdx)
+                )
+            else
               state
 
-          val state = 
+          val state =
             if vbl then
               helpFoldRegion
-                (rx, ry, rw, rh, env, state, qx, qy + hh, hw, hh, Vector.sub (nodes, blIdx))
+                ( rx
+                , ry
+                , rw
+                , rh
+                , env
+                , state
+                , qx
+                , qy + hh
+                , hw
+                , hh
+                , Vector.sub (nodes, blIdx)
+                )
             else
               state
         in
           if vbr then
-            helpFoldRegion 
-              (rx, ry, rw, rh, env, state, qw + hw, qy + hh, hw, hh, Vector.sub (nodes, brIdx))
+            helpFoldRegion
+              ( rx
+              , ry
+              , rw
+              , rh
+              , env
+              , state
+              , qw + hw
+              , qy + hh
+              , hw
+              , hh
+              , Vector.sub (nodes, brIdx)
+              )
           else
             state
         end
-    | LEAF items =>
-        foldRegionVec (rx, ry, rw, rh, env, state, 0, items)
+    | LEAF items => foldRegionVec (rx, ry, rw, rh, env, state, 0, items)
 
   fun foldRegion (rx, ry, rw, rh, env, state, tree) =
-    let
-      val {width, height, tree} = tree
-    in
-      helpFoldRegion (rx, ry, rw, rh, env, state, 0, 0, width, height, tree)
+    let val {width, height, tree} = tree
+    in helpFoldRegion (rx, ry, rw, rh, env, state, 0, 0, width, height, tree)
     end
 end

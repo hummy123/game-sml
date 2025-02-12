@@ -234,8 +234,8 @@ struct
         , nextPlatID = ~1
         , batRest = 0
         , batDirY = UP
-        , batMaxY = 635
-        , batMinY = 475
+        , batMaxY = 485
+        , batMinY = 625
         }
       val enemies = Vector.fromList [enemy1]
       val graph = Graph.fromPlatforms (platforms, platformTree)

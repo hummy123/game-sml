@@ -2,51 +2,33 @@ signature QUAD_TREE_TYPE =
 sig
   type item = {itemID: int, startX: int, startY: int, width: int, height: int}
 
-  datatype t =
-    NODE of t vector
-  | LEAF of item vector
+  datatype t = NODE of t vector | LEAF of item vector
 
   val tlIdx: int
   val trIdx: int
   val blIdx: int
   val brIdx: int
 
-  val isColliding: int * int * int * int *
-                   int * int * int * int
-                   -> bool
+  val isColliding: int * int * int * int * int * int * int * int -> bool
 
-  val isCollidingPlus: int * int * int * int *
-                       int * int * int * int
-                       -> bool
+  val isCollidingPlus: int * int * int * int * int * int * int * int -> bool
 
-  val isCollidingItem: int * int * int * int * 
-                       int * item 
-                       -> bool
+  val isCollidingItem: int * int * int * int * int * item -> bool
 
-  val visitTopLeft: int * int * int * int *
-                    int * int * int * int
-                    -> bool
+  val visitTopLeft: int * int * int * int * int * int * int * int -> bool
 
-  val visitTopRight: int * int * int * int *
-                     int * int * int * int
-                     -> bool
+  val visitTopRight: int * int * int * int * int * int * int * int -> bool
 
-  val visitBottomLeft: int * int * int * int *
-                       int * int * int * int
-                       -> bool
+  val visitBottomLeft: int * int * int * int * int * int * int * int -> bool
 
-  val visitBottomRight: int * int * int * int *
-                        int * int * int * int
-                        -> bool
+  val visitBottomRight: int * int * int * int * int * int * int * int -> bool
 end
 
 structure QuadTreeType :> QUAD_TREE_TYPE =
 struct
   type item = {itemID: int, startX: int, startY: int, width: int, height: int}
 
-  datatype t =
-    NODE of t vector
-  | LEAF of item vector
+  datatype t = NODE of t vector | LEAF of item vector
 
   val tlIdx = 0
   val trIdx = 1

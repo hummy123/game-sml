@@ -502,50 +502,58 @@ struct
   fun updateStraightBat
     (player, enemy, walls, wallTree, projectileTree, enemyList, fallingList) =
     let
-      val {x, y, batRest, ...} = enemy
+      val {x, y, batRest, batDirY, batMinY, batMaxY, xAxis, ...} = enemy
+
       val size = Constants.enemySize
-    in
-      if QuadTree.hasCollisionAt (x, y, size, size, ~1, wallTree) then
-        (* has collision with wall *)
-        let
-          val enemy =
-            if batRest >= Constants.batRestLimit then
-              (* make enemy move in opposite direction *)
-              case #xAxis enemy of
-                MOVE_RIGHT =>
-                  EnemyPatch.withPatches
-                    ( enemy
-                    , [ EnemyPatch.W_X_AXIS MOVE_LEFT
-                      , EnemyPatch.W_X (x - (Constants.moveEnemyBy * 9))
-                      ]
-                    )
-              | MOVE_LEFT =>
-                  EnemyPatch.withPatches
-                    ( enemy
-                    , [ EnemyPatch.W_X_AXIS MOVE_RIGHT
-                      , EnemyPatch.W_X (x + (Constants.moveEnemyBy * 9))
-                      ]
-                    )
-              | _ => enemy
+      val moveByY = Constants.moveBatY
+      val moveByX = Constants.moveBatX
+
+      val patches =
+        (* get apatches for up/down movement *)
+        case batDirY of
+          UP =>
+            if y - moveByY <= batMaxY then
+              [EnemyPatch.W_BAT_DIR_Y DOWN, EnemyPatch.W_Y (y + moveByY)]
             else
-              (* keep resting until we hit rest limit *)
-              EnemyPatch.withPatch (enemy, EnemyPatch.W_BAT_REST (batRest + 1))
-        in
-          (enemy :: enemyList, fallingList)
-        end
-      else
-        (* no collision, so continue moving in direction *)
-        let
-          val patches =
-            case #xAxis enemy of
-              MOVE_RIGHT => [EnemyPatch.W_X (x + Constants.moveEnemyBy)]
-            | MOVE_LEFT => [EnemyPatch.W_X (x - Constants.moveEnemyBy)]
-            | STAY_STILL => []
-          val patches = EnemyPatch.W_BAT_REST 0 :: patches
-          val enemy = EnemyPatch.withPatches (enemy, patches)
-        in
-          (enemy :: enemyList, fallingList)
-        end
+              [EnemyPatch.W_Y (y - moveByY)]
+        | DOWN =>
+            if y + moveByY >= batMinY then
+              [EnemyPatch.W_BAT_DIR_Y UP, EnemyPatch.W_Y (y - moveByY)]
+            else
+              [EnemyPatch.W_Y (y + moveByY)]
+
+      val patches =
+        (* get patches for horizontal movement *)
+        if QuadTree.hasCollisionAt (x, y, size, size, ~1, wallTree) then
+          (* has collision with wall *)
+          if batRest >= Constants.batRestLimit then
+            (* make enemy move in opposite direction *)
+            case xAxis of
+              MOVE_RIGHT =>
+                EnemyPatch.W_X_AXIS MOVE_LEFT :: EnemyPatch.W_X (x - 1)
+                :: patches
+            | MOVE_LEFT =>
+                EnemyPatch.W_X_AXIS MOVE_RIGHT :: EnemyPatch.W_X (x + 1)
+                :: patches
+            | _ => patches
+          else
+            (* keep resting until we hit rest limit *)
+            EnemyPatch.W_BAT_REST (batRest + 1) :: patches
+        else
+          (* no collision, so continue moving in direction *)
+          let
+            val patches =
+              case xAxis of
+                MOVE_RIGHT => EnemyPatch.W_X (x + moveByX) :: patches
+              | MOVE_LEFT => EnemyPatch.W_X (x - moveByX) :: patches
+              | STAY_STILL => patches
+          in
+            EnemyPatch.W_BAT_REST 0 :: patches
+          end
+
+      val enemy = EnemyPatch.withPatches (enemy, patches)
+    in
+      (enemy :: enemyList, fallingList)
     end
 
   fun updateEnemyState
