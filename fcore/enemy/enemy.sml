@@ -1,6 +1,6 @@
 structure Enemy =
 struct
-  open GameType
+  open EnemyType
 
   (* returns a vector of enemies, with new state (like position, etc.).
    * Also filters any enemies from list if defeated.

@@ -13,18 +13,19 @@ sig
   (* destructuring functions *)
   val getX: t -> int
   val getY: t -> int
-  val getXAxis: t -> GameType.x_axis
-  val getYAxis: t -> GameType.y_axis
+  val getXAxis: t -> EntityType.x_axis
+  val getYAxis: t -> EntityType.y_axis
 
   val W_X: int -> patch
   val W_Y: int -> patch
-  val W_Y_AXIS: GameType.y_axis -> patch
+  val W_Y_AXIS: EntityType.y_axis -> patch
   val W_PLAT_ID: int -> patch
 end
 
 functor MakePhysics(Fn: PHYSICS_INPUT) =
 struct
   open GameType
+  open EntityType
 
   fun getPhysicsPatches input =
     let
@@ -245,7 +246,7 @@ structure PlayerPhysics =
 structure EnemyPhysics =
   MakePhysics
     (struct
-       type t = GameType.enemy
+       type t = EnemyType.enemy
        type patch = EnemyPatch.enemy_patch
 
        val entitySize = Constants.enemySize

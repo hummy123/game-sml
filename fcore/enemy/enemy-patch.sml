@@ -4,18 +4,18 @@ sig
     W_HEALTH of int
   | W_X of int
   | W_Y of int
-  | W_X_AXIS of GameType.x_axis
-  | W_Y_AXIS of GameType.y_axis
+  | W_X_AXIS of EntityType.x_axis
+  | W_Y_AXIS of EntityType.y_axis
   | W_PLAT_ID of int
   | W_NEXT_PLAT_ID of int
   | W_BAT_REST of int
   | W_BAT_MAX_Y of int
   | W_BAT_MIN_Y of int
-  | W_BAT_DIR_Y of GameType.bat_dir_y
+  | W_BAT_DIR_Y of EnemyType.bat_dir_y
 
-  val withPatch: GameType.enemy * enemy_patch -> GameType.enemy
+  val withPatch: EnemyType.enemy * enemy_patch -> EnemyType.enemy
 
-  val withPatches: GameType.enemy * enemy_patch list -> GameType.enemy
+  val withPatches: EnemyType.enemy * enemy_patch list -> EnemyType.enemy
 end
 
 structure EnemyPatch: ENEMY_PATCH =
@@ -24,14 +24,14 @@ struct
     W_HEALTH of int
   | W_X of int
   | W_Y of int
-  | W_X_AXIS of GameType.x_axis
-  | W_Y_AXIS of GameType.y_axis
+  | W_X_AXIS of EntityType.x_axis
+  | W_Y_AXIS of EntityType.y_axis
   | W_PLAT_ID of int
   | W_NEXT_PLAT_ID of int
   | W_BAT_REST of int
   | W_BAT_MAX_Y of int
   | W_BAT_MIN_Y of int
-  | W_BAT_DIR_Y of GameType.bat_dir_y
+  | W_BAT_DIR_Y of EnemyType.bat_dir_y
 
   fun mkEnemy
     ( id

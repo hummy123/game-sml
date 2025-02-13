@@ -1,12 +1,12 @@
 signature PLAYER_PATCH =
 sig
   datatype player_patch =
-    W_X_AXIS of GameType.x_axis
-  | W_Y_AXIS of GameType.y_axis
+    W_X_AXIS of EntityType.x_axis
+  | W_Y_AXIS of EntityType.y_axis
+  | W_FACING of EntityType.facing
   | W_RECOIL of GameType.player_recoil
   | W_ATTACKED of GameType.player_attacked
   | W_MAIN_ATTACK of GameType.main_attack
-  | W_FACING of GameType.facing
   | W_HEALTH of int
   | W_X of int
   | W_Y of int
@@ -24,12 +24,12 @@ end
 structure PlayerPatch: PLAYER_PATCH =
 struct
   datatype player_patch =
-    W_X_AXIS of GameType.x_axis
-  | W_Y_AXIS of GameType.y_axis
+    W_X_AXIS of EntityType.x_axis
+  | W_Y_AXIS of EntityType.y_axis
+  | W_FACING of EntityType.facing
   | W_RECOIL of GameType.player_recoil
   | W_ATTACKED of GameType.player_attacked
   | W_MAIN_ATTACK of GameType.main_attack
-  | W_FACING of GameType.facing
   | W_HEALTH of int
   | W_X of int
   | W_Y of int

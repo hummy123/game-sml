@@ -2,6 +2,7 @@ structure Player =
 struct
   open GameType
   open PlayerPatch
+  open EntityType
 
   (* helper functions checking input *)
   fun getXAxis (lh, rh) =
@@ -315,7 +316,7 @@ struct
   structure FoldEnemies =
     MakeQuadTreeFold
       (struct
-         type env = enemy vector * player
+         type env = EnemyType.enemy vector * player
          type state = PlayerPatch.player_patch list
 
          fun getEnemyRecoilPatches (player, playerOnRight, acc) =

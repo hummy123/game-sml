@@ -29,7 +29,7 @@ struct
         orelse traceRightDescent (nextX, nextY, nextPlatID, platTree)
       end
 
-  fun traceRightDrop (enemy: GameType.enemy, nextPlatID, platTree) =
+  fun traceRightDrop (enemy: EnemyType.enemy, nextPlatID, platTree) =
     let
       val {x, y, ...} = enemy
       val x = x - Constants.enemySize
@@ -59,12 +59,12 @@ struct
         traceRightJumpAscent (nextX, nextY, nextJump, nextPlatID, platTree)
       end
 
-  fun traceRightJump (enemy: GameType.enemy, nextPlatID, platTree) =
+  fun traceRightJump (enemy: EnemyType.enemy, nextPlatID, platTree) =
     let
       val {x, y, ...} = enemy
       val x = x - Constants.enemySize
 
-      open GameType
+      open EntityType
     in
       if EnemyPhysics.standingOnArea (x, y, platTree) then
         traceRightJumpAscent (x, y, 0, nextPlatID, platTree)
@@ -94,7 +94,7 @@ struct
         orelse traceLeftDescent (nextX, nextY, nextPlatID, platTree)
       end
 
-  fun traceLeftDrop (enemy: GameType.enemy, nextPlatID, platTree) =
+  fun traceLeftDrop (enemy: EnemyType.enemy, nextPlatID, platTree) =
     let
       val {x, y, ...} = enemy
       val x = x + Constants.enemySize
@@ -121,12 +121,12 @@ struct
         traceLeftJumpAscent (nextX, nextY, nextJump, nextPlatID, platTree)
       end
 
-  fun traceLeftJump (enemy: GameType.enemy, nextPlatID, platTree) =
+  fun traceLeftJump (enemy: EnemyType.enemy, nextPlatID, platTree) =
     let
       val {x, y, ...} = enemy
       val x = x + 75
 
-      open GameType
+      open EntityType
     in
       if EnemyPhysics.standingOnArea (x, y, platTree) then
         traceLeftJumpAscent (x, y, 0, nextPlatID, platTree)

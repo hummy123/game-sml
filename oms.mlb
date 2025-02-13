@@ -25,7 +25,8 @@ fcore/platform.sml
 fcore/graph.sml
 fcore/path-finding.sml
 
-fcore/enemy/enemy-variants.sml
+fcore/entity-type.sml
+fcore/enemy/enemy-type.sml
 fcore/game-type.sml
 
 fcore/player-patch.sml

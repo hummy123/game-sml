@@ -1,6 +1,8 @@
 structure FallingEnemies =
 struct
+  open EnemyType
   open GameType
+  open EntityType
 
   fun helpGenerateTree (pos, fallingVec: falling_enemy vector, acc) =
     if pos = Vector.length fallingVec then
@@ -23,7 +25,7 @@ struct
       , QuadTree.create (Constants.worldWidth, Constants.worldHeight)
       )
 
-  fun isCollidingWithPlayerAttack (player: player, fx, fy) =
+  fun isCollidingWithPlayerAttack (player: GameType.player, fx, fy) =
     let
       val {x = px, y = py, mainAttack, facing, ...} = player
     in
@@ -44,7 +46,7 @@ struct
       | _ => false
     end
 
-  fun updateList (pos, vec, player: player, acc) =
+  fun updateList (pos, vec, player: GameType.player, acc) =
     if pos < 0 then
       acc
     else
@@ -55,7 +57,7 @@ struct
         val ww = Constants.worldWidth
         val wh = Constants.worldHeight
       in
-        if isCollidingWithPlayerAttack (player : player, x, y) then
+        if isCollidingWithPlayerAttack (player, x, y) then
           (* filter out if player is attacking falling enemy *)
           updateList (pos - 1, vec, player, acc)
         else if Collision.isCollidingPlus (x, y, size, size, 0, 0, ww, wh) then

@@ -4,20 +4,9 @@ sig
 
   type platform = {id: int, x: int, y: int, width: int}
 
-  datatype y_axis =
-    ON_GROUND
-  | FALLING
-  | DROP_BELOW_PLATFORM
-  | JUMPING of int
-  | FLOATING of int
-
-  datatype x_axis = MOVE_LEFT | STAY_STILL | MOVE_RIGHT
-
   datatype player_recoil = NO_RECOIL | RECOIL_LEFT of int | RECOIL_RIGHT of int
 
   datatype player_attacked = NOT_ATTACKED | ATTACKED of int
-
-  datatype facing = FACING_LEFT | FACING_RIGHT
 
   datatype main_attack =
     MAIN_NOT_ATTACKING
@@ -26,16 +15,16 @@ sig
 
   type defeated_enemies = {angle: int}
 
-  type player_projectile = {x: int, y: int, facing: facing}
+  type player_projectile = {x: int, y: int, facing: EntityType.facing}
 
   type player =
-    { yAxis: y_axis
-    , xAxis: x_axis
+    { yAxis: EntityType.y_axis
+    , xAxis: EntityType.x_axis
     , recoil: player_recoil
     , attacked: player_attacked
     , mainAttack: main_attack
     , mainAttackPressed: bool
-    , facing: facing
+    , facing: EntityType.facing
     , health: int
     , x: int
     , y: int
@@ -46,35 +35,15 @@ sig
     , platID: int
     }
 
-  datatype bat_dir_y = UP | DOWN
-
-  type enemy =
-    { id: int
-    , health: int
-    , x: int
-    , y: int
-    , xAxis: x_axis
-    , yAxis: y_axis
-    , variant: EnemyVariants.t
-    , platID: int
-    , nextPlatID: int
-    , batRest: int
-    , batDirY: bat_dir_y
-    , batMaxY: int
-    , batMinY: int
-    }
-
-  type falling_enemy = {x: int, y: int, variant: EnemyVariants.t}
-
   type game_type =
     { player: player
     , walls: wall vector
     , wallTree: QuadTree.t
     , platforms: platform vector
     , platformTree: QuadTree.t
-    , enemies: enemy vector
+    , enemies: EnemyType.enemy vector
     , graph: PlatSet.elem vector vector
-    , fallingEnemies: falling_enemy vector
+    , fallingEnemies: EnemyType.falling_enemy vector
     }
 
   val initial: game_type
@@ -87,20 +56,9 @@ struct
   (* all platforms have a fixed visual height and a fixed collision height *)
   type platform = {id: int, x: int, y: int, width: int}
 
-  datatype y_axis =
-    ON_GROUND
-  | FALLING
-  | DROP_BELOW_PLATFORM
-  | JUMPING of int
-  | FLOATING of int
-
-  datatype x_axis = MOVE_LEFT | STAY_STILL | MOVE_RIGHT
-
   datatype player_recoil = NO_RECOIL | RECOIL_LEFT of int | RECOIL_RIGHT of int
 
   datatype player_attacked = NOT_ATTACKED | ATTACKED of int
-
-  datatype facing = FACING_LEFT | FACING_RIGHT
 
   datatype main_attack =
     MAIN_NOT_ATTACKING
@@ -109,16 +67,16 @@ struct
 
   type defeated_enemies = {angle: int}
 
-  type player_projectile = {x: int, y: int, facing: facing}
+  type player_projectile = {x: int, y: int, facing: EntityType.facing}
 
   type player =
-    { yAxis: y_axis
-    , xAxis: x_axis
+    { yAxis: EntityType.y_axis
+    , xAxis: EntityType.x_axis
     , recoil: player_recoil
     , attacked: player_attacked
     , mainAttack: main_attack
     , mainAttackPressed: bool
-    , facing: facing
+    , facing: EntityType.facing
     , health: int
     , x: int
     , y: int
@@ -129,47 +87,27 @@ struct
     , platID: int
     }
 
-  datatype bat_dir_y = UP | DOWN
-
-  type enemy =
-    { id: int
-    , health: int
-    , x: int
-    , y: int
-    , xAxis: x_axis
-    , yAxis: y_axis
-    , variant: EnemyVariants.t
-    , platID: int
-    , nextPlatID: int
-    , batRest: int
-    , batDirY: bat_dir_y
-    , batMaxY: int
-    , batMinY: int
-    }
-
-  type falling_enemy = {x: int, y: int, variant: EnemyVariants.t}
-
   type game_type =
     { player: player
     , walls: wall vector
     , wallTree: QuadTree.t
     , platforms: platform vector
     , platformTree: QuadTree.t
-    , enemies: enemy vector
+    , enemies: EnemyType.enemy vector
     , graph: PlatSet.elem vector vector
-    , fallingEnemies: falling_enemy vector
+    , fallingEnemies: EnemyType.falling_enemy vector
     }
 
   val initial: game_type =
     let
       val player =
-        { yAxis = JUMPING 0
-        , xAxis = STAY_STILL
+        { yAxis = EntityType.JUMPING 0
+        , xAxis = EntityType.STAY_STILL
+        , facing = EntityType.FACING_RIGHT
         , recoil = NO_RECOIL
         , attacked = NOT_ATTACKED
         , mainAttack = MAIN_NOT_ATTACKING
         , mainAttackPressed = false
-        , facing = FACING_RIGHT
         , health = 3
         , x = 500
         , y = 800
@@ -227,13 +165,13 @@ struct
         , x = 751
         , y = 555
         , health = 1
-        , xAxis = MOVE_RIGHT
-        , yAxis = FALLING
-        , variant = EnemyVariants.STRAIGHT_BAT
+        , xAxis = EntityType.MOVE_RIGHT
+        , yAxis = EntityType.FALLING
+        , variant = EnemyType.STRAIGHT_BAT
+        , batDirY = EnemyType.UP
         , platID = ~1
         , nextPlatID = ~1
         , batRest = 0
-        , batDirY = UP
         , batMaxY = 485
         , batMinY = 625
         }

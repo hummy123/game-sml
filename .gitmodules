@@ -1,0 +1,3 @@
+[submodule "vendored/brolib-sml"]
+	path = vendored/brolib-sml
+	url = https://github.com/hummy123/brolib-sml

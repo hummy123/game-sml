@@ -1,6 +1,9 @@
 structure EnemyBehaviour =
 struct
   open GameType
+  open EnemyType
+  open EntityType
+
   (* if player is attacking, does enemy collide with attack? *)
   fun isCollidingWithPlayerAttack (player: player, enemy: enemy) =
     let
@@ -569,44 +572,40 @@ struct
     , enemyList
     , fallingList
     ) =
-    let
-      open EnemyVariants
-    in
-      case #variant enemy of
-        PATROL_SLIME =>
-          updatePatrolState
-            ( player
-            , enemy
-            , walls
-            , wallTree
-            , platforms
-            , platformTree
-            , projectileTree
-            , enemyList
-            , fallingList
-            )
-      | FOLLOW_SLIME =>
-          updateFollowState
-            ( player
-            , enemy
-            , walls
-            , wallTree
-            , platforms
-            , platformTree
-            , projectileTree
-            , graph
-            , enemyList
-            , fallingList
-            )
-      | STRAIGHT_BAT =>
-          updateStraightBat
-            ( player
-            , enemy
-            , walls
-            , wallTree
-            , projectileTree
-            , enemyList
-            , fallingList
-            )
-    end
+    case #variant enemy of
+      PATROL_SLIME =>
+        updatePatrolState
+          ( player
+          , enemy
+          , walls
+          , wallTree
+          , platforms
+          , platformTree
+          , projectileTree
+          , enemyList
+          , fallingList
+          )
+    | FOLLOW_SLIME =>
+        updateFollowState
+          ( player
+          , enemy
+          , walls
+          , wallTree
+          , platforms
+          , platformTree
+          , projectileTree
+          , graph
+          , enemyList
+          , fallingList
+          )
+    | STRAIGHT_BAT =>
+        updateStraightBat
+          ( player
+          , enemy
+          , walls
+          , wallTree
+          , projectileTree
+          , enemyList
+          , fallingList
+          )
 end
