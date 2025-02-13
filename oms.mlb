@@ -1,6 +1,7 @@
 $(SML_LIB)/basis/basis.mlb
 
 (* fcore *)
+vendored/brolib-sml/src/gap_map.sml
 fcore/constants.sml
 fcore/collision.sml
 
@@ -27,6 +28,7 @@ fcore/path-finding.sml
 
 fcore/entity-type.sml
 fcore/enemy/enemy-type.sml
+fcore/enemy/enemy-map.sml
 fcore/game-type.sml
 
 fcore/player-patch.sml
