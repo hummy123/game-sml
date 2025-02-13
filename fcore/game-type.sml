@@ -41,7 +41,7 @@ sig
     , wallTree: QuadTree.t
     , platforms: platform vector
     , platformTree: QuadTree.t
-    , enemies: EnemyType.enemy vector
+    , enemies: EnemyMap.t
     , graph: PlatSet.elem vector vector
     , fallingEnemies: EnemyType.falling_enemy vector
     }
@@ -93,10 +93,16 @@ struct
     , wallTree: QuadTree.t
     , platforms: platform vector
     , platformTree: QuadTree.t
-    , enemies: EnemyType.enemy vector
+    , enemies: EnemyMap.t
     , graph: PlatSet.elem vector vector
     , fallingEnemies: EnemyType.falling_enemy vector
     }
+
+  fun enemyMapFromList (hd :: tl, map) =
+        let val map = EnemyMap.add (#id hd, hd, map)
+        in enemyMapFromList (tl, map)
+        end
+    | enemyMapFromList ([], map) = map
 
   val initial: game_type =
     let
@@ -175,7 +181,7 @@ struct
         , batMaxY = 485
         , batMinY = 625
         }
-      val enemies = Vector.fromList [enemy1]
+      val enemies = enemyMapFromList ([enemy1], EnemyMap.empty)
       val graph = Graph.fromPlatforms (platforms, platformTree)
     in
       { player = player

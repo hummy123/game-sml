@@ -1,13 +1,14 @@
 $(SML_LIB)/basis/basis.mlb
 
 (* fcore *)
-vendored/brolib-sml/src/gap_map.sml
 fcore/constants.sml
 fcore/collision.sml
 
 fcore/quad-tree-type.sml
 fcore/quad-tree-fold.sml
 fcore/quad-tree.sml
+
+vendored/brolib-sml/src/gap_map.sml
 
 fcore/bin-search.sml
 fcore/bin-vec.sml

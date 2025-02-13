@@ -1,6 +1,6 @@
 signature QUAD_TREE =
 sig
-  type t
+  type t = {tree: QuadTreeType.t, width: int, height: int}
 
   val insert: int * int * int * int * int * t -> t
 

@@ -316,7 +316,7 @@ struct
   structure FoldEnemies =
     MakeQuadTreeFold
       (struct
-         type env = EnemyType.enemy vector * player
+         type env = EnemyMap.t * player
          type state = PlayerPatch.player_patch list
 
          fun getEnemyRecoilPatches (player, playerOnRight, acc) =
@@ -349,14 +349,19 @@ struct
                  val pFinishX = x + Constants.playerSize
                  val pHalfW = Constants.playerSize div 2
                  val pCentreX = x + pHalfW
-
-                 val {x = ex, y = ey, ...} = Enemy.find (enemyID, enemies)
-                 val eFinishX = ex + Constants.enemySize
-                 val eHalfW = Constants.enemySize div 2
-                 val eCentreX = ex + eHalfW
                in
-                 eCentreX < pCentreX
+                 case EnemyMap.get (enemyID, enemies) of
+                   SOME {x = ex, y = ey, ...} =>
+                     let
+                       val eFinishX = ex + Constants.enemySize
+                       val eHalfW = Constants.enemySize div 2
+                       val eCentreX = ex + eHalfW
+                     in
+                       eCentreX < pCentreX
+                     end
+                 | NONE => false
                end
+
              val patches =
                getEnemyRecoilPatches (player, playerOnRight, patches)
            in
@@ -437,10 +442,7 @@ struct
             end
 
       val patches =
-        (* if player is attacking, check if enemies collide with attack 
-        * todo: MAIN_ATTACKING variant should hold an integer, 
-        * and be compared with attackLengthLimit 
-        * and the attack should shrink at some point as well *)
+        (* if player is attacking, check if enemies collide with attack  *)
         case #mainAttack player of
           MAIN_ATTACKING {length, ...} =>
             let
