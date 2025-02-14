@@ -158,7 +158,7 @@ struct
     end
 
   fun getEnvironmentPatches
-    (input, walls: wall vector, wallTree, platforms, platformTree) =
+    (input, walls: Wall.t vector, wallTree, platforms, platformTree) =
     let
       (* react to platform and wall collisions  *)
       val x = Fn.getX input
@@ -185,7 +185,7 @@ struct
               let
                 (* default case: 
                  * player will land on platform and stay on the ground there. *)
-                val {y = platY, ...}: GameType.platform =
+                val {y = platY, ...}: Platform.t =
                   Vector.sub (platforms, standPlatID - 1)
 
                 val newY = platY - Fn.entitySize

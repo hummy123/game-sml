@@ -1,9 +1,5 @@
 signature GAME_TYPE =
 sig
-  type wall = {id: int, x: int, y: int, width: int, height: int}
-
-  type platform = {id: int, x: int, y: int, width: int}
-
   datatype player_recoil = NO_RECOIL | RECOIL_LEFT of int | RECOIL_RIGHT of int
 
   datatype player_attacked = NOT_ATTACKED | ATTACKED of int
@@ -37,9 +33,9 @@ sig
 
   type game_type =
     { player: player
-    , walls: wall vector
+    , walls: Wall.t vector
     , wallTree: QuadTree.t
-    , platforms: platform vector
+    , platforms: Platform.t vector
     , platformTree: QuadTree.t
     , enemies: EnemyMap.t
     , graph: PlatSet.elem vector vector
@@ -51,11 +47,6 @@ end
 
 structure GameType :> GAME_TYPE =
 struct
-  type wall = {id: int, x: int, y: int, width: int, height: int}
-
-  (* all platforms have a fixed visual height and a fixed collision height *)
-  type platform = {id: int, x: int, y: int, width: int}
-
   datatype player_recoil = NO_RECOIL | RECOIL_LEFT of int | RECOIL_RIGHT of int
 
   datatype player_attacked = NOT_ATTACKED | ATTACKED of int
@@ -89,9 +80,9 @@ struct
 
   type game_type =
     { player: player
-    , walls: wall vector
+    , walls: Wall.t vector
     , wallTree: QuadTree.t
-    , platforms: platform vector
+    , platforms: Platform.t vector
     , platformTree: QuadTree.t
     , enemies: EnemyMap.t
     , graph: PlatSet.elem vector vector

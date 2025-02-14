@@ -1,5 +1,7 @@
 structure Wall =
 struct
+  type t = {id: int, x: int, y: int, width: int, height: int}
+
   fun helpGenerateTree (pos, wallVec, acc) =
     if pos = Vector.length wallVec then
       acc

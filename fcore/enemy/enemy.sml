@@ -15,6 +15,18 @@ struct
 
   structure EnemyMap = MakeGapMap(EnemyPair)
 
+  (* - Updating state of enemies per-frame - *)
+  (*
+  structure UpdateEnemies = MakeGapMapMapper (struct
+    structure Pair = EnemyPair
+    
+    type env = {walls: wall vector, wallTree: QuadTree.t, platforms: platform
+    vector, platformTree: QuadTree.t}
+  
+    (enemy, walls, wallTree, platforms, platformTree, player, graph) =
+  end)
+  *)
+
   (* - Generating enemy tree - *)
   structure EnemyTree =
     MakeGapMapFolder

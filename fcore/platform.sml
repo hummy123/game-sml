@@ -1,5 +1,6 @@
 structure Platform =
 struct
+  type t = {id: int, x: int, y: int, width: int}
   (* collision height of a platform.
    * Visual height may (and probably will) be different. *)
   val platHeight = 5
