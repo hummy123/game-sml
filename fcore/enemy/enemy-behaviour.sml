@@ -409,101 +409,46 @@ struct
     | _ => enemy
 
   fun updatePatrolState
-    ( player
-    , enemy
-    , walls
-    , wallTree
-    , platforms
-    , platformTree
-    , projectileTree
-    , enemyList
-    , fallingList
-    ) =
+    (player, enemy, walls, wallTree, platforms, platformTree) =
     let
       val {x, y, ...} = enemy
       val size = Constants.enemySize
+      val enemy = withDefaultYAxis enemy
+
+      val patches = getPatrolPatches (enemy, wallTree, platformTree, [])
+      val enemy = EnemyPatch.withPatches (enemy, patches)
+
+      val patches = EnemyPhysics.getPhysicsPatches enemy
+      val enemy = EnemyPatch.withPatches (enemy, patches)
+
+      val patches = EnemyPhysics.getEnvironmentPatches
+        (enemy, walls, wallTree, platforms, platformTree)
     in
-      if QuadTree.hasCollisionAt (x, y, size, size, ~1, projectileTree) then
-        (* if projectile hits, filter out from this list, and add to list of
-         * fallingEnemies *)
-        let
-          val fallingList =
-            {x = x, y = y, variant = #variant enemy} :: fallingList
-        in
-          (enemyList, fallingList)
-        end
-      else if isCollidingWithPlayerAttack (player, enemy) then
-        (* filter out when any projectile hits *)
-        (enemyList, fallingList)
-      else
-        (* since we're not filtering out, update the enemy's state and cons enemy *)
-        let
-          val enemy = withDefaultYAxis enemy
-
-          val patches = getPatrolPatches (enemy, wallTree, platformTree, [])
-          val enemy = EnemyPatch.withPatches (enemy, patches)
-
-          val patches = EnemyPhysics.getPhysicsPatches enemy
-          val enemy = EnemyPatch.withPatches (enemy, patches)
-
-          val patches = EnemyPhysics.getEnvironmentPatches
-            (enemy, walls, wallTree, platforms, platformTree)
-          val enemy = EnemyPatch.withPatches (enemy, patches)
-        in
-          (enemy :: enemyList, fallingList)
-        end
+      EnemyPatch.withPatches (enemy, patches)
     end
 
   fun updateFollowState
-    ( player
-    , enemy
-    , walls
-    , wallTree
-    , platforms
-    , platformTree
-    , projectileTree
-    , graph
-    , enemyList
-    , fallingList
-    ) =
+    (player, enemy, walls, wallTree, platforms, platformTree, graph) =
     let
       val {x, y, ...} = enemy
       val size = Constants.enemySize
+
+      val enemy = withDefaultYAxis enemy
+
+      val patches = getFollowPatches
+        (player, enemy, wallTree, platformTree, platforms, graph, [])
+      val enemy = EnemyPatch.withPatches (enemy, patches)
+
+      val patches = EnemyPhysics.getPhysicsPatches enemy
+      val enemy = EnemyPatch.withPatches (enemy, patches)
+
+      val patches = EnemyPhysics.getEnvironmentPatches
+        (enemy, walls, wallTree, platforms, platformTree)
     in
-      if QuadTree.hasCollisionAt (x, y, size, size, ~1, projectileTree) then
-        (* if projectile hits, filter out from this list, and add to list of
-         * fallingEnemies *)
-        let
-          val fallingList =
-            {x = x, y = y, variant = #variant enemy} :: fallingList
-        in
-          (enemyList, fallingList)
-        end
-      else if isCollidingWithPlayerAttack (player, enemy) then
-        (* filter out when any projectile hits *)
-        (enemyList, fallingList)
-      else
-        (* since we're not filtering out, update the enemy's state and cons enemy *)
-        let
-          val enemy = withDefaultYAxis enemy
-
-          val patches = getFollowPatches
-            (player, enemy, wallTree, platformTree, platforms, graph, [])
-          val enemy = EnemyPatch.withPatches (enemy, patches)
-
-          val patches = EnemyPhysics.getPhysicsPatches enemy
-          val enemy = EnemyPatch.withPatches (enemy, patches)
-
-          val patches = EnemyPhysics.getEnvironmentPatches
-            (enemy, walls, wallTree, platforms, platformTree)
-          val enemy = EnemyPatch.withPatches (enemy, patches)
-        in
-          (enemy :: enemyList, fallingList)
-        end
+      EnemyPatch.withPatches (enemy, patches)
     end
 
-  fun updateStraightBat
-    (player, enemy, walls, wallTree, projectileTree, enemyList, fallingList) =
+  fun updateStraightBat (player, enemy, walls, wallTree) =
     let
       val {x, y, batRest, batDirY, batMinY, batMaxY, xAxis, ...} = enemy
 
@@ -553,59 +498,18 @@ struct
           in
             EnemyPatch.W_BAT_REST 0 :: patches
           end
-
-      val enemy = EnemyPatch.withPatches (enemy, patches)
     in
-      (enemy :: enemyList, fallingList)
+      EnemyPatch.withPatches (enemy, patches)
     end
 
   fun updateEnemyState
-    ( enemy
-    , projectiles
-    , projectileTree
-    , walls
-    , wallTree
-    , platforms
-    , platformTree
-    , player
-    , graph
-    , enemyList
-    , fallingList
-    ) =
+    (enemy, walls, wallTree, platforms, platformTree, player, graph) =
     case #variant enemy of
       PATROL_SLIME =>
         updatePatrolState
-          ( player
-          , enemy
-          , walls
-          , wallTree
-          , platforms
-          , platformTree
-          , projectileTree
-          , enemyList
-          , fallingList
-          )
+          (player, enemy, walls, wallTree, platforms, platformTree)
     | FOLLOW_SLIME =>
         updateFollowState
-          ( player
-          , enemy
-          , walls
-          , wallTree
-          , platforms
-          , platformTree
-          , projectileTree
-          , graph
-          , enemyList
-          , fallingList
-          )
-    | STRAIGHT_BAT =>
-        updateStraightBat
-          ( player
-          , enemy
-          , walls
-          , wallTree
-          , projectileTree
-          , enemyList
-          , fallingList
-          )
+          (player, enemy, walls, wallTree, platforms, platformTree, graph)
+    | STRAIGHT_BAT => updateStraightBat (player, enemy, walls, wallTree)
 end
