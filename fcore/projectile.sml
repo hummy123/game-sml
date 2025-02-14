@@ -44,7 +44,7 @@ struct
           (pos + 1, projectiles, width, height, ratio, xOffset, yOffset, acc)
       end
 
-  fun getProjectileVec (player: GameType.player, width, height) =
+  fun getProjectileVec (player: PlayerType.player, width, height) =
     let
       val {projectiles, ...} = player
 

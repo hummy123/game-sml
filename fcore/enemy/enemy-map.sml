@@ -1,1 +1,1 @@
-structure EnemyMap = Enemy.EnemyMap
+structure EnemyMap = MakeGapMap(EnemyPair)

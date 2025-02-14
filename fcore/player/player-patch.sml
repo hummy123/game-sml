@@ -4,21 +4,21 @@ sig
     W_X_AXIS of EntityType.x_axis
   | W_Y_AXIS of EntityType.y_axis
   | W_FACING of EntityType.facing
-  | W_RECOIL of GameType.player_recoil
-  | W_ATTACKED of GameType.player_attacked
-  | W_MAIN_ATTACK of GameType.main_attack
+  | W_RECOIL of PlayerType.player_recoil
+  | W_ATTACKED of PlayerType.player_attacked
+  | W_MAIN_ATTACK of PlayerType.main_attack
   | W_HEALTH of int
   | W_X of int
   | W_Y of int
   | W_JUMP_PRESSED of bool
   | W_MAIN_ATTACK_PRESSED of bool
-  | W_ENEMIES of GameType.defeated_enemies vector
+  | W_ENEMIES of PlayerType.defeated_enemies vector
   | W_CHARGE of int
-  | W_PROJECTILES of GameType.player_projectile vector
+  | W_PROJECTILES of PlayerType.player_projectile vector
   | W_PLAT_ID of int
 
-  val withPatch: GameType.player * player_patch -> GameType.player
-  val withPatches: GameType.player * player_patch list -> GameType.player
+  val withPatch: PlayerType.player * player_patch -> PlayerType.player
+  val withPatches: PlayerType.player * player_patch list -> PlayerType.player
 end
 
 structure PlayerPatch: PLAYER_PATCH =
@@ -27,17 +27,17 @@ struct
     W_X_AXIS of EntityType.x_axis
   | W_Y_AXIS of EntityType.y_axis
   | W_FACING of EntityType.facing
-  | W_RECOIL of GameType.player_recoil
-  | W_ATTACKED of GameType.player_attacked
-  | W_MAIN_ATTACK of GameType.main_attack
+  | W_RECOIL of PlayerType.player_recoil
+  | W_ATTACKED of PlayerType.player_attacked
+  | W_MAIN_ATTACK of PlayerType.main_attack
   | W_HEALTH of int
   | W_X of int
   | W_Y of int
   | W_JUMP_PRESSED of bool
   | W_MAIN_ATTACK_PRESSED of bool
-  | W_ENEMIES of GameType.defeated_enemies vector
+  | W_ENEMIES of PlayerType.defeated_enemies vector
   | W_CHARGE of int
-  | W_PROJECTILES of GameType.player_projectile vector
+  | W_PROJECTILES of PlayerType.player_projectile vector
   | W_PLAT_ID of int
 
   fun mkPlayer
@@ -367,7 +367,7 @@ struct
             )
     end
 
-  fun withPatches (player: GameType.player, lst) =
+  fun withPatches (player: PlayerType.player, lst) =
     case lst of
       hd :: tl =>
         let val player = withPatch (player, hd)

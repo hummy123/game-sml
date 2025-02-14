@@ -24,7 +24,6 @@ end
 
 functor MakePhysics(Fn: PHYSICS_INPUT) =
 struct
-  open GameType
   open EntityType
 
   fun getPhysicsPatches input =
@@ -220,7 +219,7 @@ end
 structure PlayerPhysics =
   MakePhysics
     (struct
-       type t = GameType.player
+       type t = PlayerType.player
        type patch = PlayerPatch.player_patch
 
        val entitySize = Constants.playerSize

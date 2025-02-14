@@ -1,8 +1,8 @@
 structure Player =
 struct
-  open GameType
   open PlayerPatch
   open EntityType
+  open PlayerType
 
   (* helper functions checking input *)
   fun getXAxis (lh, rh) =
@@ -378,7 +378,7 @@ struct
          fun fold (_, (), defeatedList) = {angle = 1} :: defeatedList
        end)
 
-  fun runPhysicsAndInput (game: game_type, input, enemyTree) =
+  fun runPhysicsAndInput (game: GameType.game_type, input, enemyTree) =
     let
       val player = #player game
 

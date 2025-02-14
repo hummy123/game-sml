@@ -29,18 +29,21 @@ fcore/path-finding.sml
 
 fcore/entity-type.sml
 fcore/enemy/enemy-type.sml
-fcore/enemy/enemy.sml
+fcore/enemy/enemy-pair.sml
 fcore/enemy/enemy-map.sml
+
+fcore/player/player-type.sml
+fcore/enemy/enemy.sml
 fcore/game-type.sml
 
-fcore/player-patch.sml
+fcore/player/player-patch.sml
 fcore/enemy/enemy-patch.sml
 fcore/physics.sml
 
 fcore/trace-jump.sml
 fcore/enemy/enemy-behaviour.sml
 fcore/enemy/falling-enemies.sml
-fcore/player.sml
+fcore/player/player.sml
 fcore/projectile.sml
 
 fcore/game-update.sml

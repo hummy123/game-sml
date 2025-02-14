@@ -1,11 +1,10 @@
 structure EnemyBehaviour =
 struct
-  open GameType
   open EnemyType
   open EntityType
 
   (* if player is attacking, does enemy collide with attack? *)
-  fun isCollidingWithPlayerAttack (player: player, enemy: enemy) =
+  fun isCollidingWithPlayerAttack (player: PlayerType.player, enemy: enemy) =
     let
       val {x = px, y = py, facing, mainAttack, ...} = player
       val pSize = Constants.playerSize
@@ -14,7 +13,7 @@ struct
       val eSize = Constants.enemySize
     in
       case mainAttack of
-        MAIN_ATTACKING {length, ...} =>
+        PlayerType.MAIN_ATTACKING {length, ...} =>
           (case facing of
              FACING_RIGHT =>
                let
@@ -359,7 +358,14 @@ struct
     end
 
   fun getFollowPatches
-    (player: player, enemy, wallTree, platformTree, platforms, graph, acc) =
+    ( player: PlayerType.player
+    , enemy
+    , wallTree
+    , platformTree
+    , platforms
+    , graph
+    , acc
+    ) =
     let
       val pID = #platID player
       val eID = #platID enemy
