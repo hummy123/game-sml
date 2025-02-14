@@ -4,21 +4,38 @@ struct
     MakeQuadTreeFold
       (struct
          type env = unit
-         type state = EnemyMap.t
+         type state = PlayerType.defeated_enemies list * EnemyMap.t
 
          open EnemyType
 
-         fun onAttacked
-           (enemyID: int, enemy: EnemyType.enemy, enemyMap: EnemyMap.t) =
+         fun onAttacked (enemyID, enemy, enemyMap, defeatedList) =
            case #variant enemy of
-             PATROL_SLIME => EnemyMap.remove (enemyID, enemyMap)
-           | FOLLOW_SLIME => EnemyMap.remove (enemyID, enemyMap)
-           | STRAIGHT_BAT => EnemyMap.remove (enemyID, enemyMap)
+             PATROL_SLIME =>
+               let
+                 val defeatedList = {angle = 1} :: defeatedList
+                 val enemyMap = EnemyMap.remove (enemyID, enemyMap)
+               in
+                 (defeatedList, enemyMap)
+               end
+           | FOLLOW_SLIME =>
+               let
+                 val defeatedList = {angle = 1} :: defeatedList
+                 val enemyMap = EnemyMap.remove (enemyID, enemyMap)
+               in
+                 (defeatedList, enemyMap)
+               end
+           | STRAIGHT_BAT =>
+               let
+                 val defeatedList = {angle = 1} :: defeatedList
+                 val enemyMap = EnemyMap.remove (enemyID, enemyMap)
+               in
+                 (defeatedList, enemyMap)
+               end
 
-         fun fold (enemyID, (), enemyMap) =
+         fun fold (enemyID, (), (defeatedList, enemyMap)) =
            case EnemyMap.get (enemyID, enemyMap) of
-             SOME enemy => onAttacked (enemyID, enemy, enemyMap)
-           | NONE => enemyMap
+             SOME enemy => onAttacked (enemyID, enemy, enemyMap, defeatedList)
+           | NONE => (defeatedList, enemyMap)
        end)
 
   fun attackEnemies (player: PlayerType.player, enemyMap, enemyTree) =
@@ -35,10 +52,18 @@ struct
               (case facing of
                  FACING_RIGHT => x + Constants.playerSize
                | FACING_LEFT => x - length)
+
+            val (defeatedList, enemyMap) = AttackEnemies.foldRegion
+              (x, y, length, height, (), ([], enemyMap), enemyTree)
+
+            val defeatedList = Vector.fromList defeatedList
+            val defeatedList = Vector.concat [defeatedList, #enemies player]
+
+            val player =
+              PlayerPatch.withPatch (player, PlayerPatch.W_ENEMIES defeatedList)
           in
-            AttackEnemies.foldRegion
-              (x, y, length, height, (), enemyMap, enemyTree)
+            (player, enemyMap)
           end
-      | _ => enemyMap
+      | _ => (player, enemyMap)
     end
 end
