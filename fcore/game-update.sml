@@ -16,31 +16,16 @@ struct
       val enemyTree = Enemy.generateTree enemies
       val player = Player.runPhysicsAndInput (game, input, enemyTree)
 
-      val projectiles = #projectiles player
-      val projectileTree = Projectile.generateTree projectiles
+      val enemies = Enemy.update
+        (enemies, walls, wallTree, platforms, platformTree, player, graph)
 
-    (* update state of falling enemies and possibly filter *)
-    (* todo: use enemy map
-    val fallingEnemies = FallingEnemies.updateList
-      (Vector.length fallingEnemies - 1, fallingEnemies, player, [])
-    
-    val (enemies, fallingEnemies) = Enemy.updateEnemyList
-      ( Vector.length enemies - 1
-      , enemies
-      , projectiles
-      , projectileTree
-      , walls
-      , wallTree
-      , platforms
-      , platformTree
-      , player
-      , graph
-      , []
-      , fallingEnemies
-      )
-    
-    val fallingEnemies = Vector.fromList fallingEnemies
-      *)
+      (* update state of falling enemies and possibly filter *)
+      (* todo: use enemy map
+      val fallingEnemies = FallingEnemies.updateList
+        (Vector.length fallingEnemies - 1, fallingEnemies, player, [])
+      
+      val fallingEnemies = Vector.fromList fallingEnemies
+        *)
     in
       { player = player
       , walls = walls

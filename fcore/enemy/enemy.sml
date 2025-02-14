@@ -1,16 +1,44 @@
 structure Enemy =
 struct
   (* - Updating state of enemies per loop - *)
-  (*
-  structure UpdateEnemies = MakeGapMapMapper (struct
-    structure Pair = EnemyPair
-    
-    type env = {walls: wall vector, wallTree: QuadTree.t, platforms: platform
-    vector, platformTree: QuadTree.t}
-  
-    (enemy, walls, wallTree, platforms, platformTree, player, graph) =
-  end)
-  *)
+  structure UpdateEnemies =
+    MakeGapMapMapper
+      (struct
+         structure Pair = EnemyPair
+
+         type env =
+           { walls: Wall.t vector
+           , wallTree: QuadTree.t
+           , platforms: Platform.t vector
+           , platformTree: QuadTree.t
+           , player: PlayerType.player
+           , graph: PlatSet.elem vector vector
+           }
+
+         type state = EnemyMap.t
+
+         fun map (enemy, env) =
+           let
+             val {walls, wallTree, platforms, platformTree, player, graph} = env
+           in
+             EnemyBehaviour.updateEnemyState
+               (enemy, walls, wallTree, platforms, platformTree, player, graph)
+           end
+       end)
+
+  fun update (enemies, walls, wallTree, platforms, platformTree, player, graph) =
+    let
+      val env =
+        { walls = walls
+        , wallTree = wallTree
+        , platforms = platforms
+        , platformTree = platformTree
+        , player = player
+        , graph = graph
+        }
+    in
+      UpdateEnemies.map (enemies, env)
+    end
 
   (* - Generating enemy tree - *)
   structure EnemyTree =
