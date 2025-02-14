@@ -378,7 +378,7 @@ struct
          fun fold (_, (), defeatedList) = {angle = 1} :: defeatedList
        end)
 
-  fun runPhysicsAndInput (game: GameType.game_type, input, enemyTree) =
+  fun runPhysicsAndInput (game: GameType.game_type, input) =
     let
       val player = #player game
 
@@ -423,24 +423,31 @@ struct
       val {walls, wallTree, platforms, platformTree, ...} = game
       val patches = PlayerPhysics.getEnvironmentPatches
         (player, walls, wallTree, platforms, platformTree)
-      val player = PlayerPatch.withPatches (player, patches)
+    in
+      PlayerPatch.withPatches (player, patches)
+    end
 
-      val patches =
-        (* player reaction to collisions with enemies.
-         * We only detect collisions if player is not in invincibility period
-         * after being previously attacked. *)
-        case #attacked player of
-          ATTACKED _ => []
-        | _ =>
-            let
-              val {x, y, ...} = player
-              val size = Constants.playerSize
-              val env = (#enemies game, player)
-              val state = []
-            in
-              FoldEnemies.foldRegion (x, y, size, size, env, state, enemyTree)
-            end
+  (* player reaction to collisions with enemies.
+   * We only detect collisions if player is not in invincibility period
+   * after being previously attacked. *)
+  fun checkEnemyCollisions (player: PlayerType.player, enemies, enemyTree) =
+    case #attacked player of
+      ATTACKED _ => player
+    | _ =>
+        let
+          val {x, y, ...} = player
+          val size = Constants.playerSize
+          val env = (enemies, player)
+          val state = []
+          val patches = FoldEnemies.foldRegion
+            (x, y, size, size, env, state, enemyTree)
+        in
+          PlayerPatch.withPatches (player, patches)
+        end
 
+  (* todo: check which enemies are being attacked by player, 
+   * updating player's 'defeatedEnemies' field (if enemy's health would reach 0)
+   * and updating enemy (if enemy's health wouldn't reach 0, decrement health)
       val patches =
         (* if player is attacking, check if enemies collide with attack  *)
         case #mainAttack player of
@@ -452,18 +459,18 @@ struct
                 (case facing of
                    FACING_RIGHT => x + Constants.playerSize
                  | FACING_LEFT => x - length)
-
+  
               val state = []
               (* detect collisions from enemies who are hit by attack *)
               val newDefeated = AttackEnemies.foldRegion
                 (x, y, length, height, (), state, enemyTree)
-
+  
               (* detect collisions from falling enemies too *)
               val fallingTree =
                 FallingEnemies.generateTree (#fallingEnemies game)
               val newDefeated = AttackEnemies.foldRegion
                 (x, y, length, height, (), newDefeated, fallingTree)
-
+  
               val allDefeated =
                 Vector.concat [Vector.fromList newDefeated, enemies]
             in
@@ -473,6 +480,7 @@ struct
     in
       PlayerPatch.withPatches (player, patches)
     end
+    *)
 
   (* todo: add attacked enemies to player's 'enemies' field *)
   fun concatAttackedEnemies (player: player, enemyCollisions) =
