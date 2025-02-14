@@ -18,6 +18,8 @@ struct
       val enemyTree = Enemy.generateTree enemies
       val player = Player.checkEnemyCollisions (player, enemies, enemyTree)
 
+      val enemies = PlayerAttack.attackEnemies (player, enemies, enemyTree)
+
       val enemies = Enemy.update
         (enemies, walls, wallTree, platforms, platformTree, player, graph)
 

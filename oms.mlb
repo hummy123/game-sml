@@ -44,6 +44,7 @@ fcore/enemy/enemy-behaviour.sml
 fcore/enemy/enemy.sml
 fcore/enemy/falling-enemies.sml
 fcore/player/player.sml
+fcore/player/player-attack.sml
 fcore/projectile.sml
 
 fcore/game-update.sml
