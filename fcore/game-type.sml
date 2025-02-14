@@ -102,7 +102,7 @@ struct
         , health = 1
         , xAxis = EntityType.MOVE_RIGHT
         , yAxis = EntityType.FALLING
-        , variant = EnemyType.STRAIGHT_BAT
+        , variant = EnemyType.PATROL_SLIME
         , batDirY = EnemyType.UP
         , platID = ~1
         , nextPlatID = ~1
@@ -110,7 +110,22 @@ struct
         , batMaxY = 485
         , batMinY = 625
         }
-      val enemies = enemyMapFromList ([enemy1], EnemyMap.empty)
+      val enemy2 =
+        { id = 2
+        , x = 351
+        , y = 555
+        , health = 1
+        , xAxis = EntityType.MOVE_RIGHT
+        , yAxis = EntityType.FALLING
+        , variant = EnemyType.PATROL_SLIME
+        , batDirY = EnemyType.UP
+        , platID = ~1
+        , nextPlatID = ~1
+        , batRest = 0
+        , batMaxY = 485
+        , batMinY = 625
+        }
+      val enemies = enemyMapFromList ([enemy1, enemy2], EnemyMap.empty)
       val graph = Graph.fromPlatforms (platforms, platformTree)
     in
       { player = player
