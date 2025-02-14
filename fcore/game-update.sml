@@ -13,11 +13,7 @@ struct
         , fallingEnemies
         } = game
 
-      val enemyTree = MakeEnemyTree.foldUnordered
-        ( enemies
-        , ()
-        , QuadTree.create (Constants.worldWidth, Constants.worldHeight)
-        )
+      val enemyTree = Enemy.generateTree enemies
       val player = Player.runPhysicsAndInput (game, input, enemyTree)
 
       val projectiles = #projectiles player
