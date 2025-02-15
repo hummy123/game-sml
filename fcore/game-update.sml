@@ -29,13 +29,7 @@ struct
       val enemies = Enemy.update
         (enemies, walls, wallTree, platforms, platformTree, player, graph)
 
-    (* update state of falling enemies and possibly filter *)
-    (* todo: use enemy map
-    val fallingEnemies = FallingEnemies.updateList
-      (Vector.length fallingEnemies - 1, fallingEnemies, player, [])
-    
-    val fallingEnemies = Vector.fromList fallingEnemies
-      *)
+      val fallingEnemies = FallingEnemies.update fallingEnemies
     in
       { player = player
       , walls = walls

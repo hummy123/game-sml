@@ -28,6 +28,40 @@ struct
       , QuadTree.create (Constants.worldWidth, Constants.worldHeight)
       )
 
+  (* - Updating position of fallingEnemies 
+   * - and filtering out enemies which are no longer in world bounds - *)
+  structure UpdateFalling =
+    MakeGapMapFolder
+      (struct
+         structure Pair = FallingEnemyPair
+
+         type env = unit
+
+         type state = FallingEnemyMap.t
+
+         fun fold (fallingID, fallingEnemy, (), fallingMap) =
+           let
+             val {x, y, variant} = fallingEnemy
+             val size = Constants.enemySize
+             val ww = Constants.worldWidth
+             val wh = Constants.worldHeight
+           in
+             if Collision.isCollidingPlus (x, y, size, size, 0, 0, ww, wh) then
+               let
+                 val newFalling =
+                   {x = x, y = y - Constants.moveEnemyBy, variant = variant}
+               in
+                 FallingEnemyMap.add (fallingID, newFalling, fallingMap)
+               end
+             else
+               (* filter out since not in world bounds *)
+               fallingMap
+           end
+       end)
+
+  fun update fallingEnemies =
+    UpdateFalling.foldUnordered (fallingEnemies, (), FallingEnemyMap.empty)
+
   (* - Drawing falling enemies - *)
   structure FallingDrawVec =
     MakeGapMapFolder
