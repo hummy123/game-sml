@@ -3,6 +3,32 @@ struct
   open EnemyType
   open EntityType
 
+  (* - Generating tree of falling enemies - *)
+  structure FallingTree =
+    MakeGapMapFolder
+      (struct
+         structure Pair = FallingEnemyPair
+
+         type env = unit
+         type state = QuadTree.t
+
+         fun fold (fallingID, falling: EnemyType.falling_enemy, (), quadTree) =
+           let
+             val {x, y, ...} = falling
+             val size = Constants.enemySize
+           in
+             QuadTree.insert (x, y, size, size, fallingID, quadTree)
+           end
+       end)
+
+  fun generateTree falling =
+    FallingTree.foldUnordered
+      ( falling
+      , ()
+      , QuadTree.create (Constants.worldWidth, Constants.worldHeight)
+      )
+
+  (* - Drawing falling enemies - *)
   structure FallingDrawVec =
     MakeGapMapFolder
       (struct

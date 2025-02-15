@@ -1,7 +1,7 @@
 structure PlayerAttack =
 struct
   (* - Handle collisions where player hits enemy directly - *)
-  structure AttackEnemies =
+  structure PlayerAttackEnemy =
     MakeQuadTreeFold
       (struct
          type env = unit
@@ -45,7 +45,7 @@ struct
                  FACING_RIGHT => x + Constants.playerSize
                | FACING_LEFT => x - length)
 
-            val (defeatedList, enemyMap) = AttackEnemies.foldRegion
+            val (defeatedList, enemyMap) = PlayerAttackEnemy.foldRegion
               (x, y, length, height, (), ([], enemyMap), enemyTree)
 
             val defeatedList = Vector.fromList defeatedList
