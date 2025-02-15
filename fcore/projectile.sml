@@ -1,28 +1,5 @@
 structure Projectile =
 struct
-  val projectileSize = 9.0
-  val projectileSizeInt = 9
-
-  fun helpGenerateTree (pos, projectiles, acc) =
-    if pos = Vector.length projectiles then
-      acc
-    else
-      let
-        val size = projectileSizeInt
-
-        val {x, y, facing = _} = Vector.sub (projectiles, pos)
-        val acc = QuadTree.insert (x, y, size, size, pos, acc)
-      in
-        helpGenerateTree (pos + 1, projectiles, acc)
-      end
-
-  fun generateTree projectiles =
-    helpGenerateTree
-      ( 0
-      , projectiles
-      , QuadTree.create (Constants.worldWidth, Constants.worldHeight)
-      )
-
   fun helpGetProjectileVec
     (pos, projectiles, width, height, ratio, xOffset, yOffset, acc) =
     if pos = Vector.length projectiles then
@@ -34,7 +11,7 @@ struct
         val x = Real32.fromInt x * ratio + xOffset
         val y = Real32.fromInt y * ratio + yOffset
 
-        val size = projectileSize * ratio
+        val size = Constants.projectileSize * ratio
 
         val vec = Field.lerp
           (x, y, size, size, width, height, 0.3, 0.9, 0.3, 1.0)
