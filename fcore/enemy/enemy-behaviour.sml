@@ -517,6 +517,9 @@ struct
       EnemyPatch.withPatches (enemy, patches)
     end
 
+  fun updateShieldSlime
+    (player, enemy, walls, wallTree, platforms, platformTree) = enemy
+
   fun updateEnemyState
     (enemy, walls, wallTree, platforms, platformTree, player, graph) =
     case #variant enemy of
@@ -527,4 +530,7 @@ struct
         updateFollowState
           (player, enemy, walls, wallTree, platforms, platformTree, graph)
     | STRAIGHT_BAT => updateStraightBat (player, enemy, walls, wallTree)
+    | SHIELD_SLIME =>
+        updateShieldSlime
+          (player, enemy, walls, wallTree, platforms, platformTree)
 end

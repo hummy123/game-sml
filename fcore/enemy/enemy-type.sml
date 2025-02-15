@@ -1,6 +1,6 @@
 signature ENEMY_TYPE =
 sig
-  datatype variant = PATROL_SLIME | FOLLOW_SLIME | STRAIGHT_BAT
+  datatype variant = PATROL_SLIME | FOLLOW_SLIME | STRAIGHT_BAT | SHIELD_SLIME
 
   datatype bat_dir_y = UP | DOWN
 
@@ -19,6 +19,7 @@ sig
     , batMaxY: int
     , batMinY: int
     , facing: EntityType.facing
+    , shieldOn: bool
     }
 
   type falling_enemy = {x: int, y: int, variant: variant}
@@ -29,7 +30,7 @@ end
 
 structure EnemyType: ENEMY_TYPE =
 struct
-  datatype variant = PATROL_SLIME | FOLLOW_SLIME | STRAIGHT_BAT
+  datatype variant = PATROL_SLIME | FOLLOW_SLIME | STRAIGHT_BAT | SHIELD_SLIME
 
   datatype bat_dir_y = UP | DOWN
 
@@ -48,6 +49,7 @@ struct
     , batMaxY: int
     , batMinY: int
     , facing: EntityType.facing
+    , shieldOn: bool
     }
 
   type falling_enemy = {x: int, y: int, variant: variant}

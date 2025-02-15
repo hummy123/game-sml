@@ -17,11 +17,17 @@ struct
              (defeatedList, enemyMap)
            end
 
+         fun shieldSlimeAttacked (enemyID, enemy, enemyMap, defeatedList) =
+           if #shieldOn enemy then (defeatedList, enemyMap)
+           else defeatEnemy (enemyID, enemyMap, defeatedList)
+
          fun onPlayerAttack (enemyID, enemy, enemyMap, defeatedList) =
            case #variant enemy of
              PATROL_SLIME => defeatEnemy (enemyID, enemyMap, defeatedList)
            | FOLLOW_SLIME => defeatEnemy (enemyID, enemyMap, defeatedList)
            | STRAIGHT_BAT => defeatEnemy (enemyID, enemyMap, defeatedList)
+           | SHIELD_SLIME =>
+               shieldSlimeAttacked (enemyID, enemy, enemyMap, defeatedList)
 
          fun fold (enemyID, (), (defeatedList, enemyMap)) =
            case EnemyMap.get (enemyID, enemyMap) of
@@ -105,11 +111,17 @@ struct
              (fallingMap, enemyMap)
            end
 
+         fun onShieldSlimeAttacked (enemyID, enemy, enemyMap, fallingMap) =
+           if #shieldOn enemy then (fallingMap, enemyMap)
+           else onDefeated (enemyID, enemy, enemyMap, fallingMap)
+
          fun onProjectileAttack (enemyID, enemy, enemyMap, fallingMap) =
            case #variant enemy of
              PATROL_SLIME => onDefeated (enemyID, enemy, enemyMap, fallingMap)
            | FOLLOW_SLIME => onDefeated (enemyID, enemy, enemyMap, fallingMap)
            | STRAIGHT_BAT => onDefeated (enemyID, enemy, enemyMap, fallingMap)
+           | SHIELD_SLIME =>
+               onShieldSlimeAttacked (enemyID, enemy, enemyMap, fallingMap)
 
          fun fold (enemyID, (), (fallingMap, enemyMap)) =
            case EnemyMap.get (enemyID, enemyMap) of
