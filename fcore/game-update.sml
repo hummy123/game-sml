@@ -18,8 +18,8 @@ struct
       val enemyTree = Enemy.generateTree enemies
       val player = Player.checkEnemyCollisions (player, enemies, enemyTree)
 
-      val (player, enemies) =
-        PlayerAttack.attackEnemies (player, enemies, enemyTree)
+      val (player, enemies, fallingEnemies) =
+        PlayerAttack.attackEnemies (player, enemies, enemyTree, fallingEnemies)
 
       val projectiles = #projectiles player
       val (fallingEnemies, enemies) =

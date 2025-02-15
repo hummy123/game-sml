@@ -30,7 +30,22 @@ struct
            | NONE => (defeatedList, enemyMap)
        end)
 
-  fun attackEnemies (player: PlayerType.player, enemyMap, enemyTree) =
+  structure PlayerAttackFalling =
+    MakeQuadTreeFold
+      (struct
+         type env = unit
+         type state = PlayerType.defeated_enemies list * FallingEnemyMap.t
+
+         fun fold (fallingID, (), (defeatedList, fallingMap)) =
+           let
+             val defeatedList = {angle = 1} :: defeatedList
+             val fallingMap = FallingEnemyMap.remove (fallingID, fallingMap)
+           in
+             (defeatedList, fallingMap)
+           end
+       end)
+
+  fun attackEnemies (player: PlayerType.player, enemyMap, enemyTree, fallingMap) =
     let
       open PlayerType
       val {x, y, facing, mainAttack, ...} = player
@@ -48,15 +63,26 @@ struct
             val (defeatedList, enemyMap) = PlayerAttackEnemy.foldRegion
               (x, y, length, height, (), ([], enemyMap), enemyTree)
 
+            val fallingTree = FallingEnemies.generateTree fallingMap
+            val (defeatedList, fallingMap) = PlayerAttackFalling.foldRegion
+              ( x
+              , y
+              , length
+              , height
+              , ()
+              , (defeatedList, fallingMap)
+              , fallingTree
+              )
+
             val defeatedList = Vector.fromList defeatedList
             val defeatedList = Vector.concat [defeatedList, #enemies player]
 
             val player =
               PlayerPatch.withPatch (player, PlayerPatch.W_ENEMIES defeatedList)
           in
-            (player, enemyMap)
+            (player, enemyMap, fallingMap)
           end
-      | _ => (player, enemyMap)
+      | _ => (player, enemyMap, fallingMap)
     end
 
   (* - Handle collisions when player's projectile hits enemy - *)
