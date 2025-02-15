@@ -3,104 +3,52 @@ struct
   open EnemyType
   open EntityType
 
-  fun helpGenerateTree (pos, fallingVec: falling_enemy vector, acc) =
-    if pos = Vector.length fallingVec then
-      acc
-    else
-      let
-        val {x, y, ...} = Vector.sub (fallingVec, pos)
+  structure FallingDrawVec =
+    MakeGapMapFolder
+      (struct
+         structure Pair = FallingEnemyPair
 
-        val size = Constants.enemySize
+         type env =
+           { width: Real32.real
+           , height: Real32.real
+           , ratio: Real32.real
+           , xOffset: Real32.real
+           , yOffset: Real32.real
+           }
 
-        val acc = QuadTree.insert (x, y, size, size, pos + 1, acc)
-      in
-        helpGenerateTree (pos + 1, fallingVec, acc)
-      end
+         type state = Real32.real vector list
 
-  fun generateTree fallingVec =
-    helpGenerateTree
-      ( 0
-      , fallingVec
-      , QuadTree.create (Constants.worldWidth, Constants.worldHeight)
-      )
+         fun helpGetDrawVec
+           (fallingEnemy, width, height, ratio, xOffset, yOffset, acc) =
+           let
+             val {x, y, variant = _} = fallingEnemy
 
-  fun isCollidingWithPlayerAttack (player: PlayerType.player, fx, fy) =
-    let
-      val {x = px, y = py, mainAttack, facing, ...} = player
-    in
-      case mainAttack of
-        PlayerType.MAIN_ATTACKING {length, ...} =>
-          let
-            val px =
-              (case facing of
-                 FACING_RIGHT => px + Constants.playerSize
-               | FACING_LEFT => px - length)
+             val x = Real32.fromInt x * ratio + xOffset
+             val y = Real32.fromInt y * ratio + yOffset
+             val size = Real32.fromInt Constants.enemySize * ratio
 
-            val pSize = Constants.playerSize
-            val fSize = Constants.enemySize
-          in
-            Collision.isCollidingPlus
-              (px, py, length, pSize, fx, fy, fSize, fSize)
-          end
-      | _ => false
-    end
+             val vec = Block.lerp
+               (x, y, size, size, width, height, 0.3, 0.3, 0.3)
+           in
+             vec :: acc
+           end
 
-  fun updateList (pos, vec, player: PlayerType.player, acc) =
-    if pos < 0 then
-      acc
-    else
-      let
-        val {x, y, variant} = Vector.sub (vec, pos)
-
-        val size = Constants.enemySize
-        val ww = Constants.worldWidth
-        val wh = Constants.worldHeight
-      in
-        if isCollidingWithPlayerAttack (player, x, y) then
-          (* filter out if player is attacking falling enemy *)
-          updateList (pos - 1, vec, player, acc)
-        else if Collision.isCollidingPlus (x, y, size, size, 0, 0, ww, wh) then
-          (* move falling enemy upwards *)
-          let
-            val updated =
-              {x = x, y = y - Constants.moveEnemyBy, variant = variant}
-          in
-            updateList (pos - 1, vec, player, updated :: acc)
-          end
-        else
-          (* if current is not colliding with world's bounds, then filter out 
-           * as it is off screen *)
-          updateList (pos - 1, vec, player, acc)
-      end
-
-  fun helpGetDrawVec
-    (pos, fallingVec, width, height, ratio, xOffset, yOffset, acc) =
-    if pos = Vector.length fallingVec then
-      Vector.concat acc
-    else
-      let
-        val {x, y, variant = _} = Vector.sub (fallingVec, pos)
-
-        val x = Real32.fromInt x * ratio + xOffset
-        val y = Real32.fromInt y * ratio + yOffset
-        val size = Real32.fromInt Constants.enemySize * ratio
-
-        val vec = Block.lerp (x, y, size, size, width, height, 0.3, 0.3, 0.3)
-        val acc = vec :: acc
-      in
-        helpGetDrawVec
-          (pos + 1, fallingVec, width, height, ratio, xOffset, yOffset, acc)
-      end
+         fun fold (_, fallingEnemy, env, acc) =
+           let
+             val {width, height, ratio, xOffset, yOffset} = env
+           in
+             helpGetDrawVec
+               (fallingEnemy, width, height, ratio, xOffset, yOffset, acc)
+           end
+       end)
 
   fun getDrawVec (game: GameType.game_type, width, height) =
-    if Vector.length (#fallingEnemies game) = 0 then
-      Vector.fromList []
-    else
-      let
-        val fallingEnemies = #fallingEnemies game
-        val wratio = width / Constants.worldWidthReal
-        val hratio = height / Constants.worldHeightReal
-      in
+    let
+      val fallingEnemies = #fallingEnemies game
+      val wratio = width / Constants.worldWidthReal
+      val hratio = height / Constants.worldHeightReal
+
+      val env =
         if wratio < hratio then
           let
             val scale = Constants.worldHeightReal * wratio
@@ -109,8 +57,12 @@ struct
               else if height < scale then (scale - height) / 2.0
               else 0.0
           in
-            helpGetDrawVec
-              (0, fallingEnemies, width, height, wratio, 0.0, yOffset, [])
+            { width = width
+            , height = height
+            , ratio = wratio
+            , xOffset = 0.0
+            , yOffset = yOffset
+            }
           end
         else
           let
@@ -120,8 +72,16 @@ struct
               else if width < scale then (scale - width) / 2.0
               else 0.0
           in
-            helpGetDrawVec
-              (0, fallingEnemies, width, height, hratio, xOffset, 0.0, [])
+            { width = width
+            , height = height
+            , ratio = hratio
+            , xOffset = xOffset
+            , yOffset = 0.0
+            }
           end
-      end
+
+      val lst = FallingDrawVec.foldUnordered (fallingEnemies, env, [])
+    in
+      Vector.concat lst
+    end
 end

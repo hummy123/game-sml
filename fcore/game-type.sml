@@ -8,7 +8,7 @@ sig
     , platformTree: QuadTree.t
     , enemies: EnemyMap.t
     , graph: PlatSet.elem vector vector
-    , fallingEnemies: EnemyType.falling_enemy vector
+    , fallingEnemies: FallingEnemyMap.t
     }
 
   val initial: game_type
@@ -24,7 +24,7 @@ struct
     , platformTree: QuadTree.t
     , enemies: EnemyMap.t
     , graph: PlatSet.elem vector vector
-    , fallingEnemies: EnemyType.falling_enemy vector
+    , fallingEnemies: FallingEnemyMap.t
     }
 
   fun enemyMapFromList (hd :: tl, map) =
@@ -135,7 +135,7 @@ struct
       , platformTree = platformTree
       , enemies = enemies
       , graph = graph
-      , fallingEnemies = Vector.fromList []
+      , fallingEnemies = FallingEnemyMap.empty
       }
     end
 end

@@ -31,6 +31,8 @@ fcore/entity-type.sml
 fcore/enemy/enemy-type.sml
 fcore/enemy/enemy-pair.sml
 fcore/enemy/enemy-map.sml
+fcore/enemy/falling-enemy-pair.sml
+fcore/enemy/falling-enemy-map.sml
 
 fcore/player/player-type.sml
 fcore/game-type.sml

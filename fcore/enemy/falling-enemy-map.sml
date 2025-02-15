@@ -1,0 +1,1 @@
+structure FallingEnemyMap = MakeGapMap(FallingEnemyPair)
