@@ -22,6 +22,9 @@ sig
     }
 
   type falling_enemy = {x: int, y: int, variant: variant}
+
+  datatype shoot_x_axis = SHOOT_LEFT | SHOOT_RIGHT | NO_SHOOT_X
+  datatype shoot_y_axis = SHOOT_UP | SHOOT_DOWN | NO_SHOOT_Y
 end
 
 structure EnemyType: ENEMY_TYPE =
@@ -48,4 +51,7 @@ struct
     }
 
   type falling_enemy = {x: int, y: int, variant: variant}
+
+  datatype shoot_x_axis = SHOOT_LEFT | SHOOT_RIGHT | NO_SHOOT_X
+  datatype shoot_y_axis = SHOOT_UP | SHOOT_DOWN | NO_SHOOT_Y
 end

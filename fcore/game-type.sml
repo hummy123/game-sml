@@ -102,7 +102,7 @@ struct
         , health = 1
         , xAxis = EntityType.MOVE_RIGHT
         , yAxis = EntityType.FALLING
-        , variant = EnemyType.PATROL_SLIME
+        , variant = EnemyType.FOLLOW_SLIME
         , batDirY = EnemyType.UP
         , platID = ~1
         , nextPlatID = ~1

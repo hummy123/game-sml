@@ -76,9 +76,16 @@ struct
 
          fun helpGetDrawVec (enemy: EnemyType.enemy, width, height) =
            let
-             val {x, y, ...} = enemy
+             val {x, y, variant, ...} = enemy
              val wratio = width / Constants.worldWidthReal
              val hratio = height / Constants.worldHeightReal
+
+             open EnemyType
+             val (r, g, b) =
+               case variant of
+                 PATROL_SLIME => (0.5, 0.5, 1.0)
+               | FOLLOW_SLIME => (1.0, 0.5, 0.5)
+               | STRAIGHT_BAT => (0.55, 0.55, 0.55)
            in
              if wratio < hratio then
                let
@@ -93,8 +100,7 @@ struct
 
                  val realSize = Constants.enemySizeReal * wratio
                in
-                 Block.lerp
-                   (x, y, realSize, realSize, width, height, 0.5, 0.5, 1.0)
+                 Block.lerp (x, y, realSize, realSize, width, height, r, g, b)
                end
              else
                let
@@ -109,8 +115,7 @@ struct
 
                  val realSize = Constants.enemySizeReal * hratio
                in
-                 Block.lerp
-                   (x, y, realSize, realSize, width, height, 0.5, 0.5, 1.0)
+                 Block.lerp (x, y, realSize, realSize, width, height, r, g, b)
                end
            end
 
