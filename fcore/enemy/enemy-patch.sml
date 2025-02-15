@@ -12,6 +12,7 @@ sig
   | W_BAT_MAX_Y of int
   | W_BAT_MIN_Y of int
   | W_BAT_DIR_Y of EnemyType.bat_dir_y
+  | W_FACING of EntityType.facing
 
   val withPatch: EnemyType.enemy * enemy_patch -> EnemyType.enemy
 
@@ -32,6 +33,7 @@ struct
   | W_BAT_MAX_Y of int
   | W_BAT_MIN_Y of int
   | W_BAT_DIR_Y of EnemyType.bat_dir_y
+  | W_FACING of EntityType.facing
 
   fun mkEnemy
     ( id
@@ -47,6 +49,7 @@ struct
     , batDirY
     , batMaxY
     , batMinY
+    , facing
     ) =
     { id = id
     , health = health
@@ -61,6 +64,7 @@ struct
     , batDirY = batDirY
     , batMaxY = batMaxY
     , batMinY = batMinY
+    , facing = facing
     }
 
   fun withPatch (enemy, patch) =
@@ -79,6 +83,7 @@ struct
         , batDirY
         , batMaxY
         , batMinY
+        , facing
         } = enemy
     in
       case patch of
@@ -97,6 +102,7 @@ struct
             , batDirY
             , batMaxY
             , batMinY
+            , facing
             )
       | W_X x =>
           mkEnemy
@@ -113,6 +119,7 @@ struct
             , batDirY
             , batMaxY
             , batMinY
+            , facing
             )
       | W_X_AXIS xAxis =>
           mkEnemy
@@ -129,6 +136,7 @@ struct
             , batDirY
             , batMaxY
             , batMinY
+            , facing
             )
       | W_Y y =>
           mkEnemy
@@ -145,6 +153,7 @@ struct
             , batDirY
             , batMaxY
             , batMinY
+            , facing
             )
       | W_Y_AXIS yAxis =>
           mkEnemy
@@ -161,6 +170,7 @@ struct
             , batDirY
             , batMaxY
             , batMinY
+            , facing
             )
       | W_PLAT_ID platID =>
           mkEnemy
@@ -177,6 +187,7 @@ struct
             , batDirY
             , batMaxY
             , batMinY
+            , facing
             )
       | W_NEXT_PLAT_ID nextPlatID =>
           mkEnemy
@@ -193,6 +204,7 @@ struct
             , batDirY
             , batMaxY
             , batMinY
+            , facing
             )
       | W_BAT_REST batRest =>
           mkEnemy
@@ -209,6 +221,7 @@ struct
             , batDirY
             , batMaxY
             , batMinY
+            , facing
             )
       | W_BAT_MAX_Y batMaxY =>
           mkEnemy
@@ -225,6 +238,7 @@ struct
             , batDirY
             , batMaxY
             , batMinY
+            , facing
             )
       | W_BAT_MIN_Y batMinY =>
           mkEnemy
@@ -241,6 +255,7 @@ struct
             , batDirY
             , batMaxY
             , batMinY
+            , facing
             )
       | W_BAT_DIR_Y batDirY =>
           mkEnemy
@@ -257,6 +272,24 @@ struct
             , batDirY
             , batMaxY
             , batMinY
+            , facing
+            )
+      | W_FACING facing =>
+          mkEnemy
+            ( id
+            , health
+            , x
+            , y
+            , xAxis
+            , yAxis
+            , variant
+            , platID
+            , nextPlatID
+            , batRest
+            , batDirY
+            , batMaxY
+            , batMinY
+            , facing
             )
     end
 

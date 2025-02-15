@@ -109,6 +109,7 @@ struct
         , batRest = 0
         , batMaxY = 485
         , batMinY = 625
+        , facing = EntityType.FACING_RIGHT
         }
       val enemy2 =
         { id = 2
@@ -124,6 +125,7 @@ struct
         , batRest = 0
         , batMaxY = 485
         , batMinY = 625
+        , facing = EntityType.FACING_RIGHT
         }
       val enemies = enemyMapFromList ([enemy1, enemy2], EnemyMap.empty)
       val graph = Graph.fromPlatforms (platforms, platformTree)

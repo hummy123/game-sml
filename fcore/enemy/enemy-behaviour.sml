@@ -95,13 +95,15 @@ struct
               (searchStartX, y, searchWidth, searchHeight, ~1, wallTree)
           in
             if hasWallAhead then
-              EnemyPatch.W_X_AXIS MOVE_RIGHT :: acc
+              EnemyPatch.W_FACING FACING_RIGHT :: EnemyPatch.W_X_AXIS MOVE_RIGHT
+              :: acc
             else if canWalkAhead (searchStartX, y, wallTree, platformTree) then
               (* invert direction if moving further left 
                * will result in falling down  *)
               acc
             else
-              EnemyPatch.W_X_AXIS MOVE_RIGHT :: acc
+              EnemyPatch.W_FACING FACING_RIGHT :: EnemyPatch.W_X_AXIS MOVE_RIGHT
+              :: acc
           end
       | MOVE_RIGHT =>
           let
@@ -116,13 +118,15 @@ struct
               (searchStartX, y, searchWidth, searchHeight, ~1, wallTree)
           in
             if hasWallAhead then
-              EnemyPatch.W_X_AXIS MOVE_LEFT :: acc
+              EnemyPatch.W_FACING FACING_LEFT :: EnemyPatch.W_X_AXIS MOVE_LEFT
+              :: acc
             else if canWalkAhead (searchStartX, y, wallTree, platformTree) then
               (* invert direction if moving further right
                * will result in falling down  *)
               acc
             else
-              EnemyPatch.W_X_AXIS MOVE_LEFT :: acc
+              EnemyPatch.W_FACING FACING_LEFT :: EnemyPatch.W_X_AXIS MOVE_LEFT
+              :: acc
           end
       | STAY_STILL => acc
     end
@@ -202,9 +206,11 @@ struct
         else (* have to travel either left or right before jumping *) if
           ecx < platX
         then
-          EnemyPatch.W_X_AXIS MOVE_RIGHT :: acc
+          EnemyPatch.W_FACING FACING_RIGHT :: EnemyPatch.W_X_AXIS MOVE_RIGHT
+          :: acc
         else
-          EnemyPatch.W_X_AXIS MOVE_LEFT :: acc
+          EnemyPatch.W_FACING FACING_LEFT :: EnemyPatch.W_X_AXIS MOVE_LEFT
+          :: acc
       else
         acc
     end
@@ -247,9 +253,11 @@ struct
         else (* have to travel either left or right before jumping *) if
           ecx < platX
         then
-          EnemyPatch.W_X_AXIS MOVE_RIGHT :: acc
+          EnemyPatch.W_FACING FACING_RIGHT :: EnemyPatch.W_X_AXIS MOVE_RIGHT
+          :: acc
         else
-          EnemyPatch.W_X_AXIS MOVE_LEFT :: acc
+          EnemyPatch.W_FACING FACING_LEFT :: EnemyPatch.W_X_AXIS MOVE_LEFT
+          :: acc
       else
         acc
     end
@@ -260,27 +268,31 @@ struct
      * So, if we check for jump first, we would always jump before dropping
      * even if jumping is not necessary. *)
     if TraceJump.traceRightDrop (enemy, #id nextPlatform, platformTree) then
-      EnemyPatch.W_Y_AXIS DROP_BELOW_PLATFORM :: EnemyPatch.W_X_AXIS MOVE_RIGHT
-      :: acc
+      EnemyPatch.W_FACING FACING_RIGHT
+      :: EnemyPatch.W_Y_AXIS DROP_BELOW_PLATFORM
+      :: EnemyPatch.W_X_AXIS MOVE_RIGHT :: acc
     else if TraceJump.traceRightJump (enemy, #id nextPlatform, platformTree) then
       if standingOnArea (enemy, platformTree) then
-        EnemyPatch.W_Y_AXIS (JUMPING 0) :: EnemyPatch.W_X_AXIS MOVE_RIGHT :: acc
+        EnemyPatch.W_FACING FACING_RIGHT :: EnemyPatch.W_Y_AXIS (JUMPING 0)
+        :: EnemyPatch.W_X_AXIS MOVE_RIGHT :: acc
       else
-        EnemyPatch.W_X_AXIS MOVE_RIGHT :: acc
+        EnemyPatch.W_FACING FACING_RIGHT :: EnemyPatch.W_X_AXIS MOVE_RIGHT
+        :: acc
     else
-      EnemyPatch.W_X_AXIS MOVE_RIGHT :: acc
+      EnemyPatch.W_FACING FACING_RIGHT :: EnemyPatch.W_X_AXIS MOVE_RIGHT :: acc
 
   fun getMoveLeftPatches (nextPlatform, enemy, platformTree, acc) =
     if TraceJump.traceLeftDrop (enemy, #id nextPlatform, platformTree) then
-      EnemyPatch.W_Y_AXIS DROP_BELOW_PLATFORM :: EnemyPatch.W_X_AXIS MOVE_LEFT
-      :: acc
+      EnemyPatch.W_FACING FACING_LEFT :: EnemyPatch.W_Y_AXIS DROP_BELOW_PLATFORM
+      :: EnemyPatch.W_X_AXIS MOVE_LEFT :: acc
     else if TraceJump.traceLeftJump (enemy, #id nextPlatform, platformTree) then
       if standingOnArea (enemy, platformTree) then
-        EnemyPatch.W_Y_AXIS (JUMPING 0) :: EnemyPatch.W_X_AXIS MOVE_LEFT :: acc
+        EnemyPatch.W_FACING FACING_LEFT :: EnemyPatch.W_Y_AXIS (JUMPING 0)
+        :: EnemyPatch.W_X_AXIS MOVE_LEFT :: acc
       else
-        EnemyPatch.W_X_AXIS MOVE_LEFT :: acc
+        EnemyPatch.W_FACING FACING_LEFT :: EnemyPatch.W_X_AXIS MOVE_LEFT :: acc
     else
-      EnemyPatch.W_X_AXIS MOVE_LEFT :: acc
+      EnemyPatch.W_FACING FACING_LEFT :: EnemyPatch.W_X_AXIS MOVE_LEFT :: acc
 
   (* get patches to help enemy move to nextPlatformID *)
   fun getPathToNextPlatform
@@ -331,13 +343,9 @@ struct
   fun startPatrolPatches (player, enemy, wallTree, platformTree, acc) =
     case #xAxis enemy of
       STAY_STILL =>
-        let
-          val acc =
-            if #x player <= #x enemy then EnemyPatch.W_X_AXIS MOVE_RIGHT :: acc
-            else EnemyPatch.W_X_AXIS MOVE_LEFT :: acc
-        in
-          acc
-        end
+        (case #facing enemy of
+           FACING_RIGHT => EnemyPatch.W_X_AXIS MOVE_RIGHT :: acc
+         | FACING_LEFT => EnemyPatch.W_X_AXIS MOVE_LEFT :: acc)
     | _ => getPatrolPatches (enemy, wallTree, platformTree, acc)
 
   fun isInFollowRange (player, enemy) =
@@ -484,10 +492,11 @@ struct
             (* make enemy move in opposite direction *)
             case xAxis of
               MOVE_RIGHT =>
-                EnemyPatch.W_X_AXIS MOVE_LEFT :: EnemyPatch.W_X (x - 1)
-                :: patches
+                EnemyPatch.W_FACING FACING_LEFT :: EnemyPatch.W_X_AXIS MOVE_LEFT
+                :: EnemyPatch.W_X (x - 1) :: patches
             | MOVE_LEFT =>
-                EnemyPatch.W_X_AXIS MOVE_RIGHT :: EnemyPatch.W_X (x + 1)
+                EnemyPatch.W_FACING FACING_RIGHT
+                :: EnemyPatch.W_X_AXIS MOVE_RIGHT :: EnemyPatch.W_X (x + 1)
                 :: patches
             | _ => patches
           else

@@ -18,6 +18,7 @@ sig
     , batDirY: bat_dir_y
     , batMaxY: int
     , batMinY: int
+    , facing: EntityType.facing
     }
 
   type falling_enemy = {x: int, y: int, variant: variant}
@@ -43,6 +44,7 @@ struct
     , batDirY: bat_dir_y
     , batMaxY: int
     , batMinY: int
+    , facing: EntityType.facing
     }
 
   type falling_enemy = {x: int, y: int, variant: variant}
