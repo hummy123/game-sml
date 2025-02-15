@@ -86,7 +86,9 @@ struct
                  PATROL_SLIME => (0.5, 0.5, 1.0)
                | FOLLOW_SLIME => (1.0, 0.5, 0.5)
                | STRAIGHT_BAT => (0.55, 0.55, 0.55)
-               | SHIELD_SLIME => (0.33, 0.33, 0.11)
+               | SHIELD_SLIME =>
+                   if #shieldOn enemy then (0.33, 0.33, 0.11)
+                   else (0.5, 0.5, 1.0)
            in
              if wratio < hratio then
                let

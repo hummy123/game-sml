@@ -517,8 +517,54 @@ struct
       EnemyPatch.withPatches (enemy, patches)
     end
 
+  fun getShieldOnPatches (player, enemy) =
+    if #platID player = #platID enemy then
+      []
+    else
+      (* turn off shield if player moved to a different platform *)
+      [EnemyPatch.W_SHIELD_ON false]
+
+  fun getShieldOffPatches
+    (player, enemy, walls, wallTree, platforms, platformTree) =
+    let
+      val {x = ex, y = ey, facing = eFacing, platID = eID, ...} = enemy
+      val {x = px, y = py, platID = pID, ...} = player
+
+      val shouldTurnShieldOn =
+        eID = pID
+        andalso
+        case eFacing of
+          FACING_RIGHT => px > ex
+        | FACING_LEFT => px < ex
+    in
+      if shouldTurnShieldOn then
+        [EnemyPatch.W_SHIELD_ON true, EnemyPatch.W_X_AXIS STAY_STILL]
+      else
+        startPatrolPatches (player, enemy, wallTree, platformTree, [])
+    end
+
   fun updateShieldSlime
-    (player, enemy, walls, wallTree, platforms, platformTree) = enemy
+    (player, enemy, walls, wallTree, platforms, platformTree) =
+    let
+      val size = Constants.enemySize
+      val enemy = withDefaultYAxis enemy
+
+      val patches =
+        if #shieldOn enemy then
+          getShieldOnPatches (player, enemy)
+        else
+          getShieldOffPatches
+            (player, enemy, walls, wallTree, platforms, platformTree)
+      val enemy = EnemyPatch.withPatches (enemy, patches)
+
+      val patches = EnemyPhysics.getPhysicsPatches enemy
+      val enemy = EnemyPatch.withPatches (enemy, patches)
+
+      val patches = EnemyPhysics.getEnvironmentPatches
+        (enemy, walls, wallTree, platforms, platformTree)
+    in
+      EnemyPatch.withPatches (enemy, patches)
+    end
 
   fun updateEnemyState
     (enemy, walls, wallTree, platforms, platformTree, player, graph) =
