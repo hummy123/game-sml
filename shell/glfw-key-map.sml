@@ -1,7 +1,5 @@
 structure GlfwKeyMap =
 struct
-  open CoreKey
-
   structure KeyMap =
     MakeGapMap
       (struct
@@ -15,14 +13,9 @@ struct
          val maxNodeSize = 1024
        end)
 
-  val map = ref KeyMap.empty
-
-  fun codeFromKey (key: int) =
-    KeyMap.get (key, !map)
-
   fun helpInitKeyMap (pos, pairs, acc) =
     if pos = Vector.length pairs then
-      map := acc
+      acc
     else
       let
         val (code, key) = Vector.sub (pairs, pos)
@@ -33,6 +26,8 @@ struct
 
   fun initKeyMap () =
     let
+      open CoreKey
+
       (* vector of (glfw_key_code, Core.key_code) tuples. *)
       val pairs =
        #[ (32, KEY_SPACE)
@@ -157,6 +152,10 @@ struct
         , (348, KEY_MENU)
         ]
     in
-      KeyMap.empty
+      helpInitKeyMap (0, pairs, KeyMap.empty)
     end
+
+  val map = initKeyMap ()
+
+  fun codeFromKey (key: int) = KeyMap.get (key, map)
 end

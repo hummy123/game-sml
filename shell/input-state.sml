@@ -1,5 +1,14 @@
 structure InputState =
 struct
+  val keyMappings = ref
+    { left = CoreKey.KEY_S
+    , right = CoreKey.KEY_F
+    , down = CoreKey.KEY_D
+    , up = CoreKey.KEY_E
+    , attack = CoreKey.KEY_J
+    , jump = CoreKey.KEY_K
+    }
+
   (* global state detecting button inputs *)
   val state =
     { leftHeld = ref false
@@ -19,6 +28,30 @@ struct
     , attackHeld = !(#attackHeld state)
     }
 
+  fun actionToBool action = action = Input.PRESS
+
+  fun handleKey (key, action) =
+    case GlfwKeyMap.codeFromKey key of
+      SOME code =>
+        let
+          val {left, right, down, up, attack, jump} = !keyMappings
+          val action = actionToBool action
+        in
+          if code = left then #leftHeld state := action
+          else if code = up then #upHeld state := action
+          else if code = right then #rightHeld state := action
+          else if code = down then #downHeld state := action
+          else if code = attack then #attackHeld state := action
+          else if code = jump then #upHeld state := action
+          else ()
+        end
+    | NONE => ()
+
+  fun keyCallback (key, scancode, action, mods) =
+    let open Input
+    in if mods = 0 then handleKey (key, action) else ()
+    end
+
   fun getWidth () =
     !(#width state)
 
@@ -27,37 +60,6 @@ struct
 
   fun sizeCallback (width, height) =
     (#width state := width; #height state := height)
-
-  open Input
-
-  fun handleKey (key, action) =
-    if key = KEY_K then
-      if action = PRESS then (#upHeld state) := true
-      else if action = RELEASE then (#upHeld state) := false
-      else ()
-    else if key = KEY_D then
-      if action = PRESS then (#downHeld state) := true
-      else if action = RELEASE then (#downHeld state) := false
-      else ()
-    else if key = KEY_S then
-      if action = PRESS then (#leftHeld state) := true
-      else if action = RELEASE then (#leftHeld state) := false
-      else ()
-    else if key = KEY_F then
-      if action = PRESS then (#rightHeld state) := true
-      else if action = RELEASE then (#rightHeld state) := false
-      else ()
-    else if key = KEY_J then
-      if action = PRESS then (#attackHeld state) := true
-      else if action = RELEASE then (#attackHeld state) := false
-      else ()
-    else
-      ()
-
-  fun keyCallback (key, scancode, action, mods) =
-    let open Input
-    in if mods = 0 then handleKey (key, action) else ()
-    end
 
   fun registerCallbacks window =
     let
