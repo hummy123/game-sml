@@ -15,6 +15,7 @@ struct
     , rightHeld = ref false
     , upHeld = ref false
     , downHeld = ref false
+    , jumpHeld = ref false
     , attackHeld = ref false
     , width = ref (1920.0 : Real32.real)
     , height = ref (1080.0 : Real32.real)
@@ -26,6 +27,7 @@ struct
     , upHeld = !(#upHeld state)
     , downHeld = !(#downHeld state)
     , attackHeld = !(#attackHeld state)
+    , jumpHeld = !(#jumpHeld state)
     }
 
   fun actionToBool action = action = Input.PRESS
@@ -42,7 +44,7 @@ struct
           else if code = right then #rightHeld state := action
           else if code = down then #downHeld state := action
           else if code = attack then #attackHeld state := action
-          else if code = jump then #upHeld state := action
+          else if code = jump then #jumpHeld state := action
           else ()
         end
     | NONE => ()

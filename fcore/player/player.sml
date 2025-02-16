@@ -50,11 +50,11 @@ struct
         if jumpPressed then (* apply gravity *) FALLING else JUMPING 0
     | _ => prevAxis
 
-  fun getJumpPatches (player, upHeld, downHeld, acc) =
+  fun getJumpPatches (player, jumpHeld, downHeld, acc) =
     let
       val {yAxis, jumpPressed, ...} = player
     in
-      case (upHeld, downHeld) of
+      case (jumpHeld, downHeld) of
         (false, false) =>
           let
             val yAxis = defaultYAxis yAxis
@@ -205,7 +205,7 @@ struct
         , ...
         } = player
 
-      val {leftHeld, rightHeld, upHeld, downHeld, attackHeld} = input
+      val {leftHeld, rightHeld, upHeld, downHeld, attackHeld, jumpHeld} = input
 
       val xAxis = getXAxis (leftHeld, rightHeld)
       val facing = getFacing (facing, xAxis)
@@ -225,7 +225,7 @@ struct
         , mainAttackPressed
         )
 
-      val acc = getJumpPatches (player, upHeld, downHeld, acc)
+      val acc = getJumpPatches (player, jumpHeld, downHeld, acc)
     in
       acc
     end
