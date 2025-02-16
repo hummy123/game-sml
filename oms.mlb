@@ -63,6 +63,12 @@ in
   ffi/glfw-input.sml
 end
 
+ann
+  "allowVectorExps true"
+in
+  shell/glfw-key-map.sml
+end
+
 shell/input-state.sml
 shell/gl-shaders.sml
 shell/gl-draw.sml
