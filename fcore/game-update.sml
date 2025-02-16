@@ -11,6 +11,7 @@ struct
         , enemies
         , graph
         , fallingEnemies
+        , userKeys
         } = game
 
       val player = Player.runPhysicsAndInput (game, input)
@@ -39,6 +40,7 @@ struct
       , enemies = enemies
       , graph = graph
       , fallingEnemies = fallingEnemies
+      , userKeys = userKeys
       }
     end
 end

@@ -142,7 +142,6 @@ struct
     , defeteadEnemies
     , projectiles
     , attackHeld
-    , chargeHeld
     , charge
     , player
     , acc
@@ -206,8 +205,7 @@ struct
         , ...
         } = player
 
-      val {leftHeld, rightHeld, upHeld, downHeld, attackHeld, chargeHeld} =
-        input
+      val {leftHeld, rightHeld, upHeld, downHeld, attackHeld} = input
 
       val xAxis = getXAxis (leftHeld, rightHeld)
       val facing = getFacing (facing, xAxis)
@@ -221,7 +219,6 @@ struct
         , enemies
         , projectiles
         , attackHeld
-        , chargeHeld
         , charge
         , player
         , acc

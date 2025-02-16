@@ -9,6 +9,7 @@ sig
     , enemies: EnemyMap.t
     , graph: PlatSet.elem vector vector
     , fallingEnemies: FallingEnemyMap.t
+    , userKeys: CoreKey.user_key
     }
 
   val initial: game_type
@@ -25,6 +26,7 @@ struct
     , enemies: EnemyMap.t
     , graph: PlatSet.elem vector vector
     , fallingEnemies: FallingEnemyMap.t
+    , userKeys: CoreKey.user_key
     }
 
   fun enemyMapFromList (hd :: tl, map) =
@@ -51,6 +53,16 @@ struct
         , charge = Constants.maxCharge
         , projectiles = Vector.fromList []
         , platID = ~1
+        }
+
+      (* todo: replace initialKeys with keys parsed from file *)
+      val initialKeys =
+        { left = CoreKey.KEY_S
+        , right = CoreKey.KEY_L
+        , up = CoreKey.KEY_E
+        , down = CoreKey.KEY_D
+        , jump = CoreKey.KEY_K
+        , attack = CoreKey.KEY_J
         }
 
       val wall1 = {id = 1, x = 0, y = 0, width = 100, height = 1080}
@@ -140,6 +152,7 @@ struct
       , enemies = enemies
       , graph = graph
       , fallingEnemies = FallingEnemyMap.empty
+      , userKeys = initialKeys
       }
     end
 end
