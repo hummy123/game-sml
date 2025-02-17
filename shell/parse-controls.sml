@@ -14,7 +14,7 @@ struct
     | "ACTION_RIGHT" => SOME ACTION_RIGHT
     | "ACTION_UP" => SOME ACTION_UP
     | "ACTION_DOWN" => SOME ACTION_DOWN
-    | "ACTTION_JUMP" => SOME ACTION_JUMP
+    | "ACTION_JUMP" => SOME ACTION_JUMP
     | "ACTION_ATTACK" => SOME ACTION_ATTACK
     | _ => NONE
 
@@ -107,6 +107,17 @@ struct
       | _ => NONE
     end
 
+  (* We don't want to attempt to parse strings 
+   * which have trailing spaces or newlines 
+   * so get the length of the last non-space chr *)
+  fun getLastPos (pos, line) =
+    if pos = String.size line then
+      String.size line - 1
+    else
+      let val chr = String.sub (line, pos)
+      in if Char.isSpace chr then pos - 1 else getLastPos (pos + 1, line)
+      end
+
   fun helpParse (controls, io) =
     case TextIO.inputLine io of
       SOME line =>
@@ -117,13 +128,13 @@ struct
             helpParse (controls, io)
           else
             let
-              val actionStart = colon + 1
-              val actionLength = String.size line - actionStart
-              val actionString =
-                String.substring (line, actionStart, actionLength)
+              val actionString = String.substring (line, 0, colon)
               val action = actionFromString actionString
 
-              val keyString = String.substring (line, 0, colon)
+              val keyStart = colon + 1
+              val keyFinish = getLastPos (keyStart, line)
+              val keyLength = keyFinish - keyStart + 1
+              val keyString = String.substring (line, keyStart, keyLength)
               val key = CoreKey.keyFromString keyString
 
               val controls =
@@ -135,7 +146,7 @@ struct
               helpParse (controls, io)
             end
         end
-    | NONE => returnControls controls
+    | NONE => let val () = TextIO.closeIn io in returnControls controls end
 
   fun parse () =
     let

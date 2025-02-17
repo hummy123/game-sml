@@ -70,7 +70,7 @@ in
 end
 
 shell/input-state.sml
+shell/parse-controls.sml
 shell/gl-shaders.sml
 shell/gl-draw.sml
-shell/parse-controls.sml
 shell/shell.sml

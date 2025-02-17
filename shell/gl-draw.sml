@@ -265,7 +265,20 @@ struct
     | true => Glfw.terminate ()
 
   fun loop window =
-    let val shellState = create window
-    in helpLoop (shellState, GameType.initial)
+    let
+      val shellState = create window
+      val controls =
+        case ParseControls.parse () of
+          SOME controls => controls
+        | NONE =>
+            { left = CoreKey.KEY_LEFT
+            , right = CoreKey.KEY_RIGHT
+            , up = CoreKey.KEY_UP
+            , down = CoreKey.KEY_DOWN
+            , jump = CoreKey.KEY_Z
+            , attack = CoreKey.KEY_X
+            }
+    in
+      helpLoop (shellState, GameType.initial controls)
     end
 end

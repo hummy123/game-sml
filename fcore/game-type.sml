@@ -12,7 +12,7 @@ sig
     , userKeys: CoreKey.user_key
     }
 
-  val initial: game_type
+  val initial: CoreKey.user_key -> game_type
 end
 
 structure GameType :> GAME_TYPE =
@@ -35,7 +35,7 @@ struct
         end
     | enemyMapFromList ([], map) = map
 
-  val initial: game_type =
+  fun initial userKeys =
     let
       val player =
         { yAxis = EntityType.JUMPING 0
@@ -53,16 +53,6 @@ struct
         , charge = Constants.maxCharge
         , projectiles = Vector.fromList []
         , platID = ~1
-        }
-
-      (* todo: replace initialKeys with keys parsed from file *)
-      val initialKeys =
-        { left = CoreKey.KEY_S
-        , right = CoreKey.KEY_L
-        , up = CoreKey.KEY_E
-        , down = CoreKey.KEY_D
-        , jump = CoreKey.KEY_K
-        , attack = CoreKey.KEY_J
         }
 
       val wall1 = {id = 1, x = 0, y = 0, width = 100, height = 1080}
@@ -152,7 +142,7 @@ struct
       , enemies = enemies
       , graph = graph
       , fallingEnemies = FallingEnemyMap.empty
-      , userKeys = initialKeys
+      , userKeys = userKeys
       }
     end
 end
