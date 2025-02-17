@@ -30,7 +30,9 @@ struct
     , jumpHeld = !(#jumpHeld state)
     }
 
-  fun actionToBool action = action = Input.PRESS
+  (* there are three action states reported by OS: PRESS, REPEAT and RELEASE. 
+   * If input is PRESS or REPEAT, then return true, or else return false. *)
+  fun actionToBool action = action <> Input.RELEASE
 
   fun handleKey (key, action) =
     case GlfwKeyMap.codeFromKey key of
