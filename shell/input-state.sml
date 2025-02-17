@@ -9,6 +9,8 @@ struct
     , jump = CoreKey.KEY_K
     }
 
+  fun setControls controls = keyMappings := controls
+
   (* global state detecting button inputs *)
   val state =
     { leftHeld = ref false

@@ -278,6 +278,8 @@ struct
             , jump = CoreKey.KEY_Z
             , attack = CoreKey.KEY_X
             }
+
+      val () = InputState.setControls controls
     in
       helpLoop (shellState, GameType.initial controls)
     end
