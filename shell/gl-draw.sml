@@ -233,7 +233,7 @@ struct
           val width = InputState.getWidth ()
           val height = InputState.getHeight ()
 
-          val game = GameUpdate.update (game, input)
+          val game = LevelUpdate.update (game, input)
 
           val playerVec = Player.getDrawVec (#player game, width, height)
           val enemyVec = Enemy.getDrawVec (#enemies game, width, height)
@@ -281,6 +281,6 @@ struct
 
       val () = InputState.setControls controls
     in
-      helpLoop (shellState, GameType.initial controls)
+      helpLoop (shellState, LevelType.initial controls)
     end
 end

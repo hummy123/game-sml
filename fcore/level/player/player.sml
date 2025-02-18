@@ -376,7 +376,7 @@ struct
          fun fold (_, (), defeatedList) = {angle = 1} :: defeatedList
        end)
 
-  fun runPhysicsAndInput (game: GameType.game_type, input) =
+  fun runPhysicsAndInput (game: LevelType.level_type, input) =
     let
       val player = #player game
 

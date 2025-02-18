@@ -102,7 +102,7 @@ struct
            end
        end)
 
-  fun getDrawVec (game: GameType.game_type, width, height) =
+  fun getDrawVec (game: LevelType.level_type, width, height) =
     let
       val fallingEnemies = #fallingEnemies game
       val wratio = width / Constants.worldWidthReal

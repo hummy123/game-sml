@@ -2,11 +2,11 @@ $(SML_LIB)/basis/basis.mlb
 
 (* fcore *)
 fcore/constants.sml
-fcore/collision.sml
+fcore/level/collision.sml
 
-fcore/quad-tree-type.sml
-fcore/quad-tree-fold.sml
-fcore/quad-tree.sml
+fcore/level/quad-tree-type.sml
+fcore/level/quad-tree-fold.sml
+fcore/level/quad-tree.sml
 
 vendored/brolib-sml/src/gap_map.sml
 
@@ -17,39 +17,40 @@ ann
   "allowVectorExps true"
 in
   fcore/block.sml
-  fcore/player/player-sprite.sml
+  fcore/level/player/player-sprite.sml
   fcore/field.sml
-  fcore/chain-edge.sml
+  fcore/level/chain-edge.sml
 end
 
-fcore/wall.sml
-fcore/platform.sml
+fcore/level/wall.sml
+fcore/level/platform.sml
 
-fcore/graph.sml
-fcore/path-finding.sml
+fcore/level/graph.sml
+fcore/level/path-finding.sml
 
-fcore/entity-type.sml
-fcore/enemy/enemy-type.sml
-fcore/enemy/enemy-pair.sml
-fcore/enemy/enemy-map.sml
-fcore/enemy/falling-enemy-pair.sml
-fcore/enemy/falling-enemy-map.sml
+fcore/level/entity-type.sml
+fcore/level/enemy/enemy-type.sml
+fcore/level/enemy/enemy-pair.sml
+fcore/level/enemy/enemy-map.sml
+fcore/level/enemy/falling-enemy-pair.sml
+fcore/level/enemy/falling-enemy-map.sml
 
 fcore/core-key.sml
-fcore/player/player-type.sml
-fcore/game-type.sml
+fcore/level/player/player-type.sml
+fcore/level/level-type.sml
 
-fcore/player/player-patch.sml
-fcore/enemy/enemy-patch.sml
-fcore/physics.sml
+fcore/level/player/player-patch.sml
+fcore/level/enemy/enemy-patch.sml
+fcore/level/physics.sml
 
-fcore/trace-jump.sml
-fcore/enemy/enemy-behaviour.sml
-fcore/enemy/enemy.sml
-fcore/enemy/falling-enemies.sml
-fcore/player/player.sml
-fcore/player/player-attack.sml
-fcore/projectile.sml
+fcore/level/trace-jump.sml
+fcore/level/enemy/enemy-behaviour.sml
+fcore/level/enemy/enemy.sml
+fcore/level/enemy/falling-enemies.sml
+fcore/level/player/player.sml
+fcore/level/player/player-attack.sml
+fcore/level/projectile.sml
+fcore/level/level-update.sml
 
 fcore/game-update.sml
 
