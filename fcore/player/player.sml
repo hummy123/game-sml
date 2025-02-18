@@ -496,34 +496,18 @@ struct
   (* block is placeholder asset *)
   fun helpGetDrawVec
     (x, y, realWidth, realHeight, width, height, attacked, mainAttack) =
-    case mainAttack of
-      MAIN_NOT_ATTACKING =>
-        (case attacked of
-           NOT_ATTACKED =>
-             PlayerSprite.lerp (x, y, realWidth, realHeight, width, height)
-         | ATTACKED amt =>
-             if amt mod 5 = 0 then
-               PlayerSprite.lerp (x, y, realWidth, realHeight, width, height)
-             else
-               PlayerSprite.lerp (x, y, realWidth, realHeight, width, height))
-    | MAIN_THROWING =>
-        (case attacked of
-           NOT_ATTACKED =>
-             PlayerSprite.lerp (x, y, realWidth, realHeight, width, height)
-         | ATTACKED amt =>
-             if amt mod 5 = 0 then
-               PlayerSprite.lerp (x, y, realWidth, realHeight, width, height)
-             else
-               PlayerSprite.lerp (x, y, realWidth, realHeight, width, height))
-    | MAIN_ATTACKING _ =>
-        (case attacked of
-           NOT_ATTACKED =>
-             PlayerSprite.lerp (x, y, realWidth, realHeight, width, height)
-         | ATTACKED amt =>
-             if amt mod 5 = 0 then
-               PlayerSprite.lerp (x, y, realWidth, realHeight, width, height)
-             else
-               PlayerSprite.lerp (x, y, realWidth, realHeight, width, height))
+    let
+      val (r, g, b) =
+        case attacked of
+          NOT_ATTACKED => (1.0, 1.0, 1.0)
+        | ATTACKED amt =>
+            if amt mod 5 = 0 then 
+              (1.0, 1.0, 1.0)
+            else 
+              (1.0, 0.75, 0.75)
+    in
+      PlayerSprite.lerp (x, y, realWidth, realHeight, width, height, r, g, b)
+    end
 
   fun getDrawVec (player: player, width, height) =
     let
