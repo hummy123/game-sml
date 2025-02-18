@@ -52,6 +52,7 @@ fcore/level/player/player-attack.sml
 fcore/level/projectile.sml
 fcore/level/level-update.sml
 
+fcore/game-type.sml
 fcore/game-update.sml
 
 (* shell *)

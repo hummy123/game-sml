@@ -9,10 +9,9 @@ sig
     , enemies: EnemyMap.t
     , graph: PlatSet.elem vector vector
     , fallingEnemies: FallingEnemyMap.t
-    , userKeys: CoreKey.user_key
     }
 
-  val initial: CoreKey.user_key -> level_type
+  val initial: level_type
 end
 
 structure LevelType :> LEVEL_TYPE =
@@ -26,7 +25,6 @@ struct
     , enemies: EnemyMap.t
     , graph: PlatSet.elem vector vector
     , fallingEnemies: FallingEnemyMap.t
-    , userKeys: CoreKey.user_key
     }
 
   fun enemyMapFromList (hd :: tl, map) =
@@ -35,7 +33,7 @@ struct
         end
     | enemyMapFromList ([], map) = map
 
-  fun initial userKeys =
+  val initial =
     let
       val player =
         { yAxis = EntityType.JUMPING 0
@@ -142,7 +140,6 @@ struct
       , enemies = enemies
       , graph = graph
       , fallingEnemies = FallingEnemyMap.empty
-      , userKeys = userKeys
       }
     end
 end

@@ -213,13 +213,47 @@ struct
   fun drawField ({fieldVertexBuffer, fieldProgram, fieldLength, ...}) =
     drawXyrgba (fieldVertexBuffer, fieldProgram, fieldLength)
 
-  fun draw (shellState: t) =
+  fun drawLevel (shellState: t) =
     let
       val _ = drawWall shellState
       val _ = drawPlayer shellState
       val _ = drawField shellState
     in
       ()
+    end
+
+  fun drawMode (shellState: t, game: GameType.game_type) =
+    let
+      open GameType
+    in
+      case #mode game of
+        LEVEL level =>
+          let
+            val width = InputState.getWidth ()
+            val height = InputState.getHeight ()
+
+            val playerVec = Player.getDrawVec (#player level, width, height)
+            val enemyVec = Enemy.getDrawVec (#enemies level, width, height)
+            val playerVec = Vector.concat [playerVec, enemyVec]
+
+            val wallVec = Wall.getDrawVec (#walls level, width, height)
+            val platVec = Platform.getDrawVec (#platforms level, width, height)
+            val chainVec = Player.getFieldVec (#player level, width, height)
+            val fallingVec = FallingEnemies.getDrawVec (level, width, height)
+            val wallVec = Vector.concat [wallVec, platVec, chainVec, fallingVec]
+
+            val pelletVec = Player.getPelletVec (#player level, width, height)
+            val projectileVec =
+              Projectile.getProjectileVec (#player level, width, height)
+            val fieldVec = Vector.concat [pelletVec, projectileVec]
+
+            val shellState = uploadWall (shellState, wallVec)
+            val shellState = uploadPlayer (shellState, playerVec)
+            val shellState = uploadField (shellState, fieldVec)
+            val () = drawLevel shellState
+          in
+            shellState
+          end
     end
 
   fun helpLoop (shellState as {window, ...}: t, game) =
@@ -230,32 +264,9 @@ struct
           val _ = Gles3.clear ()
 
           val input = InputState.getSnapshot ()
-          val width = InputState.getWidth ()
-          val height = InputState.getHeight ()
+          val game = GameUpdate.update (game, input)
 
-          val game = LevelUpdate.update (game, input)
-
-          val playerVec = Player.getDrawVec (#player game, width, height)
-          val enemyVec = Enemy.getDrawVec (#enemies game, width, height)
-          val playerVec = Vector.concat [playerVec, enemyVec]
-
-          val wallVec = Wall.getDrawVec (#walls game, width, height)
-          val platVec = Platform.getDrawVec (#platforms game, width, height)
-          val chainVec = Player.getFieldVec (#player game, width, height)
-          val fallingVec = FallingEnemies.getDrawVec (game, width, height)
-          val wallVec = Vector.concat [wallVec, platVec, chainVec, fallingVec]
-
-          (* temp *)
-          val pelletVec = Player.getPelletVec (#player game, width, height)
-          val projectileVec =
-            Projectile.getProjectileVec (#player game, width, height)
-          val fieldVec = Vector.concat [pelletVec, projectileVec]
-
-          val shellState = uploadWall (shellState, wallVec)
-          val shellState = uploadPlayer (shellState, playerVec)
-          val shellState = uploadField (shellState, fieldVec)
-
-          val _ = draw shellState
+          val shellState = drawMode (shellState, game)
 
           val _ = Glfw.swapBuffers window
           val _ = Glfw.pollEvents ()
@@ -281,6 +292,6 @@ struct
 
       val () = InputState.setControls controls
     in
-      helpLoop (shellState, LevelType.initial controls)
+      helpLoop (shellState, GameType.init controls)
     end
 end

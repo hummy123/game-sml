@@ -501,10 +501,7 @@ struct
         case attacked of
           NOT_ATTACKED => (1.0, 1.0, 1.0)
         | ATTACKED amt =>
-            if amt mod 5 = 0 then 
-              (1.0, 1.0, 1.0)
-            else 
-              (1.0, 0.75, 0.75)
+            if amt mod 5 = 0 then (1.0, 1.0, 1.0) else (1.0, 0.75, 0.75)
     in
       PlayerSprite.lerp (x, y, realWidth, realHeight, width, height, r, g, b)
     end
