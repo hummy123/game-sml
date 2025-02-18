@@ -103,10 +103,11 @@ struct
       Vector.fromList acc
     else
       let
-        val diff =
-          Constants.halfPlayerSizeReal - (Constants.projectileSize / 2.0)
-        val x = Real32.fromInt x + diff
-        val y = Real32.fromInt y + diff
+        val halfProjectileSize = Constants.projectileSize / 2.0
+        val diffX = Constants.halfPlayerWidthReal - halfProjectileSize
+        val diffY = Constants.halfPlayerHeightReal - halfProjectileSize
+        val x = Real32.fromInt x + diffX
+        val y = Real32.fromInt y + diffY
 
         val {angle} = Vector.sub (defeteadEnemies, pos)
         val angle = degreesToRadians angle
@@ -343,8 +344,8 @@ struct
                 * and then chose appropriate direction to recoil in *)
                let
                  val {x, ...} = player
-                 val pFinishX = x + Constants.playerSize
-                 val pHalfW = Constants.playerSize div 2
+                 val pFinishX = x + Constants.playerWidth
+                 val pHalfW = Constants.playerWidth div 2
                  val pCentreX = x + pHalfW
                in
                  case EnemyMap.get (enemyID, enemies) of
@@ -433,11 +434,12 @@ struct
     | _ =>
         let
           val {x, y, ...} = player
-          val size = Constants.playerSize
+          val ew = Constants.playerWidth
+          val eh = Constants.playerHeight
           val env = (enemies, player)
           val state = []
           val patches = FoldEnemies.foldRegion
-            (x, y, size, size, env, state, enemyTree)
+            (x, y, ew, eh, env, state, enemyTree)
         in
           PlayerPatch.withPatches (player, patches)
         end
@@ -492,35 +494,36 @@ struct
   (*** DRAWING FUNCTIONS ***)
 
   (* block is placeholder asset *)
-  fun helpGetDrawVec (x, y, size, width, height, attacked, mainAttack) =
+  fun helpGetDrawVec
+    (x, y, realWidth, realHeight, width, height, attacked, mainAttack) =
     case mainAttack of
       MAIN_NOT_ATTACKING =>
         (case attacked of
            NOT_ATTACKED =>
-             Block.lerp (x, y, size, size, width, height, 0.5, 0.5, 0.5)
+             PlayerSprite.lerp (x, y, realWidth, realHeight, width, height)
          | ATTACKED amt =>
              if amt mod 5 = 0 then
-               Block.lerp (x, y, size, size, width, height, 0.9, 0.9, 0.9)
+               PlayerSprite.lerp (x, y, realWidth, realHeight, width, height)
              else
-               Block.lerp (x, y, size, size, width, height, 0.5, 0.5, 0.5))
+               PlayerSprite.lerp (x, y, realWidth, realHeight, width, height))
     | MAIN_THROWING =>
         (case attacked of
            NOT_ATTACKED =>
-             Block.lerp (x, y, size, size, width, height, 0.5, 0.5, 0.5)
+             PlayerSprite.lerp (x, y, realWidth, realHeight, width, height)
          | ATTACKED amt =>
              if amt mod 5 = 0 then
-               Block.lerp (x, y, size, size, width, height, 0.9, 0.9, 0.9)
+               PlayerSprite.lerp (x, y, realWidth, realHeight, width, height)
              else
-               Block.lerp (x, y, size, size, width, height, 0.5, 0.5, 0.5))
+               PlayerSprite.lerp (x, y, realWidth, realHeight, width, height))
     | MAIN_ATTACKING _ =>
         (case attacked of
            NOT_ATTACKED =>
-             Block.lerp (x, y, size, size, width, height, 1.0, 0.5, 0.5)
+             PlayerSprite.lerp (x, y, realWidth, realHeight, width, height)
          | ATTACKED amt =>
              if amt mod 5 = 0 then
-               Block.lerp (x, y, size, size, width, height, 1.0, 0.9, 0.9)
+               PlayerSprite.lerp (x, y, realWidth, realHeight, width, height)
              else
-               Block.lerp (x, y, size, size, width, height, 1.0, 0.5, 0.5))
+               PlayerSprite.lerp (x, y, realWidth, realHeight, width, height))
 
   fun getDrawVec (player: player, width, height) =
     let
@@ -539,9 +542,11 @@ struct
           val x = Real32.fromInt x * wratio
           val y = Real32.fromInt y * wratio + yOffset
 
-          val realSize = Constants.playerSizeReal * wratio
+          val realWidth = Constants.playerWidthReal * wratio
+          val realHeight = Constants.playerHeightReal * wratio
         in
-          helpGetDrawVec (x, y, realSize, width, height, attacked, mainAttack)
+          helpGetDrawVec
+            (x, y, realWidth, realHeight, width, height, attacked, mainAttack)
         end
       else
         let
@@ -554,9 +559,11 @@ struct
           val x = Real32.fromInt x * hratio + xOffset
           val y = Real32.fromInt y * hratio
 
-          val realSize = Constants.playerSizeReal * hratio
+          val realWidth = Constants.playerWidthReal * hratio
+          val realHeight = Constants.playerHeightReal * hratio
         in
-          helpGetDrawVec (x, y, realSize, width, height, attacked, mainAttack)
+          helpGetDrawVec
+            (x, y, realWidth, realHeight, width, height, attacked, mainAttack)
         end
     end
 
@@ -569,7 +576,7 @@ struct
           val hratio = height / Constants.worldHeightReal
           val x =
             case #facing player of
-              FACING_RIGHT => x + Constants.playerSize
+              FACING_RIGHT => x + Constants.playerWidth
             | FACING_LEFT => x - length
         in
           if wratio < hratio then
@@ -584,7 +591,7 @@ struct
               val y = Real32.fromInt y * wratio + yOffset
 
               val realLength = Real32.fromInt length * wratio
-              val realSize = Constants.playerSizeReal * wratio
+              val realHeight = Constants.playerHeightReal * wratio
 
               val {charge, ...} = player
               val alpha = Real32.fromInt charge / 60.0
@@ -592,10 +599,10 @@ struct
               case facing of
                 FACING_RIGHT =>
                   ChainEdgeRight.lerp
-                    (x, y, realLength, realSize, width, height, 0.5, 0.5, 0.5)
+                    (x, y, realLength, realHeight, width, height, 0.5, 0.5, 0.5)
               | FACING_LEFT =>
                   ChainEdgeLeft.lerp
-                    (x, y, realLength, realSize, width, height, 0.5, 0.5, 0.5)
+                    (x, y, realLength, realHeight, width, height, 0.5, 0.5, 0.5)
             end
           else
             let
@@ -609,7 +616,7 @@ struct
               val y = Real32.fromInt y * hratio
 
               val realLength = Real32.fromInt length * hratio
-              val realSize = Constants.playerSizeReal * hratio
+              val realHeight = Constants.playerHeightReal * hratio
 
               val {charge, ...} = player
               val alpha = Real32.fromInt charge / 60.0
@@ -617,10 +624,10 @@ struct
               case facing of
                 FACING_RIGHT =>
                   ChainEdgeRight.lerp
-                    (x, y, realLength, realSize, width, height, 0.5, 0.5, 0.5)
+                    (x, y, realLength, realHeight, width, height, 0.5, 0.5, 0.5)
               | FACING_LEFT =>
                   ChainEdgeLeft.lerp
-                    (x, y, realLength, realSize, width, height, 0.5, 0.5, 0.5)
+                    (x, y, realLength, realHeight, width, height, 0.5, 0.5, 0.5)
             end
         end
     | _ => Vector.fromList []
@@ -692,10 +699,11 @@ struct
         val {x, y, enemies, ...} = player
 
         (* get centre (x, y) coordinates of player *)
-        val diff =
-          Constants.halfPlayerSizeReal - (Constants.projectileSize / 2.0)
-        val x = Real32.fromInt x + diff
-        val y = Real32.fromInt y + diff
+        val halfProjectileSize = Constants.projectileSize / 2.0
+        val diffX = Constants.halfPlayerWidthReal - halfProjectileSize
+        val diffY = Constants.halfPlayerHeightReal - halfProjectileSize
+        val x = Real32.fromInt x + diffX
+        val y = Real32.fromInt y + diffY
 
         val wratio = width / Constants.worldWidthReal
         val hratio = height / Constants.worldHeightReal

@@ -60,10 +60,10 @@ struct
         MAIN_ATTACKING {length, ...} =>
           let
             open EntityType
-            val height = Constants.playerSize
+            val height = Constants.playerHeight
             val x =
               (case facing of
-                 FACING_RIGHT => x + Constants.playerSize
+                 FACING_RIGHT => x + Constants.playerWidth
                | FACING_LEFT => x - length)
 
             val (defeatedList, enemyMap) = PlayerAttackEnemy.foldRegion

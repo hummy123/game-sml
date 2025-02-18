@@ -17,6 +17,7 @@ ann
   "allowVectorExps true"
 in
   fcore/block.sml
+  fcore/player/player-sprite.sml
   fcore/field.sml
   fcore/chain-edge.sml
 end

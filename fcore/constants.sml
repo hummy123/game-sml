@@ -6,10 +6,13 @@ struct
   val worldHeightReal: Real32.real = 1080.0
 
   (* constants for player *)
-  val playerSize = 32
-  val playerSizeReal: Real32.real = 32.0
-  val halfPlayerSize = 16
-  val halfPlayerSizeReal: Real32.real = 16.0
+  val playerWidth = 32
+  val playerHeight = 40
+  val playerWidthReal: Real32.real = 32.0
+  val playerHeightReal: Real32.real = 40.0
+
+  val halfPlayerWidthReal: Real32.real = 16.0
+  val halfPlayerHeightReal: Real32.real = 20.0
   val movePlayerBy = 5
 
   (* player timing values *)

@@ -3,7 +3,8 @@ sig
   type t
   type patch
 
-  val entitySize: int
+  val entityWidth: int
+  val entityHeight: int
 
   (* constants for physics *)
   val moveBy: int
@@ -76,9 +77,9 @@ struct
 
   fun standingOnArea (x, y, tree) =
     let
-      val y = y + Fn.entitySize - 1
+      val y = y + Fn.entityHeight - 1
 
-      val width = Fn.entitySize
+      val width = Fn.entityWidth
       val height = Platform.platHeight
 
       val ww = Constants.worldWidth
@@ -89,9 +90,9 @@ struct
 
   fun standingOnAreaID (x, y, tree) =
     let
-      val y = y + Fn.entitySize - 1
+      val y = y + Fn.entityHeight - 1
 
-      val width = Fn.entitySize
+      val width = Fn.entityWidth
       val height = Platform.platHeight + 2
 
     in
@@ -100,7 +101,9 @@ struct
 
   fun getWallPatches (x, y, walls, wallTree, acc) =
     let
-      val size = Fn.entitySize
+      val entityWidth = Fn.entityWidth
+      val entityHeight = Fn.entityHeight
+
       val moveBy = Fn.moveBy
       val ww = Constants.worldWidth
       val wh = Constants.worldHeight
@@ -126,13 +129,14 @@ struct
       (* check collision with wall to the right *)
       val acc =
         let
-          val rightWallID = QuadTree.getItemID (x + size - 1, y, 1, 1, wallTree)
+          val rightWallID = QuadTree.getItemID
+            (x + entityWidth - 1, y, 1, 1, wallTree)
         in
           if rightWallID <> ~1 then
             let
               val {x = wallX, ...} = Vector.sub (walls, rightWallID - 1)
 
-              val newX = wallX - size
+              val newX = wallX - entityWidth
             in
               Fn.W_X newX :: acc
             end
@@ -142,13 +146,13 @@ struct
 
       (* check collision with wall below *)
       val downWallID = QuadTree.getItemID
-        (x + moveBy + 1, y + size, 1, 1, wallTree)
+        (x + moveBy + 1, y + entityHeight, 1, 1, wallTree)
     in
       if downWallID <> ~1 then
         let
           val {y = wallY, ...} = Vector.sub (walls, downWallID - 1)
 
-          val newY = wallY - size
+          val newY = wallY - entityHeight
         in
           Fn.W_Y_AXIS ON_GROUND :: Fn.W_Y newY :: acc
         end
@@ -164,7 +168,9 @@ struct
       val y = Fn.getY input
       val yAxis = Fn.getYAxis input
 
-      val size = Fn.entitySize
+      val ew = Fn.entityWidth
+      val eh = Fn.entityHeight
+
       val ww = Constants.worldWidth
       val wh = Constants.worldHeight
 
@@ -187,7 +193,7 @@ struct
                 val {y = platY, ...}: Platform.t =
                   Vector.sub (platforms, standPlatID - 1)
 
-                val newY = platY - Fn.entitySize
+                val newY = platY - eh
                 val acc = Fn.W_Y_AXIS ON_GROUND :: Fn.W_Y newY :: acc
               in
                 acc
@@ -204,10 +210,8 @@ struct
             * then set new yAxis to FALLING
             * so we do not drop below any platforms again
             * *)
-            if QuadTree.hasCollisionAt (x, y, size, size, ~1, platformTree) then
-              acc
-            else
-              Fn.W_Y_AXIS FALLING :: acc
+            if QuadTree.hasCollisionAt (x, y, ew, eh, ~1, platformTree) then acc
+            else Fn.W_Y_AXIS FALLING :: acc
         | _ => acc
 
       val acc = getWallPatches (x, y, walls, wallTree, acc)
@@ -222,7 +226,8 @@ structure PlayerPhysics =
        type t = PlayerType.player
        type patch = PlayerPatch.player_patch
 
-       val entitySize = Constants.playerSize
+       val entityWidth = Constants.playerWidth
+       val entityHeight = Constants.playerHeight
 
        (* constants for physics *)
        val moveBy = Constants.movePlayerBy
@@ -248,7 +253,8 @@ structure EnemyPhysics =
        type t = EnemyType.enemy
        type patch = EnemyPatch.enemy_patch
 
-       val entitySize = Constants.enemySize
+       val entityWidth = Constants.enemySize
+       val entityHeight = Constants.enemySize
 
        (* constants for physics *)
        val moveBy = Constants.moveEnemyBy

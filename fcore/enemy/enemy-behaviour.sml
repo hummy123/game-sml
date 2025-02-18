@@ -3,35 +3,6 @@ struct
   open EnemyType
   open EntityType
 
-  (* if player is attacking, does enemy collide with attack? *)
-  fun isCollidingWithPlayerAttack (player: PlayerType.player, enemy: enemy) =
-    let
-      val {x = px, y = py, facing, mainAttack, ...} = player
-      val pSize = Constants.playerSize
-
-      val {x = ex, y = ey, ...} = enemy
-      val eSize = Constants.enemySize
-    in
-      case mainAttack of
-        PlayerType.MAIN_ATTACKING {length, ...} =>
-          (case facing of
-             FACING_RIGHT =>
-               let
-                 val px = px + pSize
-               in
-                 Collision.isCollidingPlus
-                   (px, py, length, pSize, ex, ey, eSize, eSize)
-               end
-           | FACING_LEFT =>
-               let
-                 val px = px - length
-               in
-                 Collision.isCollidingPlus
-                   (px, py, length, pSize, ex, ey, eSize, eSize)
-               end)
-      | _ => false
-    end
-
   fun canWalkAhead (x, y, wallTree, platformTree) =
     let
       val y = y + Constants.enemySize - 5
@@ -351,8 +322,8 @@ struct
   fun isInFollowRange (player, enemy) =
     let
       val {x = px, y = py, ...} = player
-      val pfx = px + Constants.playerSize
-      val pfy = py + Constants.playerSize
+      val pfx = px + Constants.playerWidth
+      val pfy = py + Constants.playerHeight
 
       val range = 199
 
