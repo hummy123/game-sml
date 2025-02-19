@@ -26,6 +26,17 @@ struct
           )
       end
 
+  fun getTextWidth text =
+    String.size text * Constants.fontSpace
+
+  (* x coordinate that will let us place this text on centre of screen *)
+  fun getTextCentreX text =
+    let
+      val textWidth = getTextWidth text
+    in
+      (Constants.worldWidth - textWidth) div 2
+    end
+
   fun getTextVec (x, y, width, height, str) =
     let
       val wratio = width / Constants.worldWidthReal
@@ -76,5 +87,9 @@ struct
     end
 
   fun getDrawVec (title: TitleType.title_type, width, height) =
-    getTextVec (0, 0, width, height, "hello world")
+    let
+      val playX = getTextCentreX "hello world"
+    in
+      getTextVec (playX, 500, width, height, "hello world")
+    end
 end
