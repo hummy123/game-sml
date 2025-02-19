@@ -213,7 +213,7 @@ struct
   fun drawField ({fieldVertexBuffer, fieldProgram, fieldLength, ...}) =
     drawXyrgba (fieldVertexBuffer, fieldProgram, fieldLength)
 
-  fun drawLevel (shellState: t) =
+  fun helpDrawLevel (shellState: t) =
     let
       val _ = drawWall shellState
       val _ = drawPlayer shellState
@@ -222,38 +222,41 @@ struct
       ()
     end
 
+  fun drawLevel (shellState: t, level) =
+    let
+      val width = InputState.getWidth ()
+      val height = InputState.getHeight ()
+
+      val playerVec = Player.getDrawVec (#player level, width, height)
+      val enemyVec = Enemy.getDrawVec (#enemies level, width, height)
+      val playerVec = Vector.concat [playerVec, enemyVec]
+
+      val wallVec = Wall.getDrawVec (#walls level, width, height)
+      val platVec = Platform.getDrawVec (#platforms level, width, height)
+      val chainVec = Player.getFieldVec (#player level, width, height)
+      val fallingVec = FallingEnemies.getDrawVec (level, width, height)
+      val wallVec = Vector.concat [wallVec, platVec, chainVec, fallingVec]
+
+      val pelletVec = Player.getPelletVec (#player level, width, height)
+      val projectileVec =
+        Projectile.getProjectileVec (#player level, width, height)
+      val fieldVec = Vector.concat [pelletVec, projectileVec]
+
+      val shellState = uploadWall (shellState, wallVec)
+      val shellState = uploadPlayer (shellState, playerVec)
+      val shellState = uploadField (shellState, fieldVec)
+      val () = helpDrawLevel shellState
+    in
+      shellState
+    end
+
   fun drawMode (shellState: t, game: GameType.game_type) =
     let
       open GameType
     in
       case #mode game of
-        LEVEL level =>
-          let
-            val width = InputState.getWidth ()
-            val height = InputState.getHeight ()
-
-            val playerVec = Player.getDrawVec (#player level, width, height)
-            val enemyVec = Enemy.getDrawVec (#enemies level, width, height)
-            val playerVec = Vector.concat [playerVec, enemyVec]
-
-            val wallVec = Wall.getDrawVec (#walls level, width, height)
-            val platVec = Platform.getDrawVec (#platforms level, width, height)
-            val chainVec = Player.getFieldVec (#player level, width, height)
-            val fallingVec = FallingEnemies.getDrawVec (level, width, height)
-            val wallVec = Vector.concat [wallVec, platVec, chainVec, fallingVec]
-
-            val pelletVec = Player.getPelletVec (#player level, width, height)
-            val projectileVec =
-              Projectile.getProjectileVec (#player level, width, height)
-            val fieldVec = Vector.concat [pelletVec, projectileVec]
-
-            val shellState = uploadWall (shellState, wallVec)
-            val shellState = uploadPlayer (shellState, playerVec)
-            val shellState = uploadField (shellState, fieldVec)
-            val () = drawLevel shellState
-          in
-            shellState
-          end
+        LEVEL level => drawLevel (shellState, level)
+      | TITLE title => shellState
     end
 
   fun helpLoop (shellState as {window, ...}: t, game) =

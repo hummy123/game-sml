@@ -1,6 +1,6 @@
 structure LevelUpdate =
 struct
-  fun update (game, input) =
+  fun update (level, input) =
     let
       val
         { player
@@ -11,9 +11,9 @@ struct
         , enemies
         , graph
         , fallingEnemies
-        } = game
+        } = level
 
-      val player = Player.runPhysicsAndInput (game, input)
+      val player = Player.runPhysicsAndInput (level, input)
 
       val enemyTree = Enemy.generateTree enemies
       val player = Player.checkEnemyCollisions (player, enemies, enemyTree)

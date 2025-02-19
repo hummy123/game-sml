@@ -12,6 +12,10 @@ struct
             let val level = LevelUpdate.update (level, input)
             in LEVEL level
             end
+        | TITLE title =>
+            let val title = TitleUpdate.update (title, input)
+            in TITLE title
+            end
     in
       {mode = mode, userKeys = userKeys}
     end
