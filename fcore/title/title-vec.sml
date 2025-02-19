@@ -1,7 +1,9 @@
 structure TitleVec =
 struct
+  open TitleType
+
   fun helpGetTextVec
-    (x, y, fontSize, fontSpace, windowWidth, windowHeight, pos, str, acc) =
+    (x, y, fontSize, fontSpace, windowWidth, windowHeight, pos, str, acc, r, g, b) =
     if pos = String.size str then
       Vector.concat acc
     else
@@ -10,7 +12,7 @@ struct
         val chrFun = Vector.sub (CozetteAscii.asciiTable, Char.ord chr)
 
         val hd = chrFun
-          (x, y, fontSize, fontSize, windowWidth, windowHeight, 0.0, 0.0, 0.0)
+          (x, y, fontSize, fontSize, windowWidth, windowHeight, r, g, b)
         val acc = hd :: acc
       in
         helpGetTextVec
@@ -23,6 +25,9 @@ struct
           , pos + 1
           , str
           , acc
+          , r
+          , g
+          , b
           )
       end
 
@@ -37,7 +42,7 @@ struct
       (Constants.worldWidth - textWidth) div 2
     end
 
-  fun getTextVec (x, y, width, height, str) =
+  fun getTextVec (x, y, width, height, str, r, g, b) =
     let
       val wratio = width / Constants.worldWidthReal
       val hratio = height / Constants.worldHeightReal
@@ -61,7 +66,7 @@ struct
           val fontSpace = Real32.fromInt Constants.fontSpace * wratio
           val fontSpace = Real32.toInt IEEEReal.TO_NEAREST fontSpace
         in
-          helpGetTextVec (x, y, fontSize, fontSpace, width, height, 0, str, [])
+          helpGetTextVec (x, y, fontSize, fontSpace, width, height, 0, str, [], r, g, b)
         end
       else
         let
@@ -82,14 +87,16 @@ struct
           val fontSpace = Real32.fromInt Constants.fontSpace * hratio
           val fontSpace = Real32.toInt IEEEReal.TO_NEAREST fontSpace
         in
-          helpGetTextVec (x, y, fontSize, fontSpace, width, height, 0, str, [])
+          helpGetTextVec (x, y, fontSize, fontSpace, width, height, 0, str, [], r, g, b)
         end
     end
 
   fun getDrawVec (title: TitleType.title_type, width, height) =
-    let
-      val playX = getTextCentreX "hello world"
-    in
-      getTextVec (playX, 500, width, height, "hello world")
-    end
+    case #focus title of
+      START_BUTTON =>
+        let
+          val playX = getTextCentreX "Play game"
+        in
+          getTextVec (playX, 500, width, height, "Play game", 0.0, 0.0, 0.0)
+        end
 end
