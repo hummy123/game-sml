@@ -1,5 +1,8 @@
 structure Constants =
 struct
+  val fontSpace = 13
+  val fontSize: Real32.real = 30.0
+
   val worldWidth = 1920
   val worldHeight = 1080
   val worldWidthReal: Real32.real = 1920.0

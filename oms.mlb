@@ -1,6 +1,8 @@
 $(SML_LIB)/basis/basis.mlb
 
 (* fcore *)
+vendored/cozette-sml/fonts/cozette-ascii.mlb
+
 fcore/constants.sml
 fcore/level/collision.sml
 
