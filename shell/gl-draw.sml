@@ -250,13 +250,24 @@ struct
       shellState
     end
 
+  fun drawTitle (shellState: t, title) =
+    let
+      val width = InputState.getWidth ()
+      val height = InputState.getHeight ()
+      val vec = TitleVec.getDrawVec (title, width, height)
+      val shellState = uploadPlayer (shellState, vec)
+      val () = helpDrawLevel shellState
+    in
+      shellState
+    end
+
   fun drawMode (shellState: t, game: GameType.game_type) =
     let
       open GameType
     in
       case #mode game of
         LEVEL level => drawLevel (shellState, level)
-      | TITLE title => shellState
+      | TITLE title => drawTitle (shellState, title)
     end
 
   fun helpLoop (shellState as {window, ...}: t, game) =

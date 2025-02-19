@@ -1,8 +1,6 @@
 $(SML_LIB)/basis/basis.mlb
 
 (* fcore *)
-vendored/cozette-sml/fonts/cozette-ascii.mlb
-
 fcore/constants.sml
 fcore/level/collision.sml
 
@@ -18,6 +16,7 @@ fcore/bin-vec.sml
 ann
   "allowVectorExps true"
 in
+  vendored/cozette-sml/fonts/cozette-ascii.mlb
   fcore/block.sml
   fcore/level/player/player-sprite.sml
   fcore/field.sml
@@ -56,6 +55,7 @@ fcore/level/level-update.sml
 
 fcore/title/title-type.sml
 fcore/title/title-update.sml
+fcore/title/title-vec.sml
 
 fcore/game-type.sml
 fcore/game-update.sml
