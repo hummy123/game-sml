@@ -22,6 +22,7 @@ in
   fcore/field.sml
   fcore/level/chain-edge.sml
 end
+fcore/make-text-vec.sml
 
 fcore/level/wall.sml
 fcore/level/platform.sml

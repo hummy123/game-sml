@@ -250,13 +250,15 @@ struct
       shellState
     end
 
+  fun helpDrawTitle (shellState: t) = drawPlayer shellState
+
   fun drawTitle (shellState: t, title) =
     let
       val width = InputState.getWidth ()
       val height = InputState.getHeight ()
       val vec = TitleVec.getDrawVec (title, width, height)
       val shellState = uploadPlayer (shellState, vec)
-      val () = helpDrawLevel shellState
+      val () = helpDrawTitle shellState
     in
       shellState
     end
