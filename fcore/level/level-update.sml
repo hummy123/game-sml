@@ -1,6 +1,6 @@
 structure LevelUpdate =
 struct
-  fun update (level, input) =
+  fun update (level, input, userKeys) =
     let
       val
         { player
@@ -30,15 +30,18 @@ struct
         (enemies, walls, wallTree, platforms, platformTree, player, graph)
 
       val fallingEnemies = FallingEnemies.update fallingEnemies
+
+      val mode =
+        { player = player
+        , walls = walls
+        , wallTree = wallTree
+        , platforms = platforms
+        , platformTree = platformTree
+        , enemies = enemies
+        , graph = graph
+        , fallingEnemies = fallingEnemies
+        }
     in
-      { player = player
-      , walls = walls
-      , wallTree = wallTree
-      , platforms = platforms
-      , platformTree = platformTree
-      , enemies = enemies
-      , graph = graph
-      , fallingEnemies = fallingEnemies
-      }
+      {mode = GameType.LEVEL mode, userKeys = userKeys}
     end
 end

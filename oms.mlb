@@ -37,8 +37,11 @@ fcore/level/enemy/falling-enemy-pair.sml
 fcore/level/enemy/falling-enemy-map.sml
 
 fcore/core-key.sml
+fcore/frame-input-type.sml
 fcore/level/player/player-type.sml
 fcore/level/level-type.sml
+fcore/title/title-type.sml
+fcore/game-type.sml
 
 fcore/level/player/player-patch.sml
 fcore/level/enemy/enemy-patch.sml
@@ -53,11 +56,9 @@ fcore/level/player/player-attack.sml
 fcore/level/projectile.sml
 fcore/level/level-update.sml
 
-fcore/title/title-type.sml
 fcore/title/title-update.sml
 fcore/title/title-vec.sml
 
-fcore/game-type.sml
 fcore/game-update.sml
 
 (* shell *)

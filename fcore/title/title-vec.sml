@@ -3,7 +3,19 @@ struct
   open TitleType
 
   fun helpGetTextVec
-    (x, y, fontSize, fontSpace, windowWidth, windowHeight, pos, str, acc, r, g, b) =
+    ( x
+    , y
+    , fontSize
+    , fontSpace
+    , windowWidth
+    , windowHeight
+    , pos
+    , str
+    , acc
+    , r
+    , g
+    , b
+    ) =
     if pos = String.size str then
       Vector.concat acc
     else
@@ -31,15 +43,12 @@ struct
           )
       end
 
-  fun getTextWidth text =
-    String.size text * Constants.fontSpace
+  fun getTextWidth text = String.size text * Constants.fontSpace
 
   (* x coordinate that will let us place this text on centre of screen *)
   fun getTextCentreX text =
-    let
-      val textWidth = getTextWidth text
-    in
-      (Constants.worldWidth - textWidth) div 2
+    let val textWidth = getTextWidth text
+    in (Constants.worldWidth - textWidth) div 2
     end
 
   fun getTextVec (x, y, width, height, str, r, g, b) =
@@ -66,7 +75,8 @@ struct
           val fontSpace = Real32.fromInt Constants.fontSpace * wratio
           val fontSpace = Real32.toInt IEEEReal.TO_NEAREST fontSpace
         in
-          helpGetTextVec (x, y, fontSize, fontSpace, width, height, 0, str, [], r, g, b)
+          helpGetTextVec
+            (x, y, fontSize, fontSpace, width, height, 0, str, [], r, g, b)
         end
       else
         let
@@ -87,16 +97,15 @@ struct
           val fontSpace = Real32.fromInt Constants.fontSpace * hratio
           val fontSpace = Real32.toInt IEEEReal.TO_NEAREST fontSpace
         in
-          helpGetTextVec (x, y, fontSize, fontSpace, width, height, 0, str, [], r, g, b)
+          helpGetTextVec
+            (x, y, fontSize, fontSpace, width, height, 0, str, [], r, g, b)
         end
     end
 
   fun getDrawVec (title: TitleType.title_type, width, height) =
     case #focus title of
       START_BUTTON =>
-        let
-          val playX = getTextCentreX "Play game"
-        in
-          getTextVec (playX, 500, width, height, "Play game", 0.0, 0.0, 0.0)
+        let val playX = getTextCentreX "Play game"
+        in getTextVec (playX, 500, width, height, "Play game", 0.0, 0.0, 0.0)
         end
 end
