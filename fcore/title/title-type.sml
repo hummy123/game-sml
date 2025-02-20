@@ -1,6 +1,6 @@
 signature TITLE_TYPE =
 sig
-  datatype focus = START_BUTTON
+  datatype focus = START_BUTTON | OPTIONS_BUTTON
 
   type title_type = {focus: focus}
 
@@ -9,7 +9,7 @@ end
 
 structure TitleType :> TITLE_TYPE =
 struct
-  datatype focus = START_BUTTON
+  datatype focus = START_BUTTON | OPTIONS_BUTTON
 
   type title_type = {focus: focus}
 

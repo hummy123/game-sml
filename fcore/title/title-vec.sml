@@ -17,7 +17,7 @@ struct
     , b
     ) =
     if pos = String.size str then
-      Vector.concat acc
+      acc
     else
       let
         val chr = String.sub (str, pos)
@@ -51,7 +51,7 @@ struct
     in (Constants.worldWidth - textWidth) div 2
     end
 
-  fun getTextVec (x, y, width, height, str, r, g, b) =
+  fun getTextVec (x, y, width, height, str, r, g, b, acc) =
     let
       val wratio = width / Constants.worldWidthReal
       val hratio = height / Constants.worldHeightReal
@@ -76,7 +76,7 @@ struct
           val fontSpace = Real32.toInt IEEEReal.TO_NEAREST fontSpace
         in
           helpGetTextVec
-            (x, y, fontSize, fontSpace, width, height, 0, str, [], r, g, b)
+            (x, y, fontSize, fontSpace, width, height, 0, str, acc, r, g, b)
         end
       else
         let
@@ -98,14 +98,34 @@ struct
           val fontSpace = Real32.toInt IEEEReal.TO_NEAREST fontSpace
         in
           helpGetTextVec
-            (x, y, fontSize, fontSpace, width, height, 0, str, [], r, g, b)
+            (x, y, fontSize, fontSpace, width, height, 0, str, acc, r, g, b)
         end
     end
 
   fun getDrawVec (title: TitleType.title_type, width, height) =
     case #focus title of
       START_BUTTON =>
-        let val playX = getTextCentreX "Play game"
-        in getTextVec (playX, 500, width, height, "Play game", 0.0, 0.0, 0.0)
+        let 
+          val playX = getTextCentreX "Play game"
+          val acc = 
+            getTextVec (playX, 500, width, height, "Play game", 0.3, 0.3, 0.7, [])
+
+          val optionsX = getTextCentreX "Options"
+          val acc =
+            getTextVec (optionsX, 600, width, height, "Options", 0.0, 0.0, 0.0, acc)
+        in
+          Vector.concat acc
+        end
+    | OPTIONS_BUTTON =>
+        let 
+          val playX = getTextCentreX "Play game"
+          val acc = 
+            getTextVec (playX, 500, width, height, "Play game", 0.0, 0.0, 0.0, [])
+
+          val optionsX = getTextCentreX "Options"
+          val acc =
+            getTextVec (optionsX, 600, width, height, "Options", 0.3, 0.3, 0.7, acc)
+        in
+          Vector.concat acc
         end
 end
