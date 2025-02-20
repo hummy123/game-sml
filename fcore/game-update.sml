@@ -9,5 +9,6 @@ struct
       case mode of
         LEVEL level => LevelUpdate.update (level, input, userKeys)
       | TITLE title => TitleUpdate.update (title, input, userKeys)
+      | OPTIONS options => OptionsUpdate.update (options, input, userKeys)
     end
 end

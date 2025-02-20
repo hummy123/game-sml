@@ -1,6 +1,9 @@
 signature GAME_TYPE =
 sig
-  datatype mode = LEVEL of LevelType.level_type | TITLE of TitleType.title_type
+  datatype mode =
+    LEVEL of LevelType.level_type
+  | TITLE of TitleType.title_type
+  | OPTIONS of OptionsType.options_type
 
   type game_type = {userKeys: CoreKey.user_key, mode: mode}
 
@@ -9,7 +12,10 @@ end
 
 structure GameType :> GAME_TYPE =
 struct
-  datatype mode = LEVEL of LevelType.level_type | TITLE of TitleType.title_type
+  datatype mode =
+    LEVEL of LevelType.level_type
+  | TITLE of TitleType.title_type
+  | OPTIONS of OptionsType.options_type
 
   type game_type = {userKeys: CoreKey.user_key, mode: mode}
 

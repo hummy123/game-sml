@@ -25,7 +25,7 @@ struct
           val mode =
             if #attackHeld input orelse #jumpHeld input then
               (* placeholder: go to configure screen instead once that is implemented *)
-              GameType.TITLE titleState
+              GameType.OPTIONS OptionsType.initial
             else
               let
                 val titleState =
