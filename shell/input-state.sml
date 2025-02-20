@@ -7,6 +7,7 @@ struct
     , up = CoreKey.KEY_E
     , attack = CoreKey.KEY_J
     , jump = CoreKey.KEY_K
+    , escape = CoreKey.KEY_ESCAPE
     }
 
   fun setControls controls = keyMappings := controls
@@ -19,6 +20,7 @@ struct
     , downHeld = ref false
     , jumpHeld = ref false
     , attackHeld = ref false
+    , escapeHeld = ref false
     , width = ref (1920.0 : Real32.real)
     , height = ref (1080.0 : Real32.real)
     }
@@ -30,6 +32,7 @@ struct
     , downHeld = !(#downHeld state)
     , attackHeld = !(#attackHeld state)
     , jumpHeld = !(#jumpHeld state)
+    , escapeHeld = !(#escapeHeld state)
     }
 
   (* there are three action states reported by OS: PRESS, REPEAT and RELEASE. 
@@ -40,7 +43,7 @@ struct
     case GlfwKeyMap.codeFromKey key of
       SOME code =>
         let
-          val {left, right, down, up, attack, jump} = !keyMappings
+          val {left, right, down, up, attack, jump, escape} = !keyMappings
           val action = actionToBool action
         in
           if code = left then #leftHeld state := action
@@ -49,6 +52,7 @@ struct
           else if code = down then #downHeld state := action
           else if code = attack then #attackHeld state := action
           else if code = jump then #jumpHeld state := action
+          else if code = escape then #escapeHeld state := action
           else ()
         end
     | NONE => ()

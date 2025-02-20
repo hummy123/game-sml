@@ -7,5 +7,6 @@ struct
     , downHeld: bool
     , attackHeld: bool
     , jumpHeld: bool
+    , escapeHeld: bool
     }
 end

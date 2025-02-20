@@ -103,6 +103,7 @@ struct
             , down = down
             , jump = jump
             , attack = attack
+            , escape = CoreKey.KEY_ESCAPE
             }
       | _ => NONE
     end

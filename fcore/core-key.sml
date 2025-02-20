@@ -134,6 +134,7 @@ sig
     , down: key_code
     , jump: key_code
     , attack: key_code
+    , escape: key_code
     }
 
   val keyFromString: string -> key_code option
@@ -275,6 +276,7 @@ struct
     , down: key_code
     , jump: key_code
     , attack: key_code
+    , escape: key_code
     }
 
   fun keyFromString str =

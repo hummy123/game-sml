@@ -304,6 +304,7 @@ struct
             , down = CoreKey.KEY_DOWN
             , jump = CoreKey.KEY_Z
             , attack = CoreKey.KEY_X
+            , escape = CoreKey.KEY_ESCAPE
             }
 
       val () = InputState.setControls controls

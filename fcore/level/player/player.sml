@@ -206,7 +206,15 @@ struct
         , ...
         } = player
 
-      val {leftHeld, rightHeld, upHeld, downHeld, attackHeld, jumpHeld} = input
+      val
+        { leftHeld
+        , rightHeld
+        , upHeld
+        , downHeld
+        , attackHeld
+        , jumpHeld
+        , escapeHeld
+        } = input
 
       val xAxis = getXAxis (leftHeld, rightHeld)
       val facing = getFacing (facing, xAxis)
