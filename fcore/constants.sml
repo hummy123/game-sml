@@ -42,4 +42,6 @@ struct
   val moveBatY = 2
 
   val moveProjectileBy = 11
+
+  val keyDelay = 0.3
 end
