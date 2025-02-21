@@ -139,6 +139,7 @@ sig
 
   val keyFromString: string -> key_code option
   val keyToString: key_code -> string
+  val userKeysToString: user_key -> string
 
   val containsKey: key_code * key_code list -> bool
   val containsAttack: user_key * key_code list -> bool
@@ -530,6 +531,28 @@ struct
     | KEY_RIGHT_ALT => "KEY_RIGHT_ALT"
     | KEY_RIGHT_SUPER => "KEY_RIGHT_SUPER"
     | KEY_MENU => "KEY_MENU"
+
+  fun userKeysToString {left, right, up, down, jump, attack, escape = _} =
+    String.concat
+      [ "ACTION_LEFT:"
+      , keyToString left
+      , "\n"
+      , "ACTION_RIGHT:"
+      , keyToString right
+      , "\n"
+      , "ACTION_UP:"
+      , keyToString up
+      , "\n"
+      , "ACTION_DOWN:"
+      , keyToString down
+      , "\n"
+      , "ACTION_JUMP:"
+      , keyToString jump
+      , "\n"
+      , "ACTION_ATTACK:"
+      , keyToString attack
+      , "\n"
+      ]
 
   fun containsKey (searchKey, lst) =
     case lst of

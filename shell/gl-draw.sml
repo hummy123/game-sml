@@ -287,8 +287,15 @@ struct
     end
 
   fun saveKeys game =
-    let val () = InputState.setControls (#userKeys game)
-    in ()
+    let
+      val newKeys = #userKeys game
+      val () = InputState.setControls newKeys
+
+      val io = TextIO.openOut "controls.config"
+      val () = TextIO.output (io, CoreKey.userKeysToString newKeys)
+      val () = TextIO.closeOut io
+    in
+      ()
     end
 
   fun runEffects game =
