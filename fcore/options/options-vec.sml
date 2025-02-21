@@ -44,8 +44,13 @@ struct
       val acc = MakeTextVec.make
         (155, 35, width, height, "Left key", 0.0, 0.0, 0.0, [])
 
-      val acc = MakeTextVec.make
-        (155, 95, width, height, "Right key", 0.3, 0.3, 0.7, acc)
+      val acc =
+        if #isSelected options then
+          MakeTextVec.make
+            (155, 95, width, height, "Right key", 0.7, 0.7, 0.3, acc)
+        else
+          MakeTextVec.make
+            (155, 95, width, height, "Right key", 0.3, 0.3, 0.7, acc)
 
       val acc = MakeTextVec.make
         (155, 155, width, height, "Up key", 0.0, 0.0, 0.0, acc)
@@ -76,8 +81,13 @@ struct
       val acc = MakeTextVec.make
         (155, 95, width, height, "Right key", 0.0, 0.0, 0.0, acc)
 
-      val acc = MakeTextVec.make
-        (155, 155, width, height, "Up key", 0.3, 0.3, 0.7, acc)
+      val acc =
+        if #isSelected options then
+          MakeTextVec.make
+            (155, 155, width, height, "Up key", 0.7, 0.7, 0.3, acc)
+        else
+          MakeTextVec.make
+            (155, 155, width, height, "Up key", 0.3, 0.3, 0.7, acc)
 
       val acc = MakeTextVec.make
         (155, 215, width, height, "Down key", 0.0, 0.0, 0.0, acc)
@@ -108,8 +118,13 @@ struct
       val acc = MakeTextVec.make
         (155, 155, width, height, "Up key", 0.0, 0.0, 0.0, acc)
 
-      val acc = MakeTextVec.make
-        (155, 215, width, height, "Down key", 0.3, 0.3, 0.7, acc)
+      val acc =
+        if #isSelected options then
+          MakeTextVec.make
+            (155, 215, width, height, "Down key", 0.7, 0.7, 0.3, acc)
+        else
+          MakeTextVec.make
+            (155, 215, width, height, "Down key", 0.3, 0.3, 0.7, acc)
 
       val acc = MakeTextVec.make
         (155, 275, width, height, "Jump key", 0.0, 0.0, 0.0, acc)
@@ -140,8 +155,13 @@ struct
       val acc = MakeTextVec.make
         (155, 215, width, height, "Down key", 0.0, 0.0, 0.0, acc)
 
-      val acc = MakeTextVec.make
-        (155, 275, width, height, "Jump key", 0.3, 0.3, 0.7, acc)
+      val acc =
+        if #isSelected options then
+          MakeTextVec.make
+            (155, 275, width, height, "Jump key", 0.7, 0.7, 0.3, acc)
+        else
+          MakeTextVec.make
+            (155, 275, width, height, "Jump key", 0.3, 0.3, 0.7, acc)
 
       val acc = MakeTextVec.make
         (155, 335, width, height, "Attack key", 0.0, 0.0, 0.0, acc)
@@ -172,8 +192,13 @@ struct
       val acc = MakeTextVec.make
         (155, 275, width, height, "Jump key", 0.0, 0.0, 0.0, acc)
 
-      val acc = MakeTextVec.make
-        (155, 335, width, height, "Attack key", 0.3, 0.3, 0.7, acc)
+      val acc =
+        if #isSelected options then
+          MakeTextVec.make
+            (155, 335, width, height, "Attack key", 0.7, 0.7, 0.3, acc)
+        else
+          MakeTextVec.make
+            (155, 335, width, height, "Attack key", 0.3, 0.3, 0.7, acc)
 
       val acc = MakeTextVec.make
         (155, 395, width, height, "Save changes", 0.0, 0.0, 0.0, acc)
@@ -204,8 +229,13 @@ struct
       val acc = MakeTextVec.make
         (155, 335, width, height, "Attack key", 0.0, 0.0, 0.0, acc)
 
-      val acc = MakeTextVec.make
-        (155, 395, width, height, "Save changes", 0.3, 0.3, 0.7, acc)
+      val acc =
+        if #isSelected options then
+          MakeTextVec.make
+            (155, 395, width, height, "Save changes", 0.7, 0.7, 0.3, acc)
+        else
+          MakeTextVec.make
+            (155, 395, width, height, "Save changes", 0.3, 0.3, 0.7, acc)
 
       val acc = MakeTextVec.make
         (155, 455, width, height, "Cancel changes", 0.0, 0.0, 0.0, acc)
@@ -236,8 +266,13 @@ struct
       val acc = MakeTextVec.make
         (155, 395, width, height, "Save changes", 0.0, 0.0, 0.0, acc)
 
-      val acc = MakeTextVec.make
-        (155, 455, width, height, "Cancel changes", 0.3, 0.3, 0.7, acc)
+      val acc =
+        if #isSelected options then
+          MakeTextVec.make
+            (155, 455, width, height, "Cancel changes", 0.7, 0.7, 0.3, acc)
+        else
+          MakeTextVec.make
+            (155, 455, width, height, "Cancel changes", 0.3, 0.3, 0.7, acc)
     in
       Vector.concat acc
     end
