@@ -5,7 +5,7 @@ sig
   | TITLE of TitleType.title_type
   | OPTIONS of OptionsType.options_type
 
-  type game_type = {userKeys: CoreKey.user_key, mode: mode}
+  type game_type = {mode: mode, userKeys: CoreKey.user_key, saveKeys: bool}
 
   val init: CoreKey.user_key -> game_type
 end
@@ -17,10 +17,10 @@ struct
   | TITLE of TitleType.title_type
   | OPTIONS of OptionsType.options_type
 
-  type game_type = {userKeys: CoreKey.user_key, mode: mode}
+  type game_type = {mode: mode, userKeys: CoreKey.user_key, saveKeys: bool}
 
   fun init userKeys =
     let val mode = TITLE TitleType.initial
-    in {mode = mode, userKeys = userKeys}
+    in {mode = mode, userKeys = userKeys, saveKeys = false}
     end
 end

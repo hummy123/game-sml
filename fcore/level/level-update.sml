@@ -42,6 +42,6 @@ struct
         , fallingEnemies = fallingEnemies
         }
     in
-      {mode = GameType.LEVEL mode, userKeys = userKeys}
+      {mode = GameType.LEVEL mode, userKeys = userKeys, saveKeys = false}
     end
 end

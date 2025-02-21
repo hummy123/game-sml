@@ -20,7 +20,7 @@ struct
         , tempKeys = tempKeys
         }
     in
-      {mode = GameType.OPTIONS options, userKeys = userKeys}
+      {mode = GameType.OPTIONS options, userKeys = userKeys, saveKeys = false}
     end
 
   fun onSelected (options, input: FrameInputType.t, userKeys, time) =
@@ -56,7 +56,7 @@ struct
         , tempKeys = userKeys
         }
     in
-      {mode = GameType.OPTIONS options, userKeys = userKeys}
+      {mode = GameType.OPTIONS options, userKeys = userKeys, saveKeys = false}
     end
 
   fun moveFocusUp (options: OptionsType.options_type, newFocus, userKeys, time) =
@@ -81,7 +81,7 @@ struct
           , tempKeys = userKeys
           }
     in
-      {mode = GameType.OPTIONS options, userKeys = userKeys}
+      {mode = GameType.OPTIONS options, userKeys = userKeys, saveKeys = false}
     end
 
   fun moveFocusDown
@@ -104,7 +104,7 @@ struct
           , tempKeys = userKeys
           }
     in
-      {mode = GameType.OPTIONS options, userKeys = userKeys}
+      {mode = GameType.OPTIONS options, userKeys = userKeys, saveKeys = false}
     end
 
   fun select (options: OptionsType.options_type, userKeys) =
@@ -118,7 +118,7 @@ struct
         , tempKeys = userKeys
         }
     in
-      {mode = GameType.OPTIONS options, userKeys = userKeys}
+      {mode = GameType.OPTIONS options, userKeys = userKeys, saveKeys = false}
     end
 
   fun deselect (options: OptionsType.options_type, userKeys) =
@@ -132,7 +132,7 @@ struct
         , tempKeys = userKeys
         }
     in
-      {mode = GameType.OPTIONS options, userKeys = userKeys}
+      {mode = GameType.OPTIONS options, userKeys = userKeys, saveKeys = false}
     end
 
   fun withLeftKeys (newLeft, userKeys: CoreKey.user_key) =

@@ -286,6 +286,16 @@ struct
       | OPTIONS options => drawOptions (shellState, options)
     end
 
+  fun saveKeys game =
+    let val () = InputState.setControls (#userKeys game)
+    in ()
+    end
+
+  fun runEffects game =
+    let val () = if #saveKeys game then saveKeys game else ()
+    in ()
+    end
+
   fun helpLoop (shellState as {window, ...}: t, game) =
     case Glfw.windowShouldClose window of
       false =>
@@ -298,6 +308,7 @@ struct
           val game = GameUpdate.update (game, input, time)
 
           val shellState = drawMode (shellState, game)
+          val () = runEffects game
 
           val _ = Glfw.swapBuffers window
           val _ = Glfw.pollEvents ()

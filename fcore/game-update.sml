@@ -4,7 +4,7 @@ struct
 
   fun update (game: GameType.game_type, input, time) =
     let
-      val {mode, userKeys} = game
+      val {mode, userKeys, saveKeys = _} = game
     in
       case mode of
         LEVEL level => LevelUpdate.update (level, input, userKeys, time)

@@ -18,7 +18,7 @@ struct
                 GameType.TITLE titleState
               end
         in
-          {mode = mode, userKeys = userKeys}
+          {mode = mode, userKeys = userKeys, saveKeys = false}
         end
     | OPTIONS_BUTTON =>
         let
@@ -35,6 +35,6 @@ struct
                 GameType.TITLE titleState
               end
         in
-          {mode = mode, userKeys = userKeys}
+          {mode = mode, userKeys = userKeys, saveKeys = false}
         end
 end
