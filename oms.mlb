@@ -13,6 +13,15 @@ vendored/brolib-sml/src/gap_map.sml
 fcore/bin-search.sml
 fcore/bin-vec.sml
 
+ann
+  "allowVectorExps true"
+in
+  vendored/cozette-sml/fonts/cozette-ascii.mlb
+  fcore/block.sml
+  fcore/level/player/player-sprite.sml
+  fcore/field.sml
+  fcore/level/chain-edge.sml
+end
 fcore/make-text-vec.sml
 
 fcore/level/wall.sml
@@ -60,6 +69,19 @@ fcore/game-update.sml
 (* shell *)
 $(SML_LIB)/basis/mlton.mlb
 
+ann
+  "allowFFI true"
+in
+  ffi/gles3-import.sml
+  ffi/glfw-import.sml
+  ffi/glfw-input.sml
+end
+
+ann
+  "allowVectorExps true"
+in
+  shell/glfw-key-map.sml
+end
 
 shell/input-state.sml
 shell/parse-controls.sml
