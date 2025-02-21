@@ -293,8 +293,9 @@ struct
           val _ = Gles3.clearColor (1.0, 1.0, 1.0, 1.0)
           val _ = Gles3.clear ()
 
+          val time = Glfw.getTime ()
           val input = InputState.getSnapshot ()
-          val game = GameUpdate.update (game, input)
+          val game = GameUpdate.update (game, input, time)
 
           val shellState = drawMode (shellState, game)
 

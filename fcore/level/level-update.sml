@@ -1,6 +1,6 @@
 structure LevelUpdate =
 struct
-  fun update (level, input, userKeys) =
+  fun update (level, input, userKeys, time) =
     let
       val
         { player

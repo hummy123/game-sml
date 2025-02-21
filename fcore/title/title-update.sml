@@ -2,7 +2,7 @@ structure TitleUpdate =
 struct
   open TitleType
 
-  fun update (titleState, input: FrameInputType.t, userKeys) =
+  fun update (titleState, input: FrameInputType.t, userKeys, time) =
     case #focus titleState of
       START_BUTTON =>
         let

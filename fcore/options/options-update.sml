@@ -8,7 +8,7 @@ struct
   fun withFocus (newFocus, userKeys) =
     {mode = GameType.OPTIONS {focus = newFocus}, userKeys = userKeys}
 
-  fun update (options, input: FrameInputType.t, userKeys) =
+  fun update (options, input: FrameInputType.t, userKeys, time) =
     case #focus options of
       LEFT_KEY =>
         if #downHeld input then withFocus (RIGHT_KEY, userKeys)
