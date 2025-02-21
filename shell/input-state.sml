@@ -51,7 +51,11 @@ struct
     case GlfwKeyMap.codeFromKey key of
       SOME code =>
         let
-          val () = #newKeys state := code :: !(#newKeys state)
+          val () =
+            if action = Input.PRESS then
+              #newKeys state := code :: !(#newKeys state)
+            else
+              ()
           val {left, right, down, up, attack, jump, escape} = !keyMappings
           val action = actionToBool action
         in

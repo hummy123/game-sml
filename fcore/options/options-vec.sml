@@ -7,8 +7,13 @@ struct
    * the branch prediction cost *)
   fun drawLeftKey (options, width, height) =
     let
-      val acc = MakeTextVec.make
-        (155, 35, width, height, "Left key", 0.3, 0.3, 0.7, [])
+      val acc =
+        if #isSelected options then
+          MakeTextVec.make
+            (155, 35, width, height, "Left key", 0.7, 0.7, 0.3, [])
+        else
+          MakeTextVec.make
+            (155, 35, width, height, "Left key", 0.3, 0.3, 0.7, [])
 
       val acc = MakeTextVec.make
         (155, 95, width, height, "Right key", 0.0, 0.0, 0.0, acc)

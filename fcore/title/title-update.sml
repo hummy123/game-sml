@@ -7,7 +7,7 @@ struct
       START_BUTTON =>
         let
           val mode =
-            if #attackHeld input orelse #jumpHeld input then
+            if #attackHeld input then
               GameType.LEVEL LevelType.initial
             else
               let
@@ -23,7 +23,7 @@ struct
     | OPTIONS_BUTTON =>
         let
           val mode =
-            if #attackHeld input orelse #jumpHeld input then
+            if #attackHeld input then
               (* placeholder: go to configure screen instead once that is implemented *)
               GameType.OPTIONS OptionsType.initial
             else

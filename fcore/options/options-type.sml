@@ -10,7 +10,8 @@ sig
   | SAVE_BUTTON
   | CANCEL_BUTTON
 
-  type options_type = {focus: focus, lastUpPress: real, lastDownPress: real}
+  type options_type =
+    {focus: focus, isSelected: bool, lastUpPress: real, lastDownPress: real}
 
   val initial: options_type
 end
@@ -27,7 +28,13 @@ struct
   | SAVE_BUTTON
   | CANCEL_BUTTON
 
-  type options_type = {focus: focus, lastUpPress: real, lastDownPress: real}
+  type options_type =
+    {focus: focus, isSelected: bool, lastUpPress: real, lastDownPress: real}
 
-  val initial = {focus = LEFT_KEY, lastUpPress = 0.0, lastDownPress = 0.0}
+  val initial =
+    { focus = LEFT_KEY
+    , isSelected = false
+    , lastUpPress = 0.0
+    , lastDownPress = 0.0
+    }
 end
