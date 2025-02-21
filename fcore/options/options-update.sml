@@ -9,7 +9,7 @@ end
 
 functor MakeUpdateSelectedKey(Fn: MAKE_UPDATE_SELECTED_KEY) =
 struct
-  fun setNewKeys (options, userKeys, time) =
+  fun setNewKeys (options, tempKeys, userKeys, time) =
     let
       val {focus, lastUpPress, lastDownPress, ...} = options
       val options =
@@ -17,6 +17,7 @@ struct
         , lastUpPress = time
         , lastDownPress = time
         , isSelected = false
+        , tempKeys = tempKeys
         }
     in
       {mode = GameType.OPTIONS options, userKeys = userKeys}
@@ -31,8 +32,8 @@ struct
           Fn.deselect (options, userKeys)
         (* what if new key collides with existing key? todo *)
         else
-          let val userKeys = Fn.updateKeys (key, userKeys)
-          in setNewKeys (options, userKeys, time)
+          let val tempKeys = Fn.updateKeys (key, userKeys)
+          in setNewKeys (options, tempKeys, userKeys, time)
           end
     | [] => Fn.default (options, userKeys)
 end
@@ -52,6 +53,7 @@ struct
         , lastUpPress = 0.0
         , lastDownPress = 0.0
         , isSelected = isSelected
+        , tempKeys = userKeys
         }
     in
       {mode = GameType.OPTIONS options, userKeys = userKeys}
@@ -69,12 +71,14 @@ struct
           , lastUpPress = time
           , lastDownPress = 0.0
           , isSelected = isSelected
+          , tempKeys = userKeys
           }
         else
           { focus = focus
           , lastUpPress = lastUpPress
           , lastDownPress = 0.0
           , isSelected = isSelected
+          , tempKeys = userKeys
           }
     in
       {mode = GameType.OPTIONS options, userKeys = userKeys}
@@ -90,12 +94,14 @@ struct
           , lastUpPress = 0.0
           , lastDownPress = time
           , isSelected = isSelected
+          , tempKeys = userKeys
           }
         else
           { focus = focus
           , lastUpPress = 0.0
           , lastDownPress = lastDownPress
           , isSelected = isSelected
+          , tempKeys = userKeys
           }
     in
       {mode = GameType.OPTIONS options, userKeys = userKeys}
@@ -109,6 +115,7 @@ struct
         , lastUpPress = lastUpPress
         , lastDownPress = lastDownPress
         , isSelected = true
+        , tempKeys = userKeys
         }
     in
       {mode = GameType.OPTIONS options, userKeys = userKeys}
@@ -122,6 +129,7 @@ struct
         , lastUpPress = lastUpPress
         , lastDownPress = lastDownPress
         , isSelected = false
+        , tempKeys = userKeys
         }
     in
       {mode = GameType.OPTIONS options, userKeys = userKeys}

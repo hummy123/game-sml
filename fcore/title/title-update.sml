@@ -24,8 +24,9 @@ struct
         let
           val mode =
             if #attackHeld input then
-              (* placeholder: go to configure screen instead once that is implemented *)
-              GameType.OPTIONS OptionsType.initial
+              let val options = OptionsType.init userKeys
+              in GameType.OPTIONS options
+              end
             else
               let
                 val titleState =
