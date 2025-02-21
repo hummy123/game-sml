@@ -18,6 +18,7 @@ struct
 
   (* GLFW functions. *)
   val init = _import "init" public : unit -> unit;
+  val getTime = _import "getTime" public : unit -> real;
   val windowHint = _import "windowHint" public : int * int -> unit;
   val createWindow =
     _import "createWindow" public : int * int * string -> window;

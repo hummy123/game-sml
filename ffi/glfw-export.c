@@ -51,3 +51,7 @@ void setClipboardString (GLFWwindow *window, const char *copyString) {
   glfwSetClipboardString(window, copyString);
 }
 
+
+double getTime() {
+  return glfwGetTime();
+}
