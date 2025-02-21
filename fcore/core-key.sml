@@ -138,6 +138,10 @@ sig
     }
 
   val keyFromString: string -> key_code option
+
+  val containsKey: key_code * key_code list -> bool
+  val containsAttack: user_key * key_code list -> bool
+  val containsEscape: user_key * key_code list -> bool
 end
 
 structure CoreKey :> CORE_KEY =
@@ -402,4 +406,15 @@ struct
     | "KEY_RIGHT_SUPER" => SOME KEY_RIGHT_SUPER
     | "KEY_MENU" => SOME KEY_MENU
     | _ => NONE
+
+  fun containsKey (searchKey, lst) =
+    case lst of
+      hd :: tl => hd = searchKey orelse containsKey (searchKey, tl)
+    | [] => false
+
+  fun containsAttack (userKeys: user_key, lst) =
+    containsKey (#attack userKeys, lst)
+
+  fun containsEscape (userKeys: user_key, lst) =
+    containsKey (#escape userKeys, lst)
 end
