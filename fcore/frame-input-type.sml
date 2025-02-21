@@ -8,5 +8,6 @@ struct
     , attackHeld: bool
     , jumpHeld: bool
     , escapeHeld: bool
+    , newKeys: CoreKey.key_code list
     }
 end

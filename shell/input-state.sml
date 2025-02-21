@@ -21,19 +21,27 @@ struct
     , jumpHeld = ref false
     , attackHeld = ref false
     , escapeHeld = ref false
+    , newKeys = ref []
     , width = ref (1920.0 : Real32.real)
     , height = ref (1080.0 : Real32.real)
     }
 
   fun getSnapshot () =
-    { leftHeld = !(#leftHeld state)
-    , rightHeld = !(#rightHeld state)
-    , upHeld = !(#upHeld state)
-    , downHeld = !(#downHeld state)
-    , attackHeld = !(#attackHeld state)
-    , jumpHeld = !(#jumpHeld state)
-    , escapeHeld = !(#escapeHeld state)
-    }
+    let
+      val input =
+        { leftHeld = !(#leftHeld state)
+        , rightHeld = !(#rightHeld state)
+        , upHeld = !(#upHeld state)
+        , downHeld = !(#downHeld state)
+        , attackHeld = !(#attackHeld state)
+        , jumpHeld = !(#jumpHeld state)
+        , escapeHeld = !(#escapeHeld state)
+        , newKeys = !(#newKeys state)
+        }
+      val () = #newKeys state := []
+    in
+      input
+    end
 
   (* there are three action states reported by OS: PRESS, REPEAT and RELEASE. 
    * If input is PRESS or REPEAT, then return true, or else return false. *)
@@ -43,6 +51,7 @@ struct
     case GlfwKeyMap.codeFromKey key of
       SOME code =>
         let
+          val () = #newKeys state := code :: !(#newKeys state)
           val {left, right, down, up, attack, jump, escape} = !keyMappings
           val action = actionToBool action
         in
@@ -58,9 +67,7 @@ struct
     | NONE => ()
 
   fun keyCallback (key, scancode, action, mods) =
-    let open Input
-    in if mods = 0 then handleKey (key, action) else ()
-    end
+    if mods = 0 then handleKey (key, action) else ()
 
   fun getWidth () =
     !(#width state)

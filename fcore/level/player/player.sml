@@ -190,7 +190,7 @@ struct
         else
           helpGetMainAttackPatches (attackHeld, mainAttackPressed, charge, acc)
 
-  fun getInputPatches (player: player, input) =
+  fun getInputPatches (player: player, input: FrameInputType.t) =
     let
       val
         { x
@@ -206,15 +206,8 @@ struct
         , ...
         } = player
 
-      val
-        { leftHeld
-        , rightHeld
-        , upHeld
-        , downHeld
-        , attackHeld
-        , jumpHeld
-        , escapeHeld
-        } = input
+      val {leftHeld, rightHeld, upHeld, downHeld, attackHeld, jumpHeld, ...} =
+        input
 
       val xAxis = getXAxis (leftHeld, rightHeld)
       val facing = getFacing (facing, xAxis)
