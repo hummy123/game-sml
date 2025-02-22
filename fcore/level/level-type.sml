@@ -51,6 +51,7 @@ struct
         , charge = Constants.maxCharge
         , projectiles = Vector.fromList []
         , platID = ~1
+        , animTimer = 0
         }
 
       val wall1 = {id = 1, x = 0, y = 0, width = 100, height = 1080}

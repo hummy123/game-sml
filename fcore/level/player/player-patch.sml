@@ -16,6 +16,7 @@ sig
   | W_CHARGE of int
   | W_PROJECTILES of PlayerType.player_projectile vector
   | W_PLAT_ID of int
+  | W_ANIM_TIMER of int
 
   val withPatch: PlayerType.player * player_patch -> PlayerType.player
   val withPatches: PlayerType.player * player_patch list -> PlayerType.player
@@ -39,6 +40,7 @@ struct
   | W_CHARGE of int
   | W_PROJECTILES of PlayerType.player_projectile vector
   | W_PLAT_ID of int
+  | W_ANIM_TIMER of int
 
   fun mkPlayer
     ( health
@@ -56,6 +58,7 @@ struct
     , charge
     , projectiles
     , platID
+    , animTimer
     ) =
     { yAxis = yAxis
     , xAxis = xAxis
@@ -72,6 +75,7 @@ struct
     , charge = charge
     , projectiles = projectiles
     , platID = platID
+    , animTimer = animTimer
     }
 
   fun withPatch (player, patch) =
@@ -92,6 +96,7 @@ struct
         , charge
         , projectiles
         , platID
+        , animTimer
         } = player
     in
       case patch of
@@ -112,6 +117,7 @@ struct
             , charge
             , projectiles
             , platID
+            , animTimer
             )
       | W_Y_AXIS yAxis =>
           mkPlayer
@@ -130,6 +136,7 @@ struct
             , charge
             , projectiles
             , platID
+            , animTimer
             )
       | W_RECOIL recoil =>
           mkPlayer
@@ -148,6 +155,7 @@ struct
             , charge
             , projectiles
             , platID
+            , animTimer
             )
       | W_ATTACKED attacked =>
           mkPlayer
@@ -166,6 +174,7 @@ struct
             , charge
             , projectiles
             , platID
+            , animTimer
             )
       | W_MAIN_ATTACK mainAttack =>
           mkPlayer
@@ -184,6 +193,7 @@ struct
             , charge
             , projectiles
             , platID
+            , animTimer
             )
       | W_FACING facing =>
           mkPlayer
@@ -202,6 +212,7 @@ struct
             , charge
             , projectiles
             , platID
+            , animTimer
             )
       | W_HEALTH health =>
           mkPlayer
@@ -220,6 +231,7 @@ struct
             , charge
             , projectiles
             , platID
+            , animTimer
             )
       | W_X x =>
           mkPlayer
@@ -238,6 +250,7 @@ struct
             , charge
             , projectiles
             , platID
+            , animTimer
             )
       | W_Y y =>
           mkPlayer
@@ -256,6 +269,7 @@ struct
             , charge
             , projectiles
             , platID
+            , animTimer
             )
       | W_JUMP_PRESSED jumpPressed =>
           mkPlayer
@@ -274,6 +288,7 @@ struct
             , charge
             , projectiles
             , platID
+            , animTimer
             )
       | W_MAIN_ATTACK_PRESSED mainAttackPressed =>
           mkPlayer
@@ -292,6 +307,7 @@ struct
             , charge
             , projectiles
             , platID
+            , animTimer
             )
       | W_ENEMIES enemies =>
           mkPlayer
@@ -310,6 +326,7 @@ struct
             , charge
             , projectiles
             , platID
+            , animTimer
             )
       | W_CHARGE charge =>
           mkPlayer
@@ -328,6 +345,7 @@ struct
             , charge
             , projectiles
             , platID
+            , animTimer
             )
       | W_PROJECTILES projectiles =>
           mkPlayer
@@ -346,6 +364,7 @@ struct
             , charge
             , projectiles
             , platID
+            , animTimer
             )
       | W_PLAT_ID platID =>
           mkPlayer
@@ -364,6 +383,26 @@ struct
             , charge
             , projectiles
             , platID
+            , animTimer
+            )
+      | W_ANIM_TIMER animTimer =>
+          mkPlayer
+            ( health
+            , xAxis
+            , yAxis
+            , x
+            , y
+            , jumpPressed
+            , recoil
+            , attacked
+            , mainAttack
+            , facing
+            , mainAttackPressed
+            , enemies
+            , charge
+            , projectiles
+            , platID
+            , animTimer
             )
     end
 

@@ -29,5 +29,6 @@ struct
     , charge: int
     , projectiles: player_projectile vector
     , platID: int
+    , animTimer: int
     }
 end
