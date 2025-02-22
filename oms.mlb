@@ -20,10 +20,24 @@ in
   fcore/block.sml
   fcore/field.sml
   fcore/level/chain-edge.sml
+end
 
+ann
+  "allowVectorExps true"
+in
   fcore/level/player/sprites/player-standing-right.sml
   fcore/level/player/sprites/player-standing-left.sml
+  fcore/level/player/sprites/player-walk-right-1.sml
+  fcore/level/player/sprites/player-walk-right-2.sml
+  fcore/level/player/sprites/player-walk-right-3.sml
+  fcore/level/player/sprites/player-walk-right-4.sml
+  fcore/level/player/sprites/player-walk-right-5.sml
+  fcore/level/player/sprites/player-walk-right-6.sml
+  fcore/level/player/sprites/player-walk-right-7.sml
+  fcore/level/player/sprites/player-walk-right-8.sml
+  fcore/level/player/sprites/player-walk-right-9.sml
 end
+
 fcore/make-text-vec.sml
 
 fcore/level/wall.sml
