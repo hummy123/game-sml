@@ -496,7 +496,7 @@ struct
 
   (* block is placeholder asset *)
   fun helpGetDrawVec
-    (x, y, realWidth, realHeight, width, height, attacked, mainAttack) =
+    (x, y, realWidth, realHeight, width, height, attacked, facing) =
     let
       val (r, g, b) =
         case attacked of
@@ -504,12 +504,18 @@ struct
         | ATTACKED amt =>
             if amt mod 5 = 0 then (1.0, 1.0, 1.0) else (1.0, 0.75, 0.75)
     in
-      PlayerSprite.lerp (x, y, realWidth, realHeight, width, height, r, g, b)
+      case facing of
+        FACING_RIGHT =>
+          PlayerStandingRight.lerp
+            (x, y, realWidth, realHeight, width, height, r, g, b)
+      | FACING_LEFT =>
+          PlayerStandingLeft.lerp
+            (x, y, realWidth, realHeight, width, height, r, g, b)
     end
 
   fun getDrawVec (player: player, width, height) =
     let
-      val {x, y, attacked, mainAttack, ...} = player
+      val {x, y, attacked, facing, ...} = player
       val wratio = width / Constants.worldWidthReal
       val hratio = height / Constants.worldHeightReal
     in
@@ -528,7 +534,7 @@ struct
           val realHeight = Constants.playerHeightReal * wratio
         in
           helpGetDrawVec
-            (x, y, realWidth, realHeight, width, height, attacked, mainAttack)
+            (x, y, realWidth, realHeight, width, height, attacked, facing)
         end
       else
         let
@@ -545,7 +551,7 @@ struct
           val realHeight = Constants.playerHeightReal * hratio
         in
           helpGetDrawVec
-            (x, y, realWidth, realHeight, width, height, attacked, mainAttack)
+            (x, y, realWidth, realHeight, width, height, attacked, facing)
         end
     end
 
