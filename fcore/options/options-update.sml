@@ -276,6 +276,12 @@ struct
       }
     end
 
+  fun cancelAndGoToTitle userKeys =
+    { mode = GameType.TITLE TitleType.initial
+    , userKeys = userKeys
+    , saveKeys = false
+    }
+
   fun update (options, input: FrameInputType.t, userKeys, time) =
     case #focus options of
       LEFT_KEY =>
@@ -355,7 +361,7 @@ struct
           default (options, userKeys)
     | CANCEL_BUTTON =>
         if CoreKey.containsAttack (userKeys, #newKeys input) then
-          select (options, userKeys)
+          cancelAndGoToTitle userKeys
         else if #upHeld input then
           moveFocusUp (options, SAVE_BUTTON, userKeys, time)
         else if #downHeld input then
