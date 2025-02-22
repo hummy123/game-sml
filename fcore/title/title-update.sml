@@ -7,7 +7,7 @@ struct
       START_BUTTON =>
         let
           val mode =
-            if #attackHeld input then
+            if CoreKey.containsAttack (userKeys, #newKeys input) then
               GameType.LEVEL LevelType.initial
             else
               let
@@ -23,7 +23,7 @@ struct
     | OPTIONS_BUTTON =>
         let
           val mode =
-            if #attackHeld input then
+            if CoreKey.containsAttack (userKeys, #newKeys input) then
               let val options = OptionsType.init userKeys
               in GameType.OPTIONS options
               end
