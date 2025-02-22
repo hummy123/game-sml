@@ -36,7 +36,7 @@ struct
         val height = Real32.fromInt height * ratio
 
         val block = Block.lerp
-          (x, y, width, height, winWidth, winHeight, 0.0, 0.0, 0.0)
+          (x, y, width, height, winWidth, winHeight, 1.0, 1.0, 1.0)
         val acc = block :: acc
       in
         helpGetDrawVecWider
@@ -59,7 +59,7 @@ struct
         val height = Real32.fromInt height * ratio
 
         val block = Block.lerp
-          (x, y, width, height, winWidth, winHeight, 0.0, 0.0, 0.0)
+          (x, y, width, height, winWidth, winHeight, 1.0, 1.0, 1.0)
         val acc = block :: acc
       in
         helpGetDrawVecTaller

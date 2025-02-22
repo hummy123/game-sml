@@ -227,7 +227,7 @@ struct
       val width = InputState.getWidth ()
       val height = InputState.getHeight ()
 
-      val playerVec = Player.getDrawVec (#player level, width, height)
+      val playerVec = PlayerVec.get (#player level, width, height)
       val enemyVec = Enemy.getDrawVec (#enemies level, width, height)
       val playerVec = Vector.concat [playerVec, enemyVec]
 

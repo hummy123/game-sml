@@ -381,6 +381,10 @@ struct
     let
       val player = #player game
 
+      val oldAnimTimer = #animTimer player
+      val oldXAxis = #xAxis player
+      val oldYAxis = #yAxis player
+
       val patches = getProjectilePatches player
       val patches = getRecoilPatches (player, patches)
       val player = PlayerPatch.withPatches (player, patches)
@@ -422,8 +426,20 @@ struct
       val {walls, wallTree, platforms, platformTree, ...} = game
       val patches = PlayerPhysics.getEnvironmentPatches
         (player, walls, wallTree, platforms, platformTree)
+
+      val player = PlayerPatch.withPatches (player, patches)
+
+      val newXAxis = #xAxis player
+      val newYAxis = #yAxis player
     in
-      PlayerPatch.withPatches (player, patches)
+      if
+        oldYAxis = ON_GROUND andalso newYAxis = ON_GROUND
+        andalso oldXAxis = MOVE_RIGHT andalso newXAxis = MOVE_RIGHT
+      then
+        (* update move-right animation *)
+        PlayerPatch.withPatch (player, W_ANIM_TIMER (oldAnimTimer + 1))
+      else
+        PlayerPatch.withPatch (player, W_ANIM_TIMER 0)
     end
 
   (* player reaction to collisions with enemies.
@@ -493,68 +509,6 @@ struct
     end
 
   (*** DRAWING FUNCTIONS ***)
-
-  (* block is placeholder asset *)
-  fun helpGetDrawVec
-    (x, y, realWidth, realHeight, width, height, attacked, facing) =
-    let
-      val (r, g, b) =
-        case attacked of
-          NOT_ATTACKED => (1.0, 1.0, 1.0)
-        | ATTACKED amt =>
-            if amt mod 5 = 0 then (1.0, 1.0, 1.0) else (1.0, 0.75, 0.75)
-    in
-      case facing of
-        FACING_RIGHT =>
-          PlayerStandingRight.lerp
-            (x, y, realWidth, realHeight, width, height, r, g, b)
-      | FACING_LEFT =>
-          PlayerStandingLeft.lerp
-            (x, y, realWidth, realHeight, width, height, r, g, b)
-    end
-
-  fun getDrawVec (player: player, width, height) =
-    let
-      val {x, y, attacked, facing, ...} = player
-      val wratio = width / Constants.worldWidthReal
-      val hratio = height / Constants.worldHeightReal
-    in
-      if wratio < hratio then
-        let
-          val scale = Constants.worldHeightReal * wratio
-          val yOffset =
-            if height > scale then (height - scale) / 2.0
-            else if height < scale then (scale - height) / 2.0
-            else 0.0
-
-          val x = Real32.fromInt x * wratio
-          val y = Real32.fromInt y * wratio + yOffset
-
-          val realWidth = Constants.playerWidthReal * wratio
-          val realHeight = Constants.playerHeightReal * wratio
-        in
-          helpGetDrawVec
-            (x, y, realWidth, realHeight, width, height, attacked, facing)
-        end
-      else
-        let
-          val scale = Constants.worldWidthReal * hratio
-          val xOffset =
-            if width > scale then (width - scale) / 2.0
-            else if width < scale then (scale - width) / 2.0
-            else 0.0
-
-          val x = Real32.fromInt x * hratio + xOffset
-          val y = Real32.fromInt y * hratio
-
-          val realWidth = Constants.playerWidthReal * hratio
-          val realHeight = Constants.playerHeightReal * hratio
-        in
-          helpGetDrawVec
-            (x, y, realWidth, realHeight, width, height, attacked, facing)
-        end
-    end
-
   fun getFieldVec (player: player, width, height) =
     case #mainAttack player of
       MAIN_ATTACKING {length, ...} =>
