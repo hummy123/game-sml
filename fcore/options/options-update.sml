@@ -283,6 +283,8 @@ struct
           UpdateLeftKey.onSelected (options, input, userKeys, time)
         else if CoreKey.containsAttack (userKeys, #newKeys input) then
           select (options, userKeys)
+        else if #upHeld input then
+          moveFocusUp (options, CANCEL_BUTTON, userKeys, time)
         else if #downHeld input then
           moveFocusDown (options, RIGHT_KEY, userKeys, time)
         else
@@ -356,6 +358,8 @@ struct
           select (options, userKeys)
         else if #upHeld input then
           moveFocusUp (options, SAVE_BUTTON, userKeys, time)
+        else if #downHeld input then
+          moveFocusDown (options, LEFT_KEY, userKeys, time)
         else
           default (options, userKeys)
 end
