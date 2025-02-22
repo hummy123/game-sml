@@ -69,6 +69,8 @@ in
   fcore/level/player/sprites/player-walk-right-7.sml
   fcore/level/player/sprites/player-walk-right-8.sml
   fcore/level/player/sprites/player-walk-right-9.sml
+  fcore/level/player/sprites/player-walk-right-10.sml
+  fcore/level/player/sprites/player-walk-right-11.sml
   fcore/level/player/player-vec.sml
 end
 
