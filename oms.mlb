@@ -81,6 +81,12 @@ in
   fcore/level/player/sprites/walk/player-walk-left-8.sml
   fcore/level/player/sprites/walk/player-walk-left-9.sml
 
+  fcore/level/player/sprites/jump/player-jump-right-1.sml
+  fcore/level/player/sprites/jump/player-jump-right-2.sml
+  fcore/level/player/sprites/jump/player-jump-right-3.sml
+  fcore/level/player/sprites/jump/player-jump-right-4.sml
+  fcore/level/player/sprites/jump/player-jump-right-5.sml
+
   fcore/level/player/player-vec.sml
 end
 

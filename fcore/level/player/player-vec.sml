@@ -68,9 +68,33 @@ struct
         end
     | STAY_STILL => getIdle (player, rx, ry, dw, dh, ww, wh)
 
+  fun getWhenJumping (player, amt, rx, ry, dw, dh, ww, wh) =
+    if amt < 3 then
+      PlayerJumpRight1.lerp 
+        (rx, ry, dw, dh, ww, wh, 1.0, 1.0, 1.0)
+    else if amt < 6 then
+      PlayerJumpRight2.lerp
+        (rx, ry, dw, dh, ww, wh, 1.0, 1.0, 1.0)
+    else if amt < 9 then
+      PlayerJumpRight3.lerp
+        (rx, ry, dw, dh, ww, wh, 1.0, 1.0, 1.0)
+    else if amt < 12 then
+      PlayerJumpRight4.lerp
+        (rx, ry, dw, dh, ww, wh, 1.0, 1.0, 1.0)
+    else
+      PlayerJumpRight5.lerp
+        (rx, ry, dw, dh, ww, wh, 1.0, 1.0, 1.0)
+
+  fun getWhenFalling (player, rx, ry, dw, dh, ww, wh) =
+    PlayerJumpRight5.lerp
+      (rx, ry, dw, dh, ww, wh, 1.0, 1.0, 1.0)
+
   fun getWhenNotAttacked (player, rx, ry, dw, dh, ww, wh) =
     case #yAxis player of
       ON_GROUND => getWhenOnGround (player, rx, ry, dw, dh, ww, wh)
+    | JUMPING amt => getWhenJumping (player, amt, rx, ry, dw, dh, ww, wh)
+    | FALLING => getWhenFalling (player, rx, ry, dw, dh, ww, wh)
+    | FLOATING _ => getWhenFalling (player, rx, ry, dw, dh, ww, wh)
     | _ => PlayerStandingRight.lerp (rx, ry, dw, dh, ww, wh, 1.0, 1.0, 1.0)
 
   fun getWhenAttacked (player, amt, rx, ry, dw, dh, ww, wh) =
