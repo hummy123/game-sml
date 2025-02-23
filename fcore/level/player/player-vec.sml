@@ -13,9 +13,6 @@ struct
     , PlayerWalkRight7.lerp
     , PlayerWalkRight8.lerp
     , PlayerWalkRight9.lerp
-    , PlayerWalkRight10.lerp
-    , PlayerWalkRight11.lerp
-    , PlayerWalkRight10.lerp
     , PlayerWalkRight8.lerp
     , PlayerWalkRight7.lerp
     , PlayerWalkRight6.lerp
