@@ -22,6 +22,25 @@ struct
     , PlayerWalkRight2.lerp
     ]
 
+  val walkLeftFrames =
+   #[ PlayerWalkLeft1.lerp
+    , PlayerWalkLeft2.lerp
+    , PlayerWalkLeft3.lerp
+    , PlayerWalkLeft4.lerp
+    , PlayerWalkLeft5.lerp
+    , PlayerWalkLeft6.lerp
+    , PlayerWalkLeft7.lerp
+    , PlayerWalkLeft8.lerp
+    , PlayerWalkLeft9.lerp
+    , PlayerWalkLeft8.lerp
+    , PlayerWalkLeft7.lerp
+    , PlayerWalkLeft6.lerp
+    , PlayerWalkLeft5.lerp
+    , PlayerWalkLeft4.lerp
+    , PlayerWalkLeft3.lerp
+    , PlayerWalkLeft2.lerp
+    ]
+
   fun getIdle (player, rx, ry, dw, dh, ww, wh) =
     case #facing player of
       FACING_RIGHT =>
@@ -39,7 +58,14 @@ struct
         in
           func (rx, ry, dw, dh, ww, wh, 1.0, 1.0, 1.0)
         end
-    | MOVE_LEFT => getIdle (player, rx, ry, dw, dh, ww, wh)
+    | MOVE_LEFT =>
+        let
+          val animTimer = #animTimer player
+          val frame = (animTimer div 2) mod Vector.length walkLeftFrames
+          val func = Vector.sub (walkLeftFrames, Int.max (frame, 0))
+        in
+          func (rx, ry, dw, dh, ww, wh, 1.0, 1.0, 1.0)
+        end
     | STAY_STILL => getIdle (player, rx, ry, dw, dh, ww, wh)
 
   fun getWhenNotAttacked (player, rx, ry, dw, dh, ww, wh) =

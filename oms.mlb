@@ -60,15 +60,27 @@ ann
 in
   fcore/level/player/sprites/player-standing-right.sml
   fcore/level/player/sprites/player-standing-left.sml
-  fcore/level/player/sprites/player-walk-right-1.sml
-  fcore/level/player/sprites/player-walk-right-2.sml
-  fcore/level/player/sprites/player-walk-right-3.sml
-  fcore/level/player/sprites/player-walk-right-4.sml
-  fcore/level/player/sprites/player-walk-right-5.sml
-  fcore/level/player/sprites/player-walk-right-6.sml
-  fcore/level/player/sprites/player-walk-right-7.sml
-  fcore/level/player/sprites/player-walk-right-8.sml
-  fcore/level/player/sprites/player-walk-right-9.sml
+
+  fcore/level/player/sprites/walk/player-walk-right-1.sml
+  fcore/level/player/sprites/walk/player-walk-right-2.sml
+  fcore/level/player/sprites/walk/player-walk-right-3.sml
+  fcore/level/player/sprites/walk/player-walk-right-4.sml
+  fcore/level/player/sprites/walk/player-walk-right-5.sml
+  fcore/level/player/sprites/walk/player-walk-right-6.sml
+  fcore/level/player/sprites/walk/player-walk-right-7.sml
+  fcore/level/player/sprites/walk/player-walk-right-8.sml
+  fcore/level/player/sprites/walk/player-walk-right-9.sml
+
+  fcore/level/player/sprites/walk/player-walk-left-1.sml
+  fcore/level/player/sprites/walk/player-walk-left-2.sml
+  fcore/level/player/sprites/walk/player-walk-left-3.sml
+  fcore/level/player/sprites/walk/player-walk-left-4.sml
+  fcore/level/player/sprites/walk/player-walk-left-5.sml
+  fcore/level/player/sprites/walk/player-walk-left-6.sml
+  fcore/level/player/sprites/walk/player-walk-left-7.sml
+  fcore/level/player/sprites/walk/player-walk-left-8.sml
+  fcore/level/player/sprites/walk/player-walk-left-9.sml
+
   fcore/level/player/player-vec.sml
 end
 

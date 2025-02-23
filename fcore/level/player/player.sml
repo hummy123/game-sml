@@ -434,10 +434,15 @@ struct
     in
       if
         oldYAxis = ON_GROUND andalso newYAxis = ON_GROUND
-        andalso oldXAxis = MOVE_RIGHT andalso newXAxis = MOVE_RIGHT
       then
-        (* update move-right animation *)
-        PlayerPatch.withPatch (player, W_ANIM_TIMER (oldAnimTimer + 1))
+        if oldXAxis = MOVE_RIGHT andalso newXAxis = MOVE_RIGHT then
+          (* update move-right animation *)
+          PlayerPatch.withPatch (player, W_ANIM_TIMER (oldAnimTimer + 1))
+        else if oldXAxis = MOVE_LEFT andalso newXAxis = MOVE_LEFT then
+          (* update move-left animation *)
+          PlayerPatch.withPatch (player, W_ANIM_TIMER (oldAnimTimer + 1))
+        else
+          PlayerPatch.withPatch (player, W_ANIM_TIMER 0)
       else
         PlayerPatch.withPatch (player, W_ANIM_TIMER 0)
     end
