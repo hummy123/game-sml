@@ -432,7 +432,9 @@ struct
       val newXAxis = #xAxis player
       val newYAxis = #yAxis player
     in
-      if
+      if oldYAxis = DROP_BELOW_PLATFORM andalso newYAxis = DROP_BELOW_PLATFORM then
+        PlayerPatch.withPatch (player, W_ANIM_TIMER (oldAnimTimer + 1))
+      else if
         oldYAxis = ON_GROUND andalso newYAxis = ON_GROUND
       then
         if oldXAxis = MOVE_RIGHT andalso newXAxis = MOVE_RIGHT then
@@ -465,53 +467,6 @@ struct
         in
           PlayerPatch.withPatches (player, patches)
         end
-
-  (* todo: check which enemies are being attacked by player, 
-   * updating player's 'defeatedEnemies' field (if enemy's health would reach 0)
-   * and updating enemy (if enemy's health wouldn't reach 0, decrement health)
-      val patches =
-        (* if player is attacking, check if enemies collide with attack  *)
-        case #mainAttack player of
-          MAIN_ATTACKING {length, ...} =>
-            let
-              val height = Constants.playerSize
-              val {x, y, facing, enemies, ...} = player
-              val x =
-                (case facing of
-                   FACING_RIGHT => x + Constants.playerSize
-                 | FACING_LEFT => x - length)
-  
-              val state = []
-              (* detect collisions from enemies who are hit by attack *)
-              val newDefeated = AttackEnemies.foldRegion
-                (x, y, length, height, (), state, enemyTree)
-  
-              (* detect collisions from falling enemies too *)
-              val fallingTree =
-                FallingEnemies.generateTree (#fallingEnemies game)
-              val newDefeated = AttackEnemies.foldRegion
-                (x, y, length, height, (), newDefeated, fallingTree)
-  
-              val allDefeated =
-                Vector.concat [Vector.fromList newDefeated, enemies]
-            in
-              W_ENEMIES allDefeated :: patches
-            end
-        | _ => patches
-    in
-      PlayerPatch.withPatches (player, patches)
-    end
-    *)
-
-  (* todo: add attacked enemies to player's 'enemies' field *)
-  fun concatAttackedEnemies (player: player, enemyCollisions) =
-    let
-      val newDefeated = Vector.map (fn id => {angle = 360}) enemyCollisions
-      val oldDefeated = #enemies player
-      val allDefeated = Vector.concat [oldDefeated, newDefeated]
-    in
-      PlayerPatch.withPatch (player, W_ENEMIES allDefeated)
-    end
 
   (*** DRAWING FUNCTIONS ***)
   fun getFieldVec (player: player, width, height) =

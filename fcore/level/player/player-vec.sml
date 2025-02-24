@@ -116,13 +116,20 @@ struct
         PlayerJumpLeft5.lerp
           (rx, ry, dw, dh, ww, wh, 1.0, 1.0, 1.0)
 
+  fun getWhenDropping (player, rx, ry, dw, dh, ww, wh) =
+    let
+      val animTimer = #animTimer player
+    in
+      getWhenJumping (player, animTimer, rx, ry, dw, dh, ww, wh)
+    end
+
   fun getWhenNotAttacked (player, rx, ry, dw, dh, ww, wh) =
     case #yAxis player of
       ON_GROUND => getWhenOnGround (player, rx, ry, dw, dh, ww, wh)
     | JUMPING amt => getWhenJumping (player, amt, rx, ry, dw, dh, ww, wh)
     | FALLING => getWhenFalling (player, rx, ry, dw, dh, ww, wh)
     | FLOATING _ => getWhenFalling (player, rx, ry, dw, dh, ww, wh)
-    | _ => PlayerStandingRight.lerp (rx, ry, dw, dh, ww, wh, 1.0, 1.0, 1.0)
+    | DROP_BELOW_PLATFORM => getWhenDropping (player, rx, ry, dw, dh, ww, wh)
 
   fun getWhenAttacked (player, amt, rx, ry, dw, dh, ww, wh) =
     case #facing player of
