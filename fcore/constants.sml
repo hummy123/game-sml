@@ -9,13 +9,13 @@ struct
   val worldHeightReal: Real32.real = 1080.0
 
   (* constants for player *)
-  val playerWidth = 32
-  val playerHeight = 40
-  val playerWidthReal: Real32.real = 32.0
-  val playerHeightReal: Real32.real = 40.0
+  val playerWidth = 48
+  val playerHeight = 60
+  val playerWidthReal: Real32.real = 48.0
+  val playerHeightReal: Real32.real = 60.0
 
-  val halfPlayerWidthReal: Real32.real = 16.0
-  val halfPlayerHeightReal: Real32.real = 20.0
+  val halfPlayerWidthReal: Real32.real = 32.0
+  val halfPlayerHeightReal: Real32.real = 40.0
   val movePlayerBy = 5
 
   (* player timing values *)
@@ -28,13 +28,13 @@ struct
 
   (* constants for projectiles *)
   val projectilePi: Real32.real = Real32.Math.pi / 180.0
-  val projectileSize: Real32.real = 9.0
-  val projectileDistance: Real32.real = 13.0
-  val projectileSizeInt = 9
+  val projectileSize: Real32.real = 18.0
+  val projectileDistance: Real32.real = 26.0
+  val projectileSizeInt = 18
 
   (* constants for enemy *)
-  val enemySize = 32
-  val enemySizeReal: Real32.real = 32.0
+  val enemySize = 48
+  val enemySizeReal: Real32.real = 48.0
   val moveEnemyBy = 3
 
   val batRestLimit = 55
