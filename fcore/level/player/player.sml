@@ -87,7 +87,7 @@ struct
     let
       val attack =
         if attackHeld andalso not mainAttackPressed then
-          MAIN_ATTACKING {length = 3, growing = true}
+          MAIN_ATTACKING 1
         else
           MAIN_NOT_ATTACKING
     in
@@ -159,30 +159,19 @@ struct
           getThrowPatches (defeteadEnemies, projectiles, player, acc)
         else
           helpGetMainAttackPatches (attackHeld, mainAttackPressed, charge, acc)
-    | MAIN_ATTACKING {length, growing} =>
+    | MAIN_ATTACKING amt =>
         let
-          val mainAttack =
-            if growing then
-              if length < Constants.attackLengthLimit then
-                let val newLength = length + Constants.moveProjectileBy
-                in MAIN_ATTACKING {length = newLength, growing = true}
-                end
-              else
-                let
-                  val newLength = length - Constants.moveProjectileBy
-                in
-                  if newLength <= 0 then MAIN_NOT_ATTACKING
-                  else MAIN_ATTACKING {length = newLength, growing = false}
-                end
+          val acc =
+            if amt = Constants.mainAttackLimit then
+              W_MAIN_ATTACK MAIN_NOT_ATTACKING :: acc
             else
               let
-                val newLength = length - Constants.moveProjectileBy
+                val amt = amt + 1
               in
-                if newLength <= 0 then MAIN_NOT_ATTACKING
-                else MAIN_ATTACKING {length = newLength, growing = false}
+                W_MAIN_ATTACK (MAIN_ATTACKING amt) :: acc
               end
         in
-          W_MAIN_ATTACK_PRESSED true :: W_MAIN_ATTACK mainAttack :: acc
+          W_MAIN_ATTACK_PRESSED true :: acc
         end
     | MAIN_THROWING =>
         if attackHeld then
@@ -469,17 +458,32 @@ struct
         end
 
   (*** DRAWING FUNCTIONS ***)
+  fun helpGetWhipVec (tlx, tly, ratio, xOffset, yOffset, pos, boxes, width, height, acc) =
+    if pos = Vector.length boxes then
+      Vector.concat acc
+    else
+      let
+        val {x, y} = Vector.sub (boxes, pos)
+        val x = tlx + x
+        val y = tly + y
+
+        val x = Real32.fromInt x * ratio + xOffset
+        val y = Real32.fromInt y * ratio + yOffset
+
+        val size = Whip.sizeReal
+        val acc = Box.lerp (x, y, size, size, width, height) :: acc
+      in
+        helpGetWhipVec (tlx, tly, ratio, xOffset, yOffset, pos + 1, boxes, width, height, acc)
+      end
+
   fun getFieldVec (player: player, width, height) =
     case #mainAttack player of
-      MAIN_ATTACKING {length, ...} =>
+      MAIN_ATTACKING amt =>
         let
+          val frame = amt div 2
           val {x, y, facing, ...} = player
           val wratio = width / Constants.worldWidthReal
           val hratio = height / Constants.worldHeightReal
-          val x =
-            case #facing player of
-              FACING_RIGHT => x + Constants.playerWidth
-            | FACING_LEFT => x - length
         in
           if wratio < hratio then
             let
@@ -489,22 +493,15 @@ struct
                 else if height < scale then (scale - height) / 2.0
                 else 0.0
 
-              val x = Real32.fromInt x * wratio
-              val y = Real32.fromInt y * wratio + yOffset
-
-              val realLength = Real32.fromInt length * wratio
-              val realHeight = Constants.playerHeightReal * wratio
-
-              val {charge, ...} = player
-              val alpha = Real32.fromInt charge / 60.0
+              val boxes =
+                case facing of
+                  FACING_RIGHT =>
+                    Vector.sub (Whip.rightFrames, frame)
+                | FACING_LEFT =>
+                    (* todo: change to leftFrames once that is implemented *)
+                    Vector.sub (Whip.rightFrames, frame)
             in
-              case facing of
-                FACING_RIGHT =>
-                  ChainEdgeRight.lerp
-                    (x, y, realLength, realHeight, width, height, 0.5, 0.5, 0.5)
-              | FACING_LEFT =>
-                  ChainEdgeLeft.lerp
-                    (x, y, realLength, realHeight, width, height, 0.5, 0.5, 0.5)
+              helpGetWhipVec (x, y, wratio, 0.0, yOffset, 0, boxes, width, height, [])
             end
           else
             let
@@ -514,22 +511,15 @@ struct
                 else if width < scale then (scale - width) / 2.0
                 else 0.0
 
-              val x = Real32.fromInt x * hratio + xOffset
-              val y = Real32.fromInt y * hratio
-
-              val realLength = Real32.fromInt length * hratio
-              val realHeight = Constants.playerHeightReal * hratio
-
-              val {charge, ...} = player
-              val alpha = Real32.fromInt charge / 60.0
+              val boxes =
+                case facing of
+                  FACING_RIGHT =>
+                    Vector.sub (Whip.rightFrames, frame)
+                | FACING_LEFT =>
+                    (* todo: change to leftFrames once that is implemented *)
+                    Vector.sub (Whip.rightFrames, frame)
             in
-              case facing of
-                FACING_RIGHT =>
-                  ChainEdgeRight.lerp
-                    (x, y, realLength, realHeight, width, height, 0.5, 0.5, 0.5)
-              | FACING_LEFT =>
-                  ChainEdgeLeft.lerp
-                    (x, y, realLength, realHeight, width, height, 0.5, 0.5, 0.5)
+              helpGetWhipVec (x, y, hratio, xOffset, 0.0, 0, boxes, width, height, [])
             end
         end
     | _ => Vector.fromList []

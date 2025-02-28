@@ -6,7 +6,7 @@ struct
 
   datatype main_attack =
     MAIN_NOT_ATTACKING
-  | MAIN_ATTACKING of {length: int, growing: bool}
+  | MAIN_ATTACKING of int
   | MAIN_THROWING
 
   type defeated_enemies = {angle: int}

@@ -56,6 +56,7 @@ struct
       open PlayerType
       val {x, y, facing, mainAttack, ...} = player
     in
+      (* todo: bring back attack 
       case mainAttack of
         MAIN_ATTACKING {length, ...} =>
           let
@@ -89,6 +90,8 @@ struct
             (player, enemyMap, fallingMap)
           end
       | _ => (player, enemyMap, fallingMap)
+      *)
+        (player, enemyMap, fallingMap)
     end
 
   (* - Handle collisions when player's projectile hits enemy - *)
