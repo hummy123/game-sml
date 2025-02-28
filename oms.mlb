@@ -19,6 +19,7 @@ in
   vendored/cozette-sml/fonts/cozette-ascii.mlb
   fcore/block.sml
   fcore/field.sml
+  fcore'box.sml
   fcore/level/chain-edge.sml
 end
 
