@@ -51,47 +51,83 @@ struct
            end
        end)
 
+  fun helpAttackEnemies
+    ( player
+    , defeatedList
+    , enemyMap
+    , fallingMap
+    , fallingTree
+    , enemyTree
+    , pos
+    , boxes
+    ) =
+    if pos = Vector.length boxes then
+      let
+        val defeatedList = Vector.fromList defeatedList
+        val defeatedList = Vector.concat [defeatedList, #enemies player]
+
+        val player =
+          PlayerPatch.withPatch (player, PlayerPatch.W_ENEMIES defeatedList)
+      in
+        (player, enemyMap, fallingMap)
+      end
+    else
+      let
+        val {x = px, y = py, ...} = player
+        val {x = bx, y = by} = Vector.sub (boxes, pos)
+
+        val x = px + bx
+        val y = py + by
+        val size = Whip.size
+
+        val (defeatedList, enemyMap) = PlayerAttackEnemy.foldRegion
+          (x, y, size, size, (), (defeatedList, enemyMap), enemyTree)
+
+        val (defeatedList, fallingMap) = PlayerAttackFalling.foldRegion
+          (x, y, size, size, (), (defeatedList, fallingMap), fallingTree)
+      in
+        helpAttackEnemies
+          ( player
+          , defeatedList
+          , enemyMap
+          , fallingMap
+          , fallingTree
+          , enemyTree
+          , pos + 1
+          , boxes
+          )
+      end
+
   fun attackEnemies (player: PlayerType.player, enemyMap, enemyTree, fallingMap) =
     let
       open PlayerType
       val {x, y, facing, mainAttack, ...} = player
     in
-      (* todo: bring back attack 
       case mainAttack of
-        MAIN_ATTACKING {length, ...} =>
+        MAIN_ATTACKING amt =>
           let
             open EntityType
-            val height = Constants.playerHeight
-            val x =
-              (case facing of
-                 FACING_RIGHT => x + Constants.playerWidth
-               | FACING_LEFT => x - length)
-
-            val (defeatedList, enemyMap) = PlayerAttackEnemy.foldRegion
-              (x, y, length, height, (), ([], enemyMap), enemyTree)
-
+            val frame = amt div 2
             val fallingTree = FallingEnemies.generateTree fallingMap
-            val (defeatedList, fallingMap) = PlayerAttackFalling.foldRegion
-              ( x
-              , y
-              , length
-              , height
-              , ()
-              , (defeatedList, fallingMap)
-              , fallingTree
-              )
-
-            val defeatedList = Vector.fromList defeatedList
-            val defeatedList = Vector.concat [defeatedList, #enemies player]
-
-            val player =
-              PlayerPatch.withPatch (player, PlayerPatch.W_ENEMIES defeatedList)
+            val boxes =
+              case facing of
+                FACING_RIGHT => Vector.sub (Whip.rightFrames, frame)
+              | FACING_LEFT =>
+                  (* todo: replace rightFrames with leftFrames *)
+                  Vector.sub (Whip.rightFrames, frame)
           in
-            (player, enemyMap, fallingMap)
+            helpAttackEnemies
+              ( player
+              , []
+              , enemyMap
+              , fallingMap
+              , fallingTree
+              , enemyTree
+              , 0
+              , boxes
+              )
           end
       | _ => (player, enemyMap, fallingMap)
-      *)
-        (player, enemyMap, fallingMap)
     end
 
   (* - Handle collisions when player's projectile hits enemy - *)

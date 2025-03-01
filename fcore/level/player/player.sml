@@ -86,10 +86,8 @@ struct
   fun helpGetMainAttackPatches (attackHeld, mainAttackPressed, charge, acc) =
     let
       val attack =
-        if attackHeld andalso not mainAttackPressed then
-          MAIN_ATTACKING 1
-        else
-          MAIN_NOT_ATTACKING
+        if attackHeld andalso not mainAttackPressed then MAIN_ATTACKING 1
+        else MAIN_NOT_ATTACKING
     in
       W_MAIN_ATTACK_PRESSED (attackHeld andalso mainAttackPressed)
       :: W_MAIN_ATTACK attack :: acc
@@ -165,10 +163,8 @@ struct
             if amt = Constants.mainAttackLimit then
               W_MAIN_ATTACK MAIN_NOT_ATTACKING :: acc
             else
-              let
-                val amt = amt + 1
-              in
-                W_MAIN_ATTACK (MAIN_ATTACKING amt) :: acc
+              let val amt = amt + 1
+              in W_MAIN_ATTACK (MAIN_ATTACKING amt) :: acc
               end
         in
           W_MAIN_ATTACK_PRESSED true :: acc
@@ -423,9 +419,7 @@ struct
     in
       if oldYAxis = DROP_BELOW_PLATFORM andalso newYAxis = DROP_BELOW_PLATFORM then
         PlayerPatch.withPatch (player, W_ANIM_TIMER (oldAnimTimer + 1))
-      else if
-        oldYAxis = ON_GROUND andalso newYAxis = ON_GROUND
-      then
+      else if oldYAxis = ON_GROUND andalso newYAxis = ON_GROUND then
         if oldXAxis = MOVE_RIGHT andalso newXAxis = MOVE_RIGHT then
           (* update move-right animation *)
           PlayerPatch.withPatch (player, W_ANIM_TIMER (oldAnimTimer + 1))
@@ -458,7 +452,8 @@ struct
         end
 
   (*** DRAWING FUNCTIONS ***)
-  fun helpGetWhipVec (tlx, tly, ratio, xOffset, yOffset, pos, boxes, width, height, acc) =
+  fun helpGetWhipVec
+    (tlx, tly, ratio, xOffset, yOffset, pos, boxes, width, height, acc) =
     if pos = Vector.length boxes then
       Vector.concat acc
     else
@@ -473,7 +468,18 @@ struct
         val size = Whip.sizeReal
         val acc = Box.lerp (x, y, size, size, width, height) :: acc
       in
-        helpGetWhipVec (tlx, tly, ratio, xOffset, yOffset, pos + 1, boxes, width, height, acc)
+        helpGetWhipVec
+          ( tlx
+          , tly
+          , ratio
+          , xOffset
+          , yOffset
+          , pos + 1
+          , boxes
+          , width
+          , height
+          , acc
+          )
       end
 
   fun getFieldVec (player: player, width, height) =
@@ -495,13 +501,13 @@ struct
 
               val boxes =
                 case facing of
-                  FACING_RIGHT =>
-                    Vector.sub (Whip.rightFrames, frame)
+                  FACING_RIGHT => Vector.sub (Whip.rightFrames, frame)
                 | FACING_LEFT =>
                     (* todo: change to leftFrames once that is implemented *)
                     Vector.sub (Whip.rightFrames, frame)
             in
-              helpGetWhipVec (x, y, wratio, 0.0, yOffset, 0, boxes, width, height, [])
+              helpGetWhipVec
+                (x, y, wratio, 0.0, yOffset, 0, boxes, width, height, [])
             end
           else
             let
@@ -513,13 +519,13 @@ struct
 
               val boxes =
                 case facing of
-                  FACING_RIGHT =>
-                    Vector.sub (Whip.rightFrames, frame)
+                  FACING_RIGHT => Vector.sub (Whip.rightFrames, frame)
                 | FACING_LEFT =>
                     (* todo: change to leftFrames once that is implemented *)
                     Vector.sub (Whip.rightFrames, frame)
             in
-              helpGetWhipVec (x, y, hratio, xOffset, 0.0, 0, boxes, width, height, [])
+              helpGetWhipVec
+                (x, y, hratio, xOffset, 0.0, 0, boxes, width, height, [])
             end
         end
     | _ => Vector.fromList []
