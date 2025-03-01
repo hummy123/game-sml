@@ -112,9 +112,7 @@ struct
             val boxes =
               case facing of
                 FACING_RIGHT => Vector.sub (Whip.rightFrames, frame)
-              | FACING_LEFT =>
-                  (* todo: replace rightFrames with leftFrames *)
-                  Vector.sub (Whip.rightFrames, frame)
+              | FACING_LEFT => Vector.sub (Whip.leftFrames, frame)
           in
             helpAttackEnemies
               ( player
