@@ -56,7 +56,6 @@ struct
     , defeatedList
     , enemyMap
     , fallingMap
-    , fallingTree
     , enemyTree
     , pos
     , boxes
@@ -83,6 +82,7 @@ struct
         val (defeatedList, enemyMap) = PlayerAttackEnemy.foldRegion
           (x, y, size, size, (), (defeatedList, enemyMap), enemyTree)
 
+        val fallingTree = FallingEnemies.generateTree fallingMap
         val (defeatedList, fallingMap) = PlayerAttackFalling.foldRegion
           (x, y, size, size, (), (defeatedList, fallingMap), fallingTree)
       in
@@ -91,7 +91,6 @@ struct
           , defeatedList
           , enemyMap
           , fallingMap
-          , fallingTree
           , enemyTree
           , pos + 1
           , boxes
@@ -108,7 +107,7 @@ struct
           let
             open EntityType
             val frame = amt div 2
-            val fallingTree = FallingEnemies.generateTree fallingMap
+
             val boxes =
               case facing of
                 FACING_RIGHT => Vector.sub (Whip.rightFrames, frame)
@@ -119,7 +118,6 @@ struct
               , []
               , enemyMap
               , fallingMap
-              , fallingTree
               , enemyTree
               , 0
               , boxes
