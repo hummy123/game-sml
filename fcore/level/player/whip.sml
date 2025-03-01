@@ -27,13 +27,27 @@ struct
     ]
 
   val rf4 =
+   #[ {x = 83, y = ~15}
+    , {x = 75, y = 2}
+    , {x = 64, y = 18}
+    , {x = 49, y = 25}
+    ]
+
+  val rf5 =
+   #[ {x = 87, y = ~5}
+    , {x = 79, y = 6}
+    , {x = 64, y = 18}
+    , {x = 49, y = 25}
+    ]
+
+  val rf6 =
    #[ {x = 96, y = 10}
     , {x = 80, y = 15}
     , {x = 64, y = 20}
     , {x = 49, y = 25}
     ]
 
-  val rf5 =
+  val rf7 =
    #[ {x = 112, y = 25}
     , {x = 96, y = 28}
     , {x = 80, y = 25}
@@ -41,7 +55,7 @@ struct
     , {x = 49, y = 25}
     ]
 
-  val rf6 =
+  val rf8 =
    #[ {x = 112, y = 25}
     , {x = 96, y = 28}
     , {x = 80, y = 25}
@@ -49,26 +63,28 @@ struct
     , {x = 49, y = 25}
     ]
 
-  val rf7 =
+  val rf9 =
    #[ {x = 96, y = 31}
     , {x = 80, y = 29}
     , {x = 64, y = 27}
     , {x = 49, y = 25}
     ]
 
-  val rf8 =
+  val rf10 =
    #[ {x = 80, y = 33}
     , {x = 64, y = 29}
     , {x = 49, y = 25}
     ]
 
-  val rf9 =
+  val rf11 =
    #[ {x = 64, y = 31}
     , {x = 49, y = 25}
     ]
 
-  val rf10 =
+  val rf12 =
    #[ {x = 49, y = 25} ]
 
-  val rightFrames = #[ rf1, rf2, rf3, rf4, rf5, rf6, rf7, rf8, rf9, rf10 ]
+  val rightFrames = #[ 
+      rf1, rf2, rf3, rf4, rf5, rf6, rf7, rf8, rf9, rf10, rf11, rf12
+    ]
 end

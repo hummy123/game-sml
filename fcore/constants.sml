@@ -24,7 +24,7 @@ struct
   val recoilLimit = 15
   val attackedLimit = 55
   val maxCharge = 60
-  val mainAttackLimit = 19
+  val mainAttackLimit = 23
 
   (* constants for projectiles *)
   val projectilePi: Real32.real = Real32.Math.pi / 180.0
