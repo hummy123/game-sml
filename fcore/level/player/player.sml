@@ -86,7 +86,7 @@ struct
   fun helpGetMainAttackPatches (attackHeld, mainAttackPressed, charge, acc) =
     let
       val attack =
-        if attackHeld andalso not mainAttackPressed then MAIN_ATTACKING 1
+        if attackHeld andalso not mainAttackPressed then MAIN_ATTACKING 0
         else MAIN_NOT_ATTACKING
     in
       W_MAIN_ATTACK_PRESSED (attackHeld andalso mainAttackPressed)
@@ -484,9 +484,8 @@ struct
 
   fun getFieldVec (player: player, width, height) =
     case #mainAttack player of
-      MAIN_ATTACKING amt =>
+      MAIN_ATTACKING frame =>
         let
-          val frame = amt div 2
           val {x, y, facing, ...} = player
           val wratio = width / Constants.worldWidthReal
           val hratio = height / Constants.worldHeightReal
@@ -502,7 +501,7 @@ struct
               val boxes =
                 case facing of
                   FACING_RIGHT => Vector.sub (Whip.rightFrames, frame)
-                | FACING_LEFT => Vector.sub (Whip.leftFrames, frame)
+                | FACING_LEFT => Vector.sub (Whip.leftFrames, frame div 2)
             in
               helpGetWhipVec
                 (x, y, wratio, 0.0, yOffset, 0, boxes, width, height, [])
@@ -518,7 +517,7 @@ struct
               val boxes =
                 case facing of
                   FACING_RIGHT => Vector.sub (Whip.rightFrames, frame)
-                | FACING_LEFT => Vector.sub (Whip.leftFrames, frame)
+                | FACING_LEFT => Vector.sub (Whip.leftFrames, frame div 2)
             in
               helpGetWhipVec
                 (x, y, hratio, xOffset, 0.0, 0, boxes, width, height, [])
