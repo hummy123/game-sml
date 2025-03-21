@@ -501,7 +501,7 @@ struct
               val boxes =
                 case facing of
                   FACING_RIGHT => Vector.sub (Whip.rightFrames, frame)
-                | FACING_LEFT => Vector.sub (Whip.leftFrames, frame div 2)
+                | FACING_LEFT => Vector.sub (Whip.leftFrames, frame)
             in
               helpGetWhipVec
                 (x, y, wratio, 0.0, yOffset, 0, boxes, width, height, [])
@@ -517,7 +517,7 @@ struct
               val boxes =
                 case facing of
                   FACING_RIGHT => Vector.sub (Whip.rightFrames, frame)
-                | FACING_LEFT => Vector.sub (Whip.leftFrames, frame div 2)
+                | FACING_LEFT => Vector.sub (Whip.leftFrames, frame)
             in
               helpGetWhipVec
                 (x, y, hratio, xOffset, 0.0, 0, boxes, width, height, [])
