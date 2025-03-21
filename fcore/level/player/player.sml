@@ -309,18 +309,18 @@ struct
                val newRecoil = RECOIL_RIGHT 0
                val newAttacked = ATTACKED 0
              in
-               W_RECOIL newRecoil :: W_ATTACKED newAttacked
-               :: W_FACING FACING_LEFT :: W_Y_AXIS FALLING
-               :: W_X_AXIS STAY_STILL :: acc
+               W_HEALTH (#health player - 1) :: W_RECOIL newRecoil
+               :: W_ATTACKED newAttacked :: W_FACING FACING_LEFT
+               :: W_Y_AXIS FALLING :: W_X_AXIS STAY_STILL :: acc
              end
            else
              let
                val newRecoil = RECOIL_LEFT 0
                val newAttacked = ATTACKED 0
              in
-               W_RECOIL newRecoil :: W_ATTACKED newAttacked
-               :: W_FACING FACING_RIGHT :: W_Y_AXIS FALLING
-               :: W_X_AXIS STAY_STILL :: acc
+               W_HEALTH (#health player - 1) :: W_RECOIL newRecoil
+               :: W_ATTACKED newAttacked :: W_FACING FACING_RIGHT
+               :: W_Y_AXIS FALLING :: W_X_AXIS STAY_STILL :: acc
              end
 
          fun fold (enemyID, (enemies, player: player), patches) =
@@ -351,15 +351,6 @@ struct
            in
              W_ATTACKED (ATTACKED 0) :: patches
            end
-       end)
-
-  structure AttackEnemies =
-    MakeQuadTreeFold
-      (struct
-         type env = unit
-         type state = defeated_enemies list
-
-         fun fold (_, (), defeatedList) = {angle = 1} :: defeatedList
        end)
 
   fun runPhysicsAndInput (game: LevelType.level_type, input) =
