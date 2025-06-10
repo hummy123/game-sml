@@ -50,12 +50,34 @@ struct
         if jumpPressed then (* apply gravity *) FALLING else JUMPING 0
     | _ => prevAxis
 
-  fun getJumpPatches (player, jumpHeld, downHeld, acc) =
+  fun getJumpPatches (player, jumpHeld, downHeld, acc, wallTree) =
     let
       val {yAxis, jumpPressed, ...} = player
     in
       case (jumpHeld, downHeld) of
-        (false, false) =>
+        (true, false) =>
+          let
+            val yAxis = onJumpPressed (yAxis, jumpPressed)
+            val jumpPressed = true
+          in
+            W_Y_AXIS yAxis :: W_JUMP_PRESSED jumpPressed :: acc
+          end
+      | (false, true) =>
+          let
+            val {x, y, ...} = player
+            val ex = Constants.playerWidth
+            val y = y + Constants.playerHeight
+            val ey = 1
+            val jumpPressed = false
+            val yAxis =
+              if QuadTree.hasCollisionAt (x, y, ex, ey, ~1, wallTree) then
+                ON_GROUND
+              else
+                DROP_BELOW_PLATFORM
+          in
+            W_Y_AXIS yAxis :: W_JUMP_PRESSED jumpPressed :: acc
+          end
+      | (false, false) =>
           let
             val yAxis = defaultYAxis yAxis
             val jumpPressed = false
@@ -65,20 +87,6 @@ struct
       | (true, true) =>
           let val yAxis = defaultYAxis yAxis
           in W_Y_AXIS yAxis :: acc
-          end
-      | (true, false) =>
-          let
-            val yAxis = onJumpPressed (yAxis, jumpPressed)
-            val jumpPressed = true
-          in
-            W_Y_AXIS yAxis :: W_JUMP_PRESSED jumpPressed :: acc
-          end
-      | (false, true) =>
-          let
-            val jumpPressed = false
-            val yAxis = DROP_BELOW_PLATFORM
-          in
-            W_Y_AXIS yAxis :: W_JUMP_PRESSED jumpPressed :: acc
           end
     end
 
@@ -175,7 +183,7 @@ struct
         else
           helpGetMainAttackPatches (attackHeld, mainAttackPressed, charge, acc)
 
-  fun getInputPatches (player: player, input: FrameInputType.t) =
+  fun getInputPatches (player: player, input: FrameInputType.t, wallTree) =
     let
       val
         { x
@@ -212,7 +220,7 @@ struct
         , mainAttackPressed
         )
 
-      val acc = getJumpPatches (player, jumpHeld, downHeld, acc)
+      val acc = getJumpPatches (player, jumpHeld, downHeld, acc, wallTree)
     in
       acc
     end
@@ -355,7 +363,7 @@ struct
 
   fun runPhysicsAndInput (game: LevelType.level_type, input) =
     let
-      val player = #player game
+      val {player, walls, wallTree, platforms, platformTree, ...} = game
 
       val oldAnimTimer = #animTimer player
       val oldXAxis = #xAxis player
@@ -370,7 +378,7 @@ struct
          * It's important to apply the recoil patches after handling input
          * because we want to act on the latest recoil state straight away. *)
         case #recoil player of
-          NO_RECOIL => getInputPatches (player, input)
+          NO_RECOIL => getInputPatches (player, input, wallTree)
         | _ => []
 
       val patches =
@@ -399,7 +407,6 @@ struct
       val patches = PlayerPhysics.getPhysicsPatches player
       val player = PlayerPatch.withPatches (player, patches)
 
-      val {walls, wallTree, platforms, platformTree, ...} = game
       val patches = PlayerPhysics.getEnvironmentPatches
         (player, walls, wallTree, platforms, platformTree)
 

@@ -52,14 +52,7 @@ struct
        end)
 
   fun helpAttackEnemies
-    ( player
-    , defeatedList
-    , enemyMap
-    , fallingMap
-    , enemyTree
-    , pos
-    , boxes
-    ) =
+    (player, defeatedList, enemyMap, fallingMap, enemyTree, pos, boxes) =
     if pos = Vector.length boxes then
       let
         val defeatedList = Vector.fromList defeatedList
@@ -114,14 +107,7 @@ struct
               | FACING_LEFT => Vector.sub (Whip.leftFrames, frame)
           in
             helpAttackEnemies
-              ( player
-              , []
-              , enemyMap
-              , fallingMap
-              , enemyTree
-              , 0
-              , boxes
-              )
+              (player, [], enemyMap, fallingMap, enemyTree, 0, boxes)
           end
       | _ => (player, enemyMap, fallingMap)
     end
