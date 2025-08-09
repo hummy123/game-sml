@@ -60,6 +60,14 @@ fcore/level/enemy/falling-enemies.sml
 ann
   "allowVectorExps true"
 in
+  fcore/level/player/blast/player-stand-left.sml
+  fcore/level/player/blast/player-attack-left-1.sml
+  fcore/level/player/blast/player-attack-left-2.sml
+  fcore/level/player/blast/player-attack-left-3.sml
+  fcore/level/player/blast/player-attack-left-4.sml
+  fcore/level/player/blast/straight-whip.sml
+
+  fcore/level/player/sprites/player-standing-right.sml
   fcore/level/player/sprites/player-standing-right.sml
   fcore/level/player/sprites/player-standing-left.sml
 

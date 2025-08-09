@@ -46,7 +46,7 @@ struct
       FACING_RIGHT =>
         PlayerStandingRight.lerp (rx, ry, dw, dh, ww, wh, 1.0, 1.0, 1.0)
     | FACING_LEFT =>
-        PlayerStandingLeft.lerp (rx, ry, dw, dh, ww, wh, 1.0, 1.0, 1.0)
+        PlayerStandLeft.lerp (rx, ry, 4.0, ww, wh)
 
   fun getWhenOnGround (player, rx, ry, dw, dh, ww, wh) =
     case #xAxis player of
@@ -146,21 +146,43 @@ struct
 
   fun helpGet
     (player: player, rx, ry, drawWidth, drawHeight, windowWidth, windowHeight) =
-    case #attacked player of
-      NOT_ATTACKED =>
-        getWhenNotAttacked
-          (player, rx, ry, drawWidth, drawHeight, windowWidth, windowHeight)
-    | ATTACKED amt =>
-        getWhenAttacked
-          ( player
-          , amt
-          , rx
-          , ry
-          , drawWidth
-          , drawHeight
-          , windowWidth
-          , windowHeight
-          )
+    case #mainAttack player of
+      MAIN_ATTACKING amt =>
+      let
+        val data = (rx, ry, 4.0, windowWidth, windowHeight)
+      in
+        if amt <= 3 then
+          PlayerAttackLeft1.lerp data
+        else if amt <= 7 then
+          PlayerAttackLeft2.lerp data
+        else if amt <= 9 then
+          PlayerAttackLeft3.lerp data
+        else
+          let
+            val playerVec = PlayerAttackLeft4.lerp data
+            val rx = rx - Real32.fromInt Constants.playerWidth + 25.0
+            val ry = ry + (Real32.fromInt Constants.playerHeight / 2.0) + 7.0
+            val whipVec = StraightWhip.lerp (rx, ry, 4.0, windowWidth, windowHeight)
+          in
+            Vector.concat [playerVec, whipVec]
+          end
+      end
+    | _ =>
+      case #attacked player of
+        NOT_ATTACKED =>
+          getWhenNotAttacked
+            (player, rx, ry, drawWidth, drawHeight, windowWidth, windowHeight)
+      | ATTACKED amt =>
+          getWhenAttacked
+            ( player
+            , amt
+            , rx
+            , ry
+            , drawWidth
+            , drawHeight
+            , windowWidth
+            , windowHeight
+            )
 
   fun get (player: player, width, height) =
     let
