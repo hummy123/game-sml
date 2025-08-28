@@ -10,7 +10,7 @@ struct
 
   (* constants for player *)
   val playerWidth = 96
-  val playerHeight = 96
+  val playerHeight = 84
   val playerWidthReal: Real32.real = 48.0
   val playerHeightReal: Real32.real = 60.0
 

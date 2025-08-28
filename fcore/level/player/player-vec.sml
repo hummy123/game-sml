@@ -44,9 +44,9 @@ struct
   fun getIdle (player, rx, ry, dw, dh, ww, wh) =
     case #facing player of
       FACING_RIGHT =>
-        PlayerStandingRight.lerp (rx, ry, dw, dh, ww, wh, 1.0, 1.0, 1.0)
+        PlayerStandingRight.lerp (rx, ry, 3.0, ww, wh)
     | FACING_LEFT =>
-        PlayerStandLeft.lerp (rx, ry, 4.0, ww, wh)
+        PlayerStandingLeft.lerp (rx, ry, 3.0, ww, wh)
 
   fun getWalk (rx, ry, dw, dh, ww, wh, walkFrames, animTimer) =
     let
@@ -130,15 +130,11 @@ struct
   fun getWhenAttacked (player, amt, rx, ry, dw, dh, ww, wh) =
     case #facing player of
       FACING_RIGHT =>
-        if amt mod 5 = 0 then
-          PlayerStandingRight.lerp (rx, ry, dw, dh, ww, wh, 1.0, 1.0, 1.0)
-        else
-          PlayerStandingRight.lerp (rx, ry, dw, dh, ww, wh, 1.0, 0.75, 0.75)
+        (* todo: hurt sprite/animation if amt mod 5 = 0 then *)
+          PlayerStandingRight.lerp (rx, ry, 3.0, ww, wh)
     | FACING_LEFT =>
-        if amt mod 5 = 0 then
-          PlayerStandingLeft.lerp (rx, ry, dw, dh, ww, wh, 1.0, 1.0, 1.0)
-        else
-          PlayerStandingLeft.lerp (rx, ry, dw, dh, ww, wh, 1.0, 0.75, 0.75)
+        (* todo: hurt sprite/animation if amt mod 5 = 0 then *)
+        PlayerStandingLeft.lerp (rx, ry, 3.0, ww, wh)
 
   fun helpGet
     (player: player, rx, ry, drawWidth, drawHeight, windowWidth, windowHeight) =
