@@ -48,24 +48,20 @@ struct
     | FACING_LEFT =>
         PlayerStandLeft.lerp (rx, ry, 4.0, ww, wh)
 
+  fun getWalk (rx, ry, dw, dh, ww, wh, walkFrames, animTimer) =
+    let
+      val frame = (animTimer div 2) mod Vector.length walkFrames
+      val func = Vector.sub (walkFrames, Int.max (frame, 0))
+    in
+      func (rx, ry, dw, dh, ww, wh, 1.0, 1.0, 1.0)
+    end
+
   fun getWhenOnGround (player, rx, ry, dw, dh, ww, wh) =
     case #xAxis player of
       MOVE_RIGHT =>
-        let
-          val animTimer = #animTimer player
-          val frame = (animTimer div 2) mod Vector.length walkRightFrames
-          val func = Vector.sub (walkRightFrames, Int.max (frame, 0))
-        in
-          func (rx, ry, dw, dh, ww, wh, 1.0, 1.0, 1.0)
-        end
+        getWalk (rx, ry, dw, dh, ww, wh, walkRightFrames, #animTimer player)
     | MOVE_LEFT =>
-        let
-          val animTimer = #animTimer player
-          val frame = (animTimer div 2) mod Vector.length walkLeftFrames
-          val func = Vector.sub (walkLeftFrames, Int.max (frame, 0))
-        in
-          func (rx, ry, dw, dh, ww, wh, 1.0, 1.0, 1.0)
-        end
+        getWalk (rx, ry, dw, dh, ww, wh, walkLeftFrames, #animTimer player)
     | STAY_STILL => getIdle (player, rx, ry, dw, dh, ww, wh)
 
   fun getWhenJumpingRight (player, amt, rx, ry, dw, dh, ww, wh) =
