@@ -27,10 +27,8 @@ struct
 
   fun getIdle (player, rx, ry, ww, wh) =
     case #facing player of
-      FACING_RIGHT =>
-        PlayerStandingRight.lerp (rx, ry, 3.0, ww, wh)
-    | FACING_LEFT =>
-        PlayerStandingLeft.lerp (rx, ry, 3.0, ww, wh)
+      FACING_RIGHT => PlayerStandingRight.lerp (rx, ry, 3.0, ww, wh)
+    | FACING_LEFT => PlayerStandingLeft.lerp (rx, ry, 3.0, ww, wh)
 
   fun getWalk (rx, ry, ww, wh, walkFrames, animTimer) =
     let
@@ -42,45 +40,23 @@ struct
 
   fun getWhenOnGround (player, rx, ry, ww, wh) =
     case #xAxis player of
-      MOVE_RIGHT =>
-        getWalk (rx, ry, ww, wh, walkRightFrames, #animTimer player)
-    | MOVE_LEFT =>
-        getWalk (rx, ry, ww, wh, walkLeftFrames, #animTimer player)
+      MOVE_RIGHT => getWalk (rx, ry, ww, wh, walkRightFrames, #animTimer player)
+    | MOVE_LEFT => getWalk (rx, ry, ww, wh, walkLeftFrames, #animTimer player)
     | STAY_STILL => getIdle (player, rx, ry, ww, wh)
 
   fun getWhenJumpingRight (player, amt, rx, ry, ww, wh) =
-    if amt < 3 then
-      PlayerJumpRight1.lerp 
-        (rx, ry, 3.0, ww, wh)
-    else if amt < 6 then
-      PlayerJumpRight2.lerp
-        (rx, ry, 3.0, ww, wh)
-    else if amt < 9 then
-      PlayerJumpRight3.lerp
-        (rx, ry, 3.0, ww, wh)
-    else if amt < 12 then
-      PlayerJumpRight4.lerp
-        (rx, ry, 3.0, ww, wh)
-    else
-      PlayerJumpRight5.lerp
-        (rx, ry, 3.0, ww, wh)
+    if amt < 3 then PlayerJumpRight1.lerp (rx, ry, 3.0, ww, wh)
+    else if amt < 6 then PlayerJumpRight2.lerp (rx, ry, 3.0, ww, wh)
+    else if amt < 9 then PlayerJumpRight3.lerp (rx, ry, 3.0, ww, wh)
+    else if amt < 12 then PlayerJumpRight4.lerp (rx, ry, 3.0, ww, wh)
+    else PlayerJumpRight5.lerp (rx, ry, 3.0, ww, wh)
 
   fun getWhenJumpingLeft (player, amt, rx, ry, ww, wh) =
-    if amt < 3 then
-      PlayerJumpLeft1.lerp 
-        (rx, ry, 3.0, ww, wh)
-    else if amt < 6 then
-      PlayerJumpLeft2.lerp
-        (rx, ry, 3.0, ww, wh)
-    else if amt < 9 then
-      PlayerJumpLeft3.lerp
-        (rx, ry, 3.0, ww, wh)
-    else if amt < 12 then
-      PlayerJumpLeft4.lerp
-        (rx, ry, 3.0, ww, wh)
-    else
-      PlayerJumpLeft5.lerp
-        (rx, ry, 3.0, ww, wh)
+    if amt < 3 then PlayerJumpLeft1.lerp (rx, ry, 3.0, ww, wh)
+    else if amt < 6 then PlayerJumpLeft2.lerp (rx, ry, 3.0, ww, wh)
+    else if amt < 9 then PlayerJumpLeft3.lerp (rx, ry, 3.0, ww, wh)
+    else if amt < 12 then PlayerJumpLeft4.lerp (rx, ry, 3.0, ww, wh)
+    else PlayerJumpLeft5.lerp (rx, ry, 3.0, ww, wh)
 
   fun getWhenJumping (player, amt, rx, ry, ww, wh) =
     case #facing player of
@@ -89,18 +65,12 @@ struct
 
   fun getWhenFalling (player, rx, ry, ww, wh) =
     case #facing player of
-      FACING_RIGHT =>
-        PlayerJumpRight5.lerp
-          (rx, ry, 3.0, ww, wh)
-    | FACING_LEFT =>
-        PlayerJumpLeft5.lerp
-          (rx, ry, 3.0, ww, wh)
+      FACING_RIGHT => PlayerJumpRight5.lerp (rx, ry, 3.0, ww, wh)
+    | FACING_LEFT => PlayerJumpLeft5.lerp (rx, ry, 3.0, ww, wh)
 
   fun getWhenDropping (player, rx, ry, ww, wh) =
-    let
-      val animTimer = #animTimer player
-    in
-      getWhenJumping (player, animTimer, rx, ry, ww, wh)
+    let val animTimer = #animTimer player
+    in getWhenJumping (player, animTimer, rx, ry, ww, wh)
     end
 
   fun getWhenNotAttacked (player, rx, ry, ww, wh) =
@@ -115,48 +85,40 @@ struct
     case #facing player of
       FACING_RIGHT =>
         (* todo: hurt sprite/animation if amt mod 5 = 0 then *)
-          PlayerStandingRight.lerp (rx, ry, 3.0, ww, wh)
+        PlayerStandingRight.lerp (rx, ry, 3.0, ww, wh)
     | FACING_LEFT =>
         (* todo: hurt sprite/animation if amt mod 5 = 0 then *)
         PlayerStandingLeft.lerp (rx, ry, 3.0, ww, wh)
 
-  fun helpGet
-    (player: player, rx, ry, windowWidth, windowHeight) =
+  fun helpGet (player: player, rx, ry, windowWidth, windowHeight) =
     case #mainAttack player of
       MAIN_ATTACKING amt =>
-      let
-        val data = (rx, ry, 4.0, windowWidth, windowHeight)
-      in
-        if amt <= 3 then
-          PlayerAttackLeft1.lerp data
-        else if amt <= 7 then
-          PlayerAttackLeft2.lerp data
-        else if amt <= 9 then
-          PlayerAttackLeft3.lerp data
-        else
-          let
-            val playerVec = PlayerAttackLeft4.lerp data
-            val rx = rx - Real32.fromInt Constants.playerWidth + 25.0
-            val ry = ry + (Real32.fromInt Constants.playerHeight / 2.0) + 7.0
-            val whipVec = StraightWhip.lerp (rx, ry, 4.0, windowWidth, windowHeight)
-          in
-            Vector.concat [playerVec, whipVec]
-          end
-      end
+        let
+          val data = (rx, ry, 4.0, windowWidth, windowHeight)
+        in
+          if amt <= 3 then
+            PlayerAttackLeft1.lerp data
+          else if amt <= 7 then
+            PlayerAttackLeft2.lerp data
+          else if amt <= 9 then
+            PlayerAttackLeft3.lerp data
+          else
+            let
+              val playerVec = PlayerAttackLeft4.lerp data
+              val rx = rx - Real32.fromInt Constants.playerWidth + 25.0
+              val ry = ry + (Real32.fromInt Constants.playerHeight / 2.0) + 7.0
+              val whipVec = StraightWhip.lerp
+                (rx, ry, 4.0, windowWidth, windowHeight)
+            in
+              Vector.concat [playerVec, whipVec]
+            end
+        end
     | _ =>
-      case #attacked player of
-        NOT_ATTACKED =>
-          getWhenNotAttacked
-            (player, rx, ry, windowWidth, windowHeight)
-      | ATTACKED amt =>
-          getWhenAttacked
-            ( player
-            , amt
-            , rx
-            , ry
-            , windowWidth
-            , windowHeight
-            )
+        case #attacked player of
+          NOT_ATTACKED =>
+            getWhenNotAttacked (player, rx, ry, windowWidth, windowHeight)
+        | ATTACKED amt =>
+            getWhenAttacked (player, amt, rx, ry, windowWidth, windowHeight)
 
   fun get (player: player, width, height) =
     let
