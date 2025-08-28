@@ -51,36 +51,36 @@ struct
   fun getWhenJumpingRight (player, amt, rx, ry, dw, dh, ww, wh) =
     if amt < 3 then
       PlayerJumpRight1.lerp 
-        (rx, ry, dw, dh, ww, wh, 1.0, 1.0, 1.0)
+        (rx, ry, 3.0, ww, wh)
     else if amt < 6 then
       PlayerJumpRight2.lerp
-        (rx, ry, dw, dh, ww, wh, 1.0, 1.0, 1.0)
+        (rx, ry, 3.0, ww, wh)
     else if amt < 9 then
       PlayerJumpRight3.lerp
-        (rx, ry, dw, dh, ww, wh, 1.0, 1.0, 1.0)
+        (rx, ry, 3.0, ww, wh)
     else if amt < 12 then
       PlayerJumpRight4.lerp
-        (rx, ry, dw, dh, ww, wh, 1.0, 1.0, 1.0)
+        (rx, ry, 3.0, ww, wh)
     else
       PlayerJumpRight5.lerp
-        (rx, ry, dw, dh, ww, wh, 1.0, 1.0, 1.0)
+        (rx, ry, 3.0, ww, wh)
 
   fun getWhenJumpingLeft (player, amt, rx, ry, dw, dh, ww, wh) =
     if amt < 3 then
       PlayerJumpLeft1.lerp 
-        (rx, ry, dw, dh, ww, wh, 1.0, 1.0, 1.0)
+        (rx, ry, 3.0, ww, wh)
     else if amt < 6 then
       PlayerJumpLeft2.lerp
-        (rx, ry, dw, dh, ww, wh, 1.0, 1.0, 1.0)
+        (rx, ry, 3.0, ww, wh)
     else if amt < 9 then
       PlayerJumpLeft3.lerp
-        (rx, ry, dw, dh, ww, wh, 1.0, 1.0, 1.0)
+        (rx, ry, 3.0, ww, wh)
     else if amt < 12 then
       PlayerJumpLeft4.lerp
-        (rx, ry, dw, dh, ww, wh, 1.0, 1.0, 1.0)
+        (rx, ry, 3.0, ww, wh)
     else
       PlayerJumpLeft5.lerp
-        (rx, ry, dw, dh, ww, wh, 1.0, 1.0, 1.0)
+        (rx, ry, 3.0, ww, wh)
 
   fun getWhenJumping (player, amt, rx, ry, dw, dh, ww, wh) =
     case #facing player of
@@ -91,10 +91,10 @@ struct
     case #facing player of
       FACING_RIGHT =>
         PlayerJumpRight5.lerp
-          (rx, ry, dw, dh, ww, wh, 1.0, 1.0, 1.0)
+          (rx, ry, 3.0, ww, wh)
     | FACING_LEFT =>
         PlayerJumpLeft5.lerp
-          (rx, ry, dw, dh, ww, wh, 1.0, 1.0, 1.0)
+          (rx, ry, 3.0, ww, wh)
 
   fun getWhenDropping (player, rx, ry, dw, dh, ww, wh) =
     let
