@@ -12,14 +12,6 @@ struct
     , PlayerWalkRight6.lerp
     , PlayerWalkRight7.lerp
     , PlayerWalkRight8.lerp
-    , PlayerWalkRight9.lerp
-    , PlayerWalkRight8.lerp
-    , PlayerWalkRight7.lerp
-    , PlayerWalkRight6.lerp
-    , PlayerWalkRight5.lerp
-    , PlayerWalkRight4.lerp
-    , PlayerWalkRight3.lerp
-    , PlayerWalkRight2.lerp
     ]
 
   val walkLeftFrames =
@@ -51,7 +43,7 @@ struct
   fun getWhenOnGround (player, rx, ry, dw, dh, ww, wh) =
     case #xAxis player of
       MOVE_RIGHT =>
-        getWalk (rx, ry, dw, dh, ww, wh, walkLeftFrames, #animTimer player)
+        getWalk (rx, ry, dw, dh, ww, wh, walkRightFrames, #animTimer player)
     | MOVE_LEFT =>
         getWalk (rx, ry, dw, dh, ww, wh, walkLeftFrames, #animTimer player)
     | STAY_STILL => getIdle (player, rx, ry, dw, dh, ww, wh)
