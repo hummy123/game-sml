@@ -89,7 +89,6 @@ in
   fcore/level/player/sprites/walk/player-walk-left-6.sml
   fcore/level/player/sprites/walk/player-walk-left-7.sml
   fcore/level/player/sprites/walk/player-walk-left-8.sml
-  fcore/level/player/sprites/walk/player-walk-left-9.sml
 
   fcore/level/player/sprites/jump/player-jump-right-1.sml
   fcore/level/player/sprites/jump/player-jump-right-2.sml

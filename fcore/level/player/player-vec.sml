@@ -31,14 +31,6 @@ struct
     , PlayerWalkLeft6.lerp
     , PlayerWalkLeft7.lerp
     , PlayerWalkLeft8.lerp
-    , PlayerWalkLeft9.lerp
-    , PlayerWalkLeft8.lerp
-    , PlayerWalkLeft7.lerp
-    , PlayerWalkLeft6.lerp
-    , PlayerWalkLeft5.lerp
-    , PlayerWalkLeft4.lerp
-    , PlayerWalkLeft3.lerp
-    , PlayerWalkLeft2.lerp
     ]
 
   fun getIdle (player, rx, ry, dw, dh, ww, wh) =
@@ -50,16 +42,16 @@ struct
 
   fun getWalk (rx, ry, dw, dh, ww, wh, walkFrames, animTimer) =
     let
-      val frame = (animTimer div 2) mod Vector.length walkFrames
+      val frame = (animTimer div 4) mod Vector.length walkFrames
       val func = Vector.sub (walkFrames, Int.max (frame, 0))
     in
-      func (rx, ry, dw, dh, ww, wh, 1.0, 1.0, 1.0)
+      func (rx, ry, 3.0, ww, wh)
     end
 
   fun getWhenOnGround (player, rx, ry, dw, dh, ww, wh) =
     case #xAxis player of
       MOVE_RIGHT =>
-        getWalk (rx, ry, dw, dh, ww, wh, walkRightFrames, #animTimer player)
+        getWalk (rx, ry, dw, dh, ww, wh, walkLeftFrames, #animTimer player)
     | MOVE_LEFT =>
         getWalk (rx, ry, dw, dh, ww, wh, walkLeftFrames, #animTimer player)
     | STAY_STILL => getIdle (player, rx, ry, dw, dh, ww, wh)
