@@ -92,7 +92,7 @@ struct
 
   val rightFrames = #[ 
       rf1, rf2, rf3, rf4, rf5, rf6, rf7, rf8, rf9, rf10, rf11, rf12, rf13, rf14,
-      rf15, rf16, rf17, rf18, rf19, rf20, rf21, rf22, rf23, rf24
+      rf15, rf16, rf17, rf18, rf19, rf20, rf21, rf22, rf23, rf24, #[], #[]
     ]
 
   (* left frames *)
@@ -192,6 +192,6 @@ struct
 
   val leftFrames = #[ 
       lf1, lf2, lf3, lf4, lf5, lf6, lf7, lf8, lf9, lf10, lf11, lf12, lf13, lf14,
-      lf15, lf16, lf17, lf18, lf19, lf20, lf21, lf22, lf23, lf24
+      lf15, lf16, lf17, lf18, lf19, lf20, lf21, lf22, lf23, lf24, #[], #[]
     ]
 end
