@@ -119,22 +119,34 @@ struct
       FACING_RIGHT => getWhenJumpingRight (player, amt, rx, ry, ww, wh)
     | FACING_LEFT => getWhenJumpingLeft (player, amt, rx, ry, ww, wh)
 
-  fun getWhenFalling (player, rx, ry, ww, wh) =
+  fun getWhenFloating (player, rx, ry, ww, wh) =
     case #facing player of
       FACING_RIGHT => PlayerJumpRight5.lerp (rx, ry, 3.0, ww, wh)
     | FACING_LEFT => PlayerJumpLeft5.lerp (rx, ry, 3.0, ww, wh)
 
+  fun getWhenFalling (player, rx, ry, ww, wh) =
+    case #facing player of
+      FACING_RIGHT => PlayerFallRight.lerp (rx, ry, 3.0, ww, wh)
+    | FACING_LEFT => PlayerFallLeft.lerp (rx, ry, 3.0, ww, wh)
+
   fun getWhenDropping (player, rx, ry, ww, wh) =
-    let val animTimer = #animTimer player
-    in getWhenJumping (player, animTimer, rx, ry, ww, wh)
+    let
+      val animTimer = #animTimer player
+    in
+      if animTimer < 15 then
+        getWhenJumping (player, animTimer, rx, ry, ww, wh)
+      else
+        case #facing player of
+          FACING_RIGHT => PlayerFallRight.lerp (rx, ry, 3.0, ww, wh)
+        | FACING_LEFT => PlayerFallLeft.lerp (rx, ry, 3.0, ww, wh)
     end
 
   fun getWhenNotAttacked (player, rx, ry, ww, wh) =
     case #yAxis player of
       ON_GROUND => getWhenOnGround (player, rx, ry, ww, wh)
     | JUMPING amt => getWhenJumping (player, amt, rx, ry, ww, wh)
+    | FLOATING _ => getWhenFloating (player, rx, ry, ww, wh)
     | FALLING => getWhenFalling (player, rx, ry, ww, wh)
-    | FLOATING _ => getWhenFalling (player, rx, ry, ww, wh)
     | DROP_BELOW_PLATFORM => getWhenDropping (player, rx, ry, ww, wh)
 
   fun getWhenAttacked (player, amt, rx, ry, ww, wh) =
@@ -146,7 +158,18 @@ struct
         (* todo: hurt sprite/animation if amt mod 5 = 0 then *)
         PlayerStandingLeft.lerp (rx, ry, 3.0, ww, wh)
 
-  fun helpGet (player: player, x, y, xOffset, yOffset, ratio, rx, ry, windowWidth, windowHeight) =
+  fun helpGet
+    ( player: player
+    , x
+    , y
+    , xOffset
+    , yOffset
+    , ratio
+    , rx
+    , ry
+    , windowWidth
+    , windowHeight
+    ) =
     case #mainAttack player of
       MAIN_ATTACKING {animTimer = amt, ...} =>
         (case #facing player of
