@@ -149,12 +149,33 @@ struct
   fun helpGet (player: player, rx, ry, windowWidth, windowHeight) =
     case #mainAttack player of
       MAIN_ATTACKING amt =>
-        let
-          val playerVec = PlayerAttackStandLeft.lerp (rx, ry, 3.0, windowWidth, windowHeight)
-          val projectileVec = Vector.fromList []
-        in
-          playerVec
-        end
+        (case #facing player of
+           FACING_RIGHT =>
+             let
+               val playerVec = PlayerAttackStandLeft.lerp
+                 (rx, ry, 3.0, windowWidth, windowHeight)
+
+               val projY = ry + (Constants.playerHeightReal / 2.0)
+               val projX = rx + Constants.playerWidthReal
+               val func = Vector.sub (attackLeftProjectiles, amt)
+               val projectilesVec = func
+                 (projX, projY, 3.0, windowWidth, windowHeight)
+             in
+               Vector.concat [playerVec, projectilesVec]
+             end
+         | FACING_LEFT =>
+             let
+               val playerVec = PlayerAttackStandLeft.lerp
+                 (rx, ry, 3.0, windowWidth, windowHeight)
+
+               val projY = ry + (Constants.playerHeightReal / 2.0)
+               val projX = rx - Constants.playerWidthReal
+               val func = Vector.sub (attackLeftProjectiles, amt)
+               val projectilesVec = func
+                 (projX, projY, 3.0, windowWidth, windowHeight)
+             in
+               Vector.concat [playerVec, projectilesVec]
+             end)
     | _ =>
         case #attacked player of
           NOT_ATTACKED =>
