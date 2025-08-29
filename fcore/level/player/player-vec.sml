@@ -152,12 +152,12 @@ struct
         (case #facing player of
            FACING_RIGHT =>
              let
-               val playerVec = PlayerAttackStandLeft.lerp
+               val playerVec = PlayerAttackStandRight.lerp
                  (rx, ry, 3.0, windowWidth, windowHeight)
 
-               val projY = ry + (Constants.playerHeightReal / 2.0)
-               val projX = rx + Constants.playerWidthReal
-               val func = Vector.sub (attackLeftProjectiles, amt)
+               val projY = ry + (Constants.playerHeightReal / 3.0)
+               val projX = rx + 32.0
+               val func = Vector.sub (attackRightProjectiles, amt)
                val projectilesVec = func
                  (projX, projY, 3.0, windowWidth, windowHeight)
              in
@@ -168,8 +168,8 @@ struct
                val playerVec = PlayerAttackStandLeft.lerp
                  (rx, ry, 3.0, windowWidth, windowHeight)
 
-               val projY = ry + (Constants.playerHeightReal / 2.0)
-               val projX = rx - Constants.playerWidthReal
+               val projY = ry + (Constants.playerHeightReal / 3.0)
+               val projX = rx - 32.0
                val func = Vector.sub (attackLeftProjectiles, amt)
                val projectilesVec = func
                  (projX, projY, 3.0, windowWidth, windowHeight)
