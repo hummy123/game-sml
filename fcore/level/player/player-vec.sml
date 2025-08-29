@@ -156,7 +156,7 @@ struct
                  (rx, ry, 3.0, windowWidth, windowHeight)
 
                val projY = ry + (Constants.playerHeightReal / 3.0)
-               val projX = rx + 32.0
+               val projX = rx + (Constants.playerHeightReal / 4.0 * 3.0)
                val func = Vector.sub (attackRightProjectiles, amt)
                val projectilesVec = func
                  (projX, projY, 3.0, windowWidth, windowHeight)
@@ -169,7 +169,7 @@ struct
                  (rx, ry, 3.0, windowWidth, windowHeight)
 
                val projY = ry + (Constants.playerHeightReal / 3.0)
-               val projX = rx - 32.0
+               val projX = rx - Constants.playerHeightReal
                val func = Vector.sub (attackLeftProjectiles, amt)
                val projectilesVec = func
                  (projX, projY, 3.0, windowWidth, windowHeight)
