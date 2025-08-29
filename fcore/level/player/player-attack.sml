@@ -5,35 +5,40 @@ struct
     MakeQuadTreeFold
       (struct
          type env = unit
-         type state = PlayerType.defeated_enemies list * EnemyMap.t
+         type state = FallingEnemyMap.t * EnemyMap.t
 
          open EnemyType
 
-         fun defeatEnemy (enemyID, enemyMap, defeatedList) =
-           let
-             val defeatedList = {angle = 1} :: defeatedList
-             val enemyMap = EnemyMap.remove (enemyID, enemyMap)
-           in
-             (defeatedList, enemyMap)
-           end
+         fun defeatEnemy (enemyID, enemyMap, fallingMap) =
+           case EnemyMap.get (enemyID, enemyMap) of
+              SOME (enemy: EnemyType.enemy) =>
+                let
+                  val {x, y, variant, ...} = enemy
+                  val fallenEnemy = {x = x, y = y, variant = variant}
+                  val fallingMap = FallingEnemyMap.add (enemyID, fallenEnemy, fallingMap)
+                  val enemyMap = EnemyMap.remove (enemyID, enemyMap)
+                in
+                  (fallingMap, enemyMap)
+                end
+            | NONE => (fallingMap, enemyMap)
 
-         fun shieldSlimeAttacked (enemyID, enemy, enemyMap, defeatedList) =
-           if #shieldOn enemy then (defeatedList, enemyMap)
-           else defeatEnemy (enemyID, enemyMap, defeatedList)
+         fun shieldSlimeAttacked (enemyID, enemy, enemyMap, fallingMap) =
+           if #shieldOn enemy then (fallingMap, enemyMap)
+           else defeatEnemy (enemyID, enemyMap, fallingMap)
 
-         fun onPlayerAttack (enemyID, enemy, enemyMap, defeatedList) =
+         fun onPlayerAttack (enemyID, enemy, enemyMap, fallingMap) =
            case #variant enemy of
-             PATROL_SLIME => defeatEnemy (enemyID, enemyMap, defeatedList)
-           | FOLLOW_SLIME => defeatEnemy (enemyID, enemyMap, defeatedList)
-           | STRAIGHT_BAT => defeatEnemy (enemyID, enemyMap, defeatedList)
+             PATROL_SLIME => defeatEnemy (enemyID, enemyMap, fallingMap)
+           | FOLLOW_SLIME => defeatEnemy (enemyID, enemyMap, fallingMap)
+           | STRAIGHT_BAT => defeatEnemy (enemyID, enemyMap, fallingMap)
            | SHIELD_SLIME =>
-               shieldSlimeAttacked (enemyID, enemy, enemyMap, defeatedList)
+               shieldSlimeAttacked (enemyID, enemy, enemyMap, fallingMap)
 
-         fun fold (enemyID, (), (defeatedList, enemyMap)) =
+         fun fold (enemyID, (), (fallingMap, enemyMap)) =
            case EnemyMap.get (enemyID, enemyMap) of
              SOME enemy =>
-               onPlayerAttack (enemyID, enemy, enemyMap, defeatedList)
-           | NONE => (defeatedList, enemyMap)
+               onPlayerAttack (enemyID, enemy, enemyMap, fallingMap)
+           | NONE => (fallingMap, enemyMap)
        end)
 
   structure PlayerAttackFalling =
@@ -57,9 +62,6 @@ struct
       val width = Constants.projectileWidth
       val height = Constants.projectileHeight
 
-      val (defeatedList, enemyMap) = PlayerAttackEnemy.foldRegion
-        (projectileX, projectileY, width, height, (), ([], enemyMap), enemyTree)
-
       val fallingTree = FallingEnemies.generateTree fallingMap
       val (defeatedList, fallingMap) = PlayerAttackFalling.foldRegion
         ( projectileX
@@ -67,11 +69,15 @@ struct
         , width
         , height
         , ()
-        , (defeatedList, fallingMap)
+        , ([], fallingMap)
         , fallingTree
         )
 
+      val (fallingMap, enemyMap) = PlayerAttackEnemy.foldRegion
+        (projectileX, projectileY, width, height, (), (fallingMap, enemyMap), enemyTree)
+
       val defeatedList = Vector.fromList defeatedList
+      val defeatedList = Vector.concat [defeatedList, #enemies player]
       val player =
         PlayerPatch.withPatch (player, PlayerPatch.W_ENEMIES defeatedList)
     in
