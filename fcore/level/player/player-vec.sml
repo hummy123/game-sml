@@ -148,7 +148,7 @@ struct
 
   fun helpGet (player: player, x, y, xOffset, yOffset, ratio, rx, ry, windowWidth, windowHeight) =
     case #mainAttack player of
-      MAIN_ATTACKING amt =>
+      MAIN_ATTACKING {animTimer = amt, ...} =>
         (case #facing player of
            FACING_RIGHT =>
              let

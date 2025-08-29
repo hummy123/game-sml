@@ -91,11 +91,13 @@ struct
     end
 
   (* called only when player has no projectiles or was not previously attacking *)
-  fun helpGetMainAttackPatches (attackHeld, mainAttackPressed, charge, acc) =
+  fun helpGetMainAttackPatches (attackHeld, mainAttackPressed, charge, acc, time) =
     let
       val attack =
-        if attackHeld andalso not mainAttackPressed then MAIN_ATTACKING 0
-        else MAIN_NOT_ATTACKING
+        if attackHeld andalso not mainAttackPressed then 
+          MAIN_ATTACKING {animTimer = 0, timePressed = time}
+        else 
+          MAIN_NOT_ATTACKING
     in
       W_MAIN_ATTACK_PRESSED (attackHeld andalso mainAttackPressed)
       :: W_MAIN_ATTACK attack :: acc
@@ -153,6 +155,7 @@ struct
     , player
     , acc
     , mainAttackPressed
+    , time
     ) =
     case prevAttack of
       MAIN_NOT_ATTACKING =>
@@ -164,15 +167,16 @@ struct
            * and there is more than one enemy *)
           getThrowPatches (defeteadEnemies, projectiles, player, acc)
         else
-          helpGetMainAttackPatches (attackHeld, mainAttackPressed, charge, acc)
-    | MAIN_ATTACKING amt =>
+          helpGetMainAttackPatches (attackHeld, mainAttackPressed, charge, acc, time)
+    | MAIN_ATTACKING {animTimer = amt, timePressed} =>
         let
           val acc =
             if amt = Constants.mainAttackLimit then
               W_MAIN_ATTACK MAIN_NOT_ATTACKING :: acc
             else
               let val amt = amt + 1
-              in W_MAIN_ATTACK (MAIN_ATTACKING amt) :: acc
+                val attack = MAIN_ATTACKING {animTimer = amt, timePressed = timePressed}
+              in W_MAIN_ATTACK attack :: acc
               end
         in
           W_MAIN_ATTACK_PRESSED true :: acc
@@ -181,9 +185,9 @@ struct
         if attackHeld then
           acc
         else
-          helpGetMainAttackPatches (attackHeld, mainAttackPressed, charge, acc)
+          helpGetMainAttackPatches (attackHeld, mainAttackPressed, charge, acc, time)
 
-  fun getInputPatches (player: player, input: FrameInputType.t, wallTree) =
+  fun getInputPatches (player: player, input: FrameInputType.t, wallTree, time) =
     let
       val
         { x
@@ -218,6 +222,7 @@ struct
         , player
         , acc
         , mainAttackPressed
+        , time
         )
 
       val acc = getJumpPatches (player, jumpHeld, downHeld, acc, wallTree)
@@ -361,7 +366,7 @@ struct
            end
        end)
 
-  fun runPhysicsAndInput (game: LevelType.level_type, input) =
+  fun runPhysicsAndInput (game: LevelType.level_type, input, time) =
     let
       val {player, walls, wallTree, platforms, platformTree, ...} = game
 
@@ -378,7 +383,7 @@ struct
          * It's important to apply the recoil patches after handling input
          * because we want to act on the latest recoil state straight away. *)
         case #recoil player of
-          NO_RECOIL => getInputPatches (player, input, wallTree)
+          NO_RECOIL => getInputPatches (player, input, wallTree, time)
         | _ => []
 
       val patches =

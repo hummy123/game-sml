@@ -6,7 +6,7 @@ struct
 
   datatype main_attack =
     MAIN_NOT_ATTACKING
-  | MAIN_ATTACKING of int
+  | MAIN_ATTACKING of {animTimer: int, timePressed: Time.time}
   | MAIN_THROWING
 
   type defeated_enemies = {angle: int}

@@ -13,7 +13,7 @@ struct
         , fallingEnemies
         } = level
 
-      val player = Player.runPhysicsAndInput (level, input)
+      val player = Player.runPhysicsAndInput (level, input, time)
 
       val enemyTree = Enemy.generateTree enemies
       val player = Player.checkEnemyCollisions (player, enemies, enemyTree)
