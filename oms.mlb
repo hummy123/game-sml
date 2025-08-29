@@ -18,10 +18,7 @@ ann
 in
   vendored/cozette-sml/fonts/cozette-ascii.mlb
   fcore/block.sml
-  fcore/field.sml
   fcore/box.sml
-  fcore/level/chain-edge.sml
-  fcore/level/player/whip.sml
 end
 
 
@@ -155,7 +152,6 @@ end
 fcore/level/player/player.sml
 fcore/level/player/player-attack.sml
 
-fcore/level/projectile.sml
 fcore/level/level-update.sml
 
 fcore/title/title-update.sml

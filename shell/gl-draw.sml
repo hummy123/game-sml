@@ -233,18 +233,11 @@ struct
 
       val wallVec = Wall.getDrawVec (#walls level, width, height)
       val platVec = Platform.getDrawVec (#platforms level, width, height)
-      val chainVec = Player.getFieldVec (#player level, width, height)
       val fallingVec = FallingEnemies.getDrawVec (level, width, height)
-      val wallVec = Vector.concat [wallVec, platVec, chainVec, fallingVec]
-
-      val pelletVec = Player.getPelletVec (#player level, width, height)
-      val projectileVec =
-        Projectile.getProjectileVec (#player level, width, height)
-      val fieldVec = Vector.concat [pelletVec, projectileVec]
+      val wallVec = Vector.concat [wallVec, platVec, fallingVec]
 
       val shellState = uploadWall (shellState, wallVec)
       val shellState = uploadPlayer (shellState, playerVec)
-      val shellState = uploadField (shellState, fieldVec)
       val () = helpDrawLevel shellState
     in
       shellState
