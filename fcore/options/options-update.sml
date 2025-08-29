@@ -49,8 +49,8 @@ struct
        * as neither is being pressed. *)
       val options =
         { focus = focus
-        , lastUpPress = 0.0
-        , lastDownPress = 0.0
+        , lastUpPress = Time.zeroTime
+        , lastDownPress = Time.zeroTime
         , isSelected = isSelected
         , tempKeys = tempKeys
         }
@@ -60,6 +60,9 @@ struct
 
   fun moveFocusUp (options: OptionsType.options_type, newFocus, userKeys, time) =
     let
+      (* only opening Time for time comparison and adding; no impurities here *)
+      open Time
+
       val {focus, isSelected, lastUpPress, tempKeys, ...} = options
       (* only switch to newFocus if it is time for key delay to be triggered.
        * We set lastDownPress to 0 because up is currently being pressed instead
@@ -68,14 +71,14 @@ struct
         if lastUpPress + Constants.keyDelay <= time then
           { focus = newFocus
           , lastUpPress = time
-          , lastDownPress = 0.0
+          , lastDownPress = Time.zeroTime
           , isSelected = isSelected
           , tempKeys = tempKeys
           }
         else
           { focus = focus
           , lastUpPress = lastUpPress
-          , lastDownPress = 0.0
+          , lastDownPress = Time.zeroTime
           , isSelected = isSelected
           , tempKeys = tempKeys
           }
@@ -86,18 +89,21 @@ struct
   fun moveFocusDown
     (options: OptionsType.options_type, newFocus, userKeys, time) =
     let
+      (* only opening Time for time comparison and adding; no impurities here *)
+      open Time
+
       val {focus, isSelected, lastDownPress, tempKeys, ...} = options
       val options =
         if lastDownPress + Constants.keyDelay <= time then
           { focus = newFocus
-          , lastUpPress = 0.0
+          , lastUpPress = Time.zeroTime
           , lastDownPress = time
           , isSelected = isSelected
           , tempKeys = tempKeys
           }
         else
           { focus = focus
-          , lastUpPress = 0.0
+          , lastUpPress = Time.zeroTime
           , lastDownPress = lastDownPress
           , isSelected = isSelected
           , tempKeys = tempKeys

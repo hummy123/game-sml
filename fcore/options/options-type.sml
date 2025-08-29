@@ -13,15 +13,15 @@ sig
   type options_type =
     { focus: focus
     , isSelected: bool
-    , lastUpPress: real
-    , lastDownPress: real
+    , lastUpPress: Time.time
+    , lastDownPress: Time.time
     , tempKeys: CoreKey.user_key
     }
 
   val init: CoreKey.user_key -> options_type
 end
 
-structure OptionsType :> OPTIONS_TYPE =
+structure OptionsType : OPTIONS_TYPE =
 struct
   datatype focus =
     LEFT_KEY
@@ -36,16 +36,16 @@ struct
   type options_type =
     { focus: focus
     , isSelected: bool
-    , lastUpPress: real
-    , lastDownPress: real
+    , lastUpPress: Time.time
+    , lastDownPress: Time.time
     , tempKeys: CoreKey.user_key
     }
 
   fun init userKeys =
     { focus = LEFT_KEY
     , isSelected = false
-    , lastUpPress = 0.0
-    , lastDownPress = 0.0
+    , lastUpPress = Time.zeroTime
+    , lastDownPress = Time.zeroTime
     , tempKeys = userKeys
     }
 end

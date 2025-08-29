@@ -47,5 +47,10 @@ struct
 
   val moveProjectileBy = 11
 
-  val keyDelay = 0.3
+  val keyDelay = 
+    let
+      val time = LargeInt.fromInt 300
+    in
+      Time.fromMilliseconds time
+    end
 end
