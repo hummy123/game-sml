@@ -25,6 +25,62 @@ struct
     , PlayerWalkLeft8.lerp
     ]
 
+  val attackLeftProjectiles =
+   #[ PlayerAttackLeftProjectile1.lerp
+    , PlayerAttackLeftProjectile2.lerp
+    , PlayerAttackLeftProjectile3.lerp
+    , PlayerAttackLeftProjectile4.lerp
+    , PlayerAttackLeftProjectile5.lerp
+    , PlayerAttackLeftProjectile6.lerp
+    , PlayerAttackLeftProjectile7.lerp
+    , PlayerAttackLeftProjectile8.lerp
+    , PlayerAttackLeftProjectile9.lerp
+    , PlayerAttackLeftProjectile10.lerp
+    , PlayerAttackLeftProjectile11.lerp
+    , PlayerAttackLeftProjectile12.lerp
+    , PlayerAttackLeftProjectile13.lerp
+    , PlayerAttackLeftProjectile14.lerp
+    , PlayerAttackLeftProjectile15.lerp
+    , PlayerAttackLeftProjectile16.lerp
+    , PlayerAttackLeftProjectile17.lerp
+    , PlayerAttackLeftProjectile18.lerp
+    , PlayerAttackLeftProjectile19.lerp
+    , PlayerAttackLeftProjectile20.lerp
+    , PlayerAttackLeftProjectile21.lerp
+    , PlayerAttackLeftProjectile22.lerp
+    , PlayerAttackLeftProjectile23.lerp
+    , PlayerAttackLeftProjectile24.lerp
+    , PlayerAttackLeftProjectile25.lerp
+    ]
+
+  val attackRightProjectiles =
+   #[ PlayerAttackRightProjectile1.lerp
+    , PlayerAttackRightProjectile2.lerp
+    , PlayerAttackRightProjectile3.lerp
+    , PlayerAttackRightProjectile4.lerp
+    , PlayerAttackRightProjectile5.lerp
+    , PlayerAttackRightProjectile6.lerp
+    , PlayerAttackRightProjectile7.lerp
+    , PlayerAttackRightProjectile8.lerp
+    , PlayerAttackRightProjectile9.lerp
+    , PlayerAttackRightProjectile10.lerp
+    , PlayerAttackRightProjectile11.lerp
+    , PlayerAttackRightProjectile12.lerp
+    , PlayerAttackRightProjectile13.lerp
+    , PlayerAttackRightProjectile14.lerp
+    , PlayerAttackRightProjectile15.lerp
+    , PlayerAttackRightProjectile16.lerp
+    , PlayerAttackRightProjectile17.lerp
+    , PlayerAttackRightProjectile18.lerp
+    , PlayerAttackRightProjectile19.lerp
+    , PlayerAttackRightProjectile20.lerp
+    , PlayerAttackRightProjectile21.lerp
+    , PlayerAttackRightProjectile22.lerp
+    , PlayerAttackRightProjectile23.lerp
+    , PlayerAttackRightProjectile24.lerp
+    , PlayerAttackRightProjectile25.lerp
+    ]
+
   fun getIdle (player, rx, ry, ww, wh) =
     case #facing player of
       FACING_RIGHT => PlayerStandingRight.lerp (rx, ry, 3.0, ww, wh)

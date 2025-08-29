@@ -60,6 +60,58 @@ fcore/level/enemy/falling-enemies.sml
 ann
   "allowVectorExps true"
 in
+  fcore/level/player/sprites/attack/projectiles/player-attack-left-projectile1.sml
+  fcore/level/player/sprites/attack/projectiles/player-attack-left-projectile2.sml
+  fcore/level/player/sprites/attack/projectiles/player-attack-left-projectile3.sml
+  fcore/level/player/sprites/attack/projectiles/player-attack-left-projectile4.sml
+  fcore/level/player/sprites/attack/projectiles/player-attack-left-projectile5.sml
+  fcore/level/player/sprites/attack/projectiles/player-attack-left-projectile6.sml
+  fcore/level/player/sprites/attack/projectiles/player-attack-left-projectile7.sml
+  fcore/level/player/sprites/attack/projectiles/player-attack-left-projectile8.sml
+  fcore/level/player/sprites/attack/projectiles/player-attack-left-projectile9.sml
+  fcore/level/player/sprites/attack/projectiles/player-attack-left-projectile10.sml
+  fcore/level/player/sprites/attack/projectiles/player-attack-left-projectile11.sml
+  fcore/level/player/sprites/attack/projectiles/player-attack-left-projectile12.sml
+  fcore/level/player/sprites/attack/projectiles/player-attack-left-projectile13.sml
+  fcore/level/player/sprites/attack/projectiles/player-attack-left-projectile14.sml
+  fcore/level/player/sprites/attack/projectiles/player-attack-left-projectile15.sml
+  fcore/level/player/sprites/attack/projectiles/player-attack-left-projectile16.sml
+  fcore/level/player/sprites/attack/projectiles/player-attack-left-projectile17.sml
+  fcore/level/player/sprites/attack/projectiles/player-attack-left-projectile18.sml
+  fcore/level/player/sprites/attack/projectiles/player-attack-left-projectile19.sml
+  fcore/level/player/sprites/attack/projectiles/player-attack-left-projectile20.sml
+  fcore/level/player/sprites/attack/projectiles/player-attack-left-projectile21.sml
+  fcore/level/player/sprites/attack/projectiles/player-attack-left-projectile22.sml
+  fcore/level/player/sprites/attack/projectiles/player-attack-left-projectile23.sml
+  fcore/level/player/sprites/attack/projectiles/player-attack-left-projectile24.sml
+  fcore/level/player/sprites/attack/projectiles/player-attack-left-projectile25.sml
+
+  fcore/level/player/sprites/attack/projectiles/player-attack-right-projectile1.sml
+  fcore/level/player/sprites/attack/projectiles/player-attack-right-projectile2.sml
+  fcore/level/player/sprites/attack/projectiles/player-attack-right-projectile3.sml
+  fcore/level/player/sprites/attack/projectiles/player-attack-right-projectile4.sml
+  fcore/level/player/sprites/attack/projectiles/player-attack-right-projectile5.sml
+  fcore/level/player/sprites/attack/projectiles/player-attack-right-projectile6.sml
+  fcore/level/player/sprites/attack/projectiles/player-attack-right-projectile7.sml
+  fcore/level/player/sprites/attack/projectiles/player-attack-right-projectile8.sml
+  fcore/level/player/sprites/attack/projectiles/player-attack-right-projectile9.sml
+  fcore/level/player/sprites/attack/projectiles/player-attack-right-projectile10.sml
+  fcore/level/player/sprites/attack/projectiles/player-attack-right-projectile11.sml
+  fcore/level/player/sprites/attack/projectiles/player-attack-right-projectile12.sml
+  fcore/level/player/sprites/attack/projectiles/player-attack-right-projectile13.sml
+  fcore/level/player/sprites/attack/projectiles/player-attack-right-projectile14.sml
+  fcore/level/player/sprites/attack/projectiles/player-attack-right-projectile15.sml
+  fcore/level/player/sprites/attack/projectiles/player-attack-right-projectile16.sml
+  fcore/level/player/sprites/attack/projectiles/player-attack-right-projectile17.sml
+  fcore/level/player/sprites/attack/projectiles/player-attack-right-projectile18.sml
+  fcore/level/player/sprites/attack/projectiles/player-attack-right-projectile19.sml
+  fcore/level/player/sprites/attack/projectiles/player-attack-right-projectile20.sml
+  fcore/level/player/sprites/attack/projectiles/player-attack-right-projectile21.sml
+  fcore/level/player/sprites/attack/projectiles/player-attack-right-projectile22.sml
+  fcore/level/player/sprites/attack/projectiles/player-attack-right-projectile23.sml
+  fcore/level/player/sprites/attack/projectiles/player-attack-right-projectile24.sml
+  fcore/level/player/sprites/attack/projectiles/player-attack-right-projectile25.sml
+
   fcore/level/player/sprites/attack/player-attack-stand-left.sml
   fcore/level/player/sprites/attack/player-attack-stand-right.sml
 
