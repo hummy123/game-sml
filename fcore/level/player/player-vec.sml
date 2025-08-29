@@ -158,7 +158,7 @@ struct
                (* adding playerWidth to x so that projectile starts from 
                 * the rightmost pixel of the player *)
                val projX = x + Constants.playerWidth
-               val projY = y + (Constants.playerHeight div 3)
+               val projY = y + Constants.projectileOffsetY
                val projX = (Real32.fromInt projX + xOffset) * ratio
                val projY = (Real32.fromInt projY + yOffset) * ratio
 
@@ -173,12 +173,10 @@ struct
                val playerVec = PlayerAttackStandLeft.lerp
                  (rx, ry, 3.0, windowWidth, windowHeight)
 
-               (* subtracting playerHeight from x because projectile
-                * is the same size as the playerHeight, and it looks like
-                * the projectile starts from player's leftmost side this way.
-                * *)
-               val projX = x - Constants.playerHeight
-               val projY = y + (Constants.playerHeight div 3)
+               (* subtracting projectileWidth from x it looks like
+                * the projectile starts from player's leftmost side this way. *)
+               val projX = x - Constants.projectileWidth
+               val projY = y + Constants.projectileOffsetY
                val projX = (Real32.fromInt projX + xOffset) * ratio
                val projY = (Real32.fromInt projY + yOffset) * ratio
 

@@ -32,6 +32,10 @@ struct
   val projectileDistance: Real32.real = 26.0
   val projectileSizeInt = 18
 
+  val projectileHeight = 24
+  val projectileWidth = 96
+  val projectileOffsetY = playerHeight div 3
+
   (* constants for enemy *)
   val enemySize = 48
   val enemySizeReal: Real32.real = 48.0
