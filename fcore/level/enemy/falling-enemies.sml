@@ -41,7 +41,7 @@ struct
 
          fun fold (fallingID, fallingEnemy, (), fallingMap) =
            let
-             val {x, y, variant} = fallingEnemy
+             val {x, y, variant, time} = fallingEnemy
              val size = Constants.enemySize
              val ww = Constants.worldWidth
              val wh = Constants.worldHeight
@@ -49,7 +49,11 @@ struct
              if Collision.isCollidingPlus (x, y, size, size, 0, 0, ww, wh) then
                let
                  val newFalling =
-                   {x = x, y = y - Constants.moveEnemyBy, variant = variant}
+                   { x = x
+                   , y = y - Constants.moveEnemyBy
+                   , variant = variant
+                   , time = time
+                   }
                in
                  FallingEnemyMap.add (fallingID, newFalling, fallingMap)
                end
@@ -81,7 +85,7 @@ struct
          fun helpGetDrawVec
            (fallingEnemy, width, height, ratio, xOffset, yOffset, acc) =
            let
-             val {x, y, variant = _} = fallingEnemy
+             val {x, y, variant = _, time = _} = fallingEnemy
 
              val x = Real32.fromInt x * ratio + xOffset
              val y = Real32.fromInt y * ratio + yOffset

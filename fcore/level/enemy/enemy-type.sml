@@ -22,7 +22,7 @@ sig
     , shieldOn: bool
     }
 
-  type falling_enemy = {x: int, y: int, variant: variant}
+  type falling_enemy = {x: int, y: int, variant: variant, time: Time.time}
 
   datatype shoot_x_axis = SHOOT_LEFT | SHOOT_RIGHT | NO_SHOOT_X
   datatype shoot_y_axis = SHOOT_UP | SHOOT_DOWN | NO_SHOOT_Y
@@ -52,7 +52,7 @@ struct
     , shieldOn: bool
     }
 
-  type falling_enemy = {x: int, y: int, variant: variant}
+  type falling_enemy = {x: int, y: int, variant: variant, time: Time.time}
 
   datatype shoot_x_axis = SHOOT_LEFT | SHOOT_RIGHT | NO_SHOOT_X
   datatype shoot_y_axis = SHOOT_UP | SHOOT_DOWN | NO_SHOOT_Y

@@ -25,9 +25,8 @@ struct
               (player, enemies, enemyTree, fallingEnemies)
 
           val projectiles = #projectiles player
-          val (fallingEnemies, enemies) =
-            PlayerAttack.projectileHitEnemy
-              (projectiles, enemies, enemyTree, fallingEnemies)
+          val (fallingEnemies, enemies) = PlayerAttack.projectileHitEnemy
+            (projectiles, enemies, enemyTree, fallingEnemies, time)
 
           val enemies = Enemy.update
             (enemies, walls, wallTree, platforms, platformTree, player, graph)
