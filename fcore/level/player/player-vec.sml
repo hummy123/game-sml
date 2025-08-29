@@ -146,7 +146,7 @@ struct
         (* todo: hurt sprite/animation if amt mod 5 = 0 then *)
         PlayerStandingLeft.lerp (rx, ry, 3.0, ww, wh)
 
-  fun helpGet (player: player, rx, ry, windowWidth, windowHeight) =
+  fun helpGet (player: player, x, y, xOffset, yOffset, ratio, rx, ry, windowWidth, windowHeight) =
     case #mainAttack player of
       MAIN_ATTACKING amt =>
         (case #facing player of
@@ -155,8 +155,12 @@ struct
                val playerVec = PlayerAttackStandRight.lerp
                  (rx, ry, 3.0, windowWidth, windowHeight)
 
-               val projY = ry + (Constants.playerHeightReal / 3.0)
-               val projX = rx + (Constants.playerHeightReal / 4.0 * 3.0)
+               (* todo: why does 81 work to give perfect alignment? *)
+               val projX = x + 81
+               val projY = y + (Constants.playerHeight div 3)
+               val projX = (Real32.fromInt projX + xOffset) * ratio
+               val projY = (Real32.fromInt projY + yOffset) * ratio
+
                val func = Vector.sub (attackRightProjectiles, amt)
                val projectilesVec = func
                  (projX, projY, 3.0, windowWidth, windowHeight)
@@ -168,8 +172,11 @@ struct
                val playerVec = PlayerAttackStandLeft.lerp
                  (rx, ry, 3.0, windowWidth, windowHeight)
 
-               val projY = ry + (Constants.playerHeightReal / 3.0)
-               val projX = rx - (Constants.playerHeightReal / 5.0 * 4.0)
+               val projX = x - Constants.playerHeight
+               val projY = y + (Constants.playerHeight div 3)
+               val projX = (Real32.fromInt projX + xOffset) * ratio
+               val projY = (Real32.fromInt projY + yOffset) * ratio
+
                val func = Vector.sub (attackLeftProjectiles, amt)
                val projectilesVec = func
                  (projX, projY, 3.0, windowWidth, windowHeight)
@@ -197,10 +204,10 @@ struct
             else if height < scale then (scale - height) / 2.0
             else 0.0
 
-          val x = Real32.fromInt x * wratio
-          val y = Real32.fromInt y * wratio + yOffset
+          val rx = Real32.fromInt x * wratio
+          val ry = Real32.fromInt y * wratio + yOffset
         in
-          helpGet (player, x, y, width, height)
+          helpGet (player, x, y, 0.0, yOffset, wratio, rx, ry, width, height)
         end
       else
         let
@@ -210,10 +217,10 @@ struct
             else if width < scale then (scale - width) / 2.0
             else 0.0
 
-          val x = Real32.fromInt x * hratio + xOffset
-          val y = Real32.fromInt y * hratio
+          val rx = Real32.fromInt x * hratio + xOffset
+          val ry = Real32.fromInt y * hratio
         in
-          helpGet (player, x, y, width, height)
+          helpGet (player, x, y, xOffset, 0.0, hratio, rx, ry, width, height)
         end
     end
 end
