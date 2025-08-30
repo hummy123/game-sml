@@ -133,12 +133,7 @@ struct
     let
       val animTimer = #animTimer player
     in
-      if animTimer < 15 then
-        getWhenJumping (player, animTimer, rx, ry, ww, wh)
-      else
-        case #facing player of
-          FACING_RIGHT => PlayerFallRight.lerp (rx, ry, 3.0, ww, wh)
-        | FACING_LEFT => PlayerFallLeft.lerp (rx, ry, 3.0, ww, wh)
+      getWhenJumping (player, animTimer, rx, ry, ww, wh)
     end
 
   fun getWhenNotAttacked (player, rx, ry, ww, wh) =
